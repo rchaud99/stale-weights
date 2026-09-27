@@ -1,0 +1,48 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# LoRA weights are large (kept on disk, not in git)
+adapters/
+adapters_tool/
+*.safetensors
+
+# pytest
+.pytest_cache/
+
+# --- added for GitHub publish ---
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials*.json
+# environments, caches, tooling
+.venv*/
+__pycache__/
+*.py[oc]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+node_modules/
+.DS_Store
+.claude/
+# weights, checkpoints, API caches
+*.safetensors
+*.npz
+*.ckpt
+*.pt
+*.bin
+adapters/
+checkpoints/
+*.sqlite
+*.sqlite3

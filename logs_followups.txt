@@ -1,0 +1,123 @@
+[00:05:34] partial None None
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3870.00it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[00:15:48] partial A 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 6147.30it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[00:25:58] partial B 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4032.21it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[00:36:10] partial read 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4153.19it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[00:46:34] abstain None None
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3480.46it/s]
+48/96096/960144/960192/960240/960288/960336/960384/960432/960480/960528/960576/960624/960672/960720/960768/960816/960864/960912/960960/960
+[01:03:30] abstain A 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3780.70it/s]
+48/96096/960144/960192/960240/960288/960336/960384/960432/960480/960528/960576/960624/960672/960720/960768/960816/960864/960912/960960/960
+[01:18:36] abstain B 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 5122.50it/s]
+48/96096/960144/960192/960240/960288/960336/960384/960432/960480/960528/960576/960624/960672/960720/960768/960816/960864/960912/960960/960
+[01:35:02] abstain read 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3956.89it/s]
+48/96096/960144/960192/960240/960288/960336/960384/960432/960480/960528/960576/960624/960672/960720/960768/960816/960864/960912/960960/960
+[01:51:02] train chat A_inprompt
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3615.16it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:06<01:01,  6.88s/it]Calculating loss...:  20%|██        | 2/10 [00:13<00:53,  6.74s/it]Calculating loss...:  30%|███       | 3/10 [00:20<00:47,  6.72s/it]Calculating loss...:  40%|████      | 4/10 [00:27<00:42,  7.09s/it]Calculating loss...:  50%|█████     | 5/10 [00:35<00:36,  7.29s/it]Calculating loss...:  60%|██████    | 6/10 [00:42<00:28,  7.11s/it]Calculating loss...:  70%|███████   | 7/10 [00:49<00:20,  6.99s/it]Calculating loss...:  80%|████████  | 8/10 [00:55<00:13,  6.92s/it]Calculating loss...:  90%|█████████ | 9/10 [01:02<00:06,  6.87s/it]Calculating loss...: 100%|██████████| 10/10 [01:10<00:00,  7.12s/it]Calculating loss...: 100%|██████████| 10/10 [01:10<00:00,  7.03s/it]
+Iter 1: Val loss 1.346, Val took 70.262s
+Iter 25: Train loss 0.182, Learning Rate 1.000e-05, It/sec 0.094, Tokens/sec 39.905, Trained Tokens 10576, Peak mem 22.219 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000025_adapters.safetensors.
+Iter 50: Train loss 0.003, Learning Rate 1.000e-05, It/sec 0.094, Tokens/sec 39.413, Trained Tokens 21059, Peak mem 22.265 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000050_adapters.safetensors.
+Iter 75: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.093, Tokens/sec 39.952, Trained Tokens 31748, Peak mem 22.265 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000075_adapters.safetensors.
+Iter 100: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.095, Tokens/sec 39.859, Trained Tokens 42187, Peak mem 22.265 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000100_adapters.safetensors.
+Iter 125: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.095, Tokens/sec 39.892, Trained Tokens 52735, Peak mem 22.265 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000125_adapters.safetensors.
+Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.094, Tokens/sec 39.914, Trained Tokens 63334, Peak mem 22.265 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000150_adapters.safetensors.
+Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.093, Tokens/sec 39.419, Trained Tokens 73924, Peak mem 22.265 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:06<00:58,  6.49s/it]Calculating loss...:  20%|██        | 2/10 [00:13<00:52,  6.57s/it]Calculating loss...:  30%|███       | 3/10 [00:20<00:49,  7.02s/it]Calculating loss...:  40%|████      | 4/10 [00:27<00:41,  6.90s/it]Calculating loss...:  50%|█████     | 5/10 [00:35<00:35,  7.17s/it]Calculating loss...:  60%|██████    | 6/10 [00:41<00:28,  7.04s/it]Calculating loss...:  70%|███████   | 7/10 [00:48<00:20,  6.95s/it]Calculating loss...:  80%|████████  | 8/10 [00:56<00:14,  7.17s/it]Calculating loss...:  90%|█████████ | 9/10 [01:03<00:07,  7.05s/it]Calculating loss...: 100%|██████████| 10/10 [01:10<00:00,  7.25s/it]Calculating loss...: 100%|██████████| 10/10 [01:10<00:00,  7.07s/it]
+Iter 200: Val loss 0.000, Val took 70.707s
+Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.096, Tokens/sec 40.135, Trained Tokens 84393, Peak mem 22.265 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A_inprompt/adapters.safetensors.
+[02:28:45] train chat B_inprompt
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 5353.29it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:03,  7.02s/it]Calculating loss...:  20%|██        | 2/10 [00:14<01:00,  7.53s/it]Calculating loss...:  30%|███       | 3/10 [00:21<00:50,  7.14s/it]Calculating loss...:  40%|████      | 4/10 [00:29<00:44,  7.34s/it]Calculating loss...:  50%|█████     | 5/10 [00:36<00:37,  7.46s/it]Calculating loss...:  60%|██████    | 6/10 [00:44<00:30,  7.54s/it]Calculating loss...:  70%|███████   | 7/10 [00:52<00:22,  7.57s/it]Calculating loss...:  80%|████████  | 8/10 [00:59<00:15,  7.60s/it]Calculating loss...:  90%|█████████ | 9/10 [01:07<00:07,  7.62s/it]Calculating loss...: 100%|██████████| 10/10 [01:15<00:00,  7.63s/it]Calculating loss...: 100%|██████████| 10/10 [01:15<00:00,  7.52s/it]
+Iter 1: Val loss 1.251, Val took 75.222s
+Iter 25: Train loss 0.172, Learning Rate 1.000e-05, It/sec 0.088, Tokens/sec 42.625, Trained Tokens 12165, Peak mem 22.219 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000025_adapters.safetensors.
+Iter 50: Train loss 0.004, Learning Rate 1.000e-05, It/sec 0.088, Tokens/sec 41.146, Trained Tokens 23889, Peak mem 22.265 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000050_adapters.safetensors.
+Iter 75: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 42.527, Trained Tokens 36130, Peak mem 22.265 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000075_adapters.safetensors.
+Iter 100: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.088, Tokens/sec 42.125, Trained Tokens 48139, Peak mem 22.265 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000100_adapters.safetensors.
+Iter 125: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 40.607, Trained Tokens 59757, Peak mem 22.265 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000125_adapters.safetensors.
+Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.089, Tokens/sec 41.848, Trained Tokens 71565, Peak mem 22.265 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000150_adapters.safetensors.
+Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 41.536, Trained Tokens 83452, Peak mem 22.265 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:06,  7.42s/it]Calculating loss...:  20%|██        | 2/10 [00:14<01:00,  7.51s/it]Calculating loss...:  30%|███       | 3/10 [00:22<00:53,  7.61s/it]Calculating loss...:  40%|████      | 4/10 [00:30<00:46,  7.67s/it]Calculating loss...:  50%|█████     | 5/10 [00:38<00:38,  7.71s/it]Calculating loss...:  60%|██████    | 6/10 [00:46<00:31,  7.75s/it]Calculating loss...:  70%|███████   | 7/10 [00:53<00:23,  7.77s/it]Calculating loss...:  80%|████████  | 8/10 [01:01<00:15,  7.77s/it]Calculating loss...:  90%|█████████ | 9/10 [01:08<00:07,  7.50s/it]Calculating loss...: 100%|██████████| 10/10 [01:16<00:00,  7.59s/it]Calculating loss...: 100%|██████████| 10/10 [01:16<00:00,  7.64s/it]
+Iter 200: Val loss 0.000, Val took 76.375s
+Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 41.405, Trained Tokens 95394, Peak mem 22.265 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/B_inprompt/adapters.safetensors.
+[03:09:25] eval chat A_inprompt 25
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4420.64it/s]
+48/40096/400144/400192/400240/400288/400336/400384/400400/400
+[03:16:35] eval chat A_inprompt 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4116.91it/s]
+48/40096/400144/400192/400240/400288/400336/400384/400400/400
+[03:23:35] eval chat B_inprompt 25
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3604.90it/s]
+48/40096/400144/400192/400240/400288/400336/400384/400400/400
+[03:30:49] eval chat B_inprompt 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3803.32it/s]
+48/40096/400144/400192/400240/400288/400336/400384/400400/400
+[03:38:03] long None None
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3277.57it/s]
+48/30096/300144/300192/300240/300288/300300/300
+[04:02:25] long A 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3710.79it/s]
+48/30096/300144/300192/300240/300288/300300/300
+[04:25:03] long B 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3497.88it/s]
+48/30096/300144/300192/300240/300288/300300/300
+[04:48:45] long B 200 finished; long read 200 skipped (the long condition failed its base gate)
+[04:48:45] agentic base gate
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3777.97it/s]
+64/960128/960192/960256/960320/960384/960448/960512/960576/960640/960704/960768/960832/960896/960960/960
+26/26
+[05:33:49] partial A_inprompt 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3156.46it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[05:44:44] partial B_inprompt 200
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3276.54it/s]
+48/60096/600144/600192/600240/600288/600336/600384/600432/600480/600528/600576/600600/600
+[05:54:59] queue2 done
+[05:55:04] agentic base gate v4
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3943.50it/s]
+64/960128/960192/960256/960320/960384/960448/960512/960576/960640/960704/960768/960832/960896/960960/960
+64/238128/238192/238238/238
+[06:48:48] queue3 done
+[06:49:41] agentic base gate v5
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 5552.43it/s]
+64/960128/960192/960256/960320/960384/960448/960512/960576/960640/960704/960768/960832/960896/960960/960
+64/275128/275192/275256/275275/275
+[07:45:43] gate v5 done

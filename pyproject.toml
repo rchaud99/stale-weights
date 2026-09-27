@@ -1,0 +1,22 @@
+[project]
+name = "staleweights"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "helix-admin", email = "202902841+ZeroXSigmoid@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "mlx-lm>=0.31.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
