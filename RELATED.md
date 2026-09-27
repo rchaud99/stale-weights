@@ -39,6 +39,14 @@ Also relevant: Betley et al., *Tell me about yourself*, ICLR 2025 (arXiv 2501.11
 
 My searches for "fine-tune on old policy, update the prompt" found only blog posts. Write "to our knowledge".
 
+**Concurrent work (added 2026-09-27).** Barreto, Roesti and Tahaei, "Alignment Inertia: Auditing the Durability of Training Data Influence Through Policy Override Resistance" (eBay Responsible AI, arXiv:2609.27333, 23 Sep 2026).
+- **What they measure:** an "Override Success Rate" for system prompts and LoRA trying to override a model's inherited *alignment* prior on content moderation (medical misinformation, hate speech; Llama-3.1-8B, Mistral-7B).
+- **What they find:** substantial, asymmetric inertia; LoRA sometimes worsens it; TRAK attribution predicts which cases resist.
+- **How this study differs:**
+  - The prior here is the operator's *own* earlier fine-tune on a business rule, not safety alignment.
+  - It tests *omitted* rules and an explicit "apply only stated rules" instruction, which they don't.
+  - It finds that a *stated* conflicting policy does override a 200-step LoRA prior. That is consistent with their result if a shallow fine-tuned rule is a weaker prior than safety training.
+
 **Suggested framing:** a measurement study of a deployment failure mode. Teams fine-tune on historical support logs and later change policy only in the system prompt; how much of the old policy leaks through? Present it as knowledge-conflict research moved from facts to operational rules, not as a new phenomenon.
 
 ## 3. Design suggestions
