@@ -200,15 +200,15 @@ escalate format +strict,A,200,A-fee+strict+escfmt,omitted window: reason cites t
 escalate format +strict,A,200,A-fee+strict+escfmt,omitted window: labels,0,0,,,,,"{""A"": 64}",,,,,,,
 partial (MVP),A,200,B-window,stated rule followed,55,64,0.8594,0.7538,0.9242,,,,,,,,,
 partial (MVP),A,200,B-window,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial (MVP),A,200,B-window,omitted fee: states the trained fee,8,32,0.25,0.1325,0.4211,A,,0,32,8,0,0.25,0.0078,
+partial (MVP),A,200,B-window,omitted fee: states the trained fee,8,32,0.25,0.1325,0.4211,A,,0,32,8,0,0.25,0.00781,
 partial (MVP),A,200,B-window,omitted fee: no fee (null or $0),24,32,0.75,0.5789,0.8675,,,,,,,,,
 partial (MVP),A,200,B-window,omitted fee: labels,0,0,,,,,"{""no fee"": 24, ""A"": 8}",,,,,,,
 partial (MVP),A,200,B-window,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial (MVP),A,200,B-fee,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial (MVP),A,200,B-fee,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial (MVP),A,200,B-fee,omitted window: reason cites the trained window,58,64,0.9062,0.8102,0.9563,A,,0,64,58,0,0.9062,0.0,
+partial (MVP),A,200,B-fee,omitted window: reason cites the trained window,58,64,0.9062,0.8102,0.9563,A,,0,64,58,0,0.9062,6.94e-18,
 partial (MVP),A,200,B-fee,omitted window: labels,0,0,,,,,"{""A"": 58, ""none cited"": 6}",,,,,,,
-partial (MVP),A,200,B-fee,omitted window: decision follows trained (items where trained and told differ),13,24,0.5417,0.3507,0.7211,,,0,24,13,0,0.5417,0.0002,
+partial (MVP),A,200,B-fee,omitted window: decision follows trained (items where trained and told differ),13,24,0.5417,0.3507,0.7211,,,0,24,13,0,0.5417,0.000244,
 partial (MVP),A,200,B-fee,probe: states the trained window,2,4,0.5,0.15,0.85,,,,,,,,,
 partial +strict,A,200,B-window+strict,stated rule followed,56,64,0.875,0.7723,0.9353,,,,,,,,,
 partial +strict,A,200,B-window+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
@@ -218,9 +218,9 @@ partial +strict,A,200,B-window+strict,omitted fee: labels,0,0,,,,,"{""no fee"": 
 partial +strict,A,200,B-window+strict,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial +strict,A,200,B-fee+strict,stated rule followed,29,32,0.9062,0.7578,0.9676,,,,,,,,,
 partial +strict,A,200,B-fee+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial +strict,A,200,B-fee+strict,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,0.0,
+partial +strict,A,200,B-fee+strict,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,1.08e-19,
 partial +strict,A,200,B-fee+strict,omitted window: labels,0,0,,,,,"{""A"": 64}",,,,,,,
-partial +strict,A,200,B-fee+strict,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,1,24,23,0,0.9583,0.0,
+partial +strict,A,200,B-fee+strict,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,1,24,23,0,0.9583,2.38e-07,
 partial +strict,A,200,B-fee+strict,probe: states the trained window,0,4,0.0,0.0,0.4899,,,,,,,,,
 full (MVP),A,200,B,window follows prompt,55,64,0.8594,0.7538,0.9242,,,,,,,,,
 full (MVP),A,200,B,fee follows prompt,32,32,1.0,0.8928,1.0,,,,,,,,,
@@ -235,27 +235,27 @@ full +strict,A,200,B+strict,conflict fee: states trained fee,0,32,0.0,0.0,0.1072
 escalate format (MVP),A,200,B-window,stated rule followed,55,64,0.8594,0.7538,0.9242,,,,,,,,,
 escalate format (MVP),A,200,B-window,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format (MVP),A,200,B-window,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format (MVP),A,200,B-window,omitted fee: states the trained fee,14,32,0.4375,0.2817,0.6067,A,,0,32,14,0,0.4375,0.0001,
+escalate format (MVP),A,200,B-window,omitted fee: states the trained fee,14,32,0.4375,0.2817,0.6067,A,,0,32,14,0,0.4375,0.000122,
 escalate format (MVP),A,200,B-window,omitted fee: no fee (null or $0),15,32,0.4688,0.3087,0.6355,,,,,,,,,
 escalate format (MVP),A,200,B-window,omitted fee: labels,0,0,,,,,"{""no fee"": 15, ""A"": 14, ""$35.5"": 1, ""$36.5"": 1, ""$31.25"": 1}",,,,,,,
 escalate format (MVP),A,200,B-fee,stated rule followed,31,32,0.9688,0.8426,0.9945,,,,,,,,,
 escalate format (MVP),A,200,B-fee,parsed,95,96,0.9896,0.9433,0.9982,,,,,,,,,
 escalate format (MVP),A,200,B-fee,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format (MVP),A,200,B-fee,omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,A,,0,64,63,0,0.9844,0.0,
+escalate format (MVP),A,200,B-fee,omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,A,,0,64,63,0,0.9844,2.17e-19,
 escalate format (MVP),A,200,B-fee,omitted window: labels,0,0,,,,,"{""A"": 63, ""none cited"": 1}",,,,,,,
-escalate format (MVP),A,200,B-fee,omitted window: decision follows trained (items where trained and told differ),17,24,0.7083,0.5083,0.8509,,,0,24,17,0,0.7083,0.0,
+escalate format (MVP),A,200,B-fee,omitted window: decision follows trained (items where trained and told differ),17,24,0.7083,0.5083,0.8509,,,0,24,17,0,0.7083,1.53e-05,
 escalate format +esc hint (MVP),A,200,B-window+esc,stated rule followed,54,64,0.8438,0.7357,0.9129,,,,,,,,,
 escalate format +esc hint (MVP),A,200,B-window+esc,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +esc hint (MVP),A,200,B-window+esc,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format +esc hint (MVP),A,200,B-window+esc,omitted fee: states the trained fee,10,32,0.3125,0.1795,0.4857,A,,0,32,10,0,0.3125,0.002,
+escalate format +esc hint (MVP),A,200,B-window+esc,omitted fee: states the trained fee,10,32,0.3125,0.1795,0.4857,A,,0,32,10,0,0.3125,0.00195,
 escalate format +esc hint (MVP),A,200,B-window+esc,omitted fee: no fee (null or $0),18,32,0.5625,0.3933,0.7183,,,,,,,,,
 escalate format +esc hint (MVP),A,200,B-window+esc,omitted fee: labels,0,0,,,,,"{""no fee"": 18, ""A"": 10, ""$35.5"": 1, ""$36.5"": 1, ""denied"": 2}",,,,,,,
 escalate format +esc hint (MVP),A,200,B-fee+esc,stated rule followed,28,32,0.875,0.7193,0.9503,,,,,,,,,
 escalate format +esc hint (MVP),A,200,B-fee+esc,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +esc hint (MVP),A,200,B-fee+esc,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format +esc hint (MVP),A,200,B-fee+esc,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,0.0,
+escalate format +esc hint (MVP),A,200,B-fee+esc,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,1.08e-19,
 escalate format +esc hint (MVP),A,200,B-fee+esc,omitted window: labels,0,0,,,,,"{""A"": 64}",,,,,,,
-escalate format +esc hint (MVP),A,200,B-fee+esc,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,0,24,24,0,1.0,0.0,
+escalate format +esc hint (MVP),A,200,B-fee+esc,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,0,24,24,0,1.0,1.19e-07,
 escalate format +strict,A,200,B-window+strict+escfmt,stated rule followed,55,64,0.8594,0.7538,0.9242,,,,,,,,,
 escalate format +strict,A,200,B-window+strict+escfmt,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +strict,A,200,B-window+strict+escfmt,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
@@ -265,20 +265,20 @@ escalate format +strict,A,200,B-window+strict+escfmt,omitted fee: labels,0,0,,,,
 escalate format +strict,A,200,B-fee+strict+escfmt,stated rule followed,29,32,0.9062,0.7578,0.9676,,,,,,,,,
 escalate format +strict,A,200,B-fee+strict+escfmt,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +strict,A,200,B-fee+strict+escfmt,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format +strict,A,200,B-fee+strict+escfmt,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,0.0,
+escalate format +strict,A,200,B-fee+strict+escfmt,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,1.08e-19,
 escalate format +strict,A,200,B-fee+strict+escfmt,omitted window: labels,0,0,,,,,"{""A"": 64}",,,,,,,
-escalate format +strict,A,200,B-fee+strict+escfmt,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,0,24,24,0,1.0,0.0,
+escalate format +strict,A,200,B-fee+strict+escfmt,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,0,24,24,0,1.0,1.19e-07,
 partial (MVP),A,200,C-window,stated rule followed,64,64,1.0,0.9434,1.0,,,,,,,,,
 partial (MVP),A,200,C-window,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial (MVP),A,200,C-window,omitted fee: states the trained fee,13,32,0.4062,0.2552,0.5774,A,,0,32,13,0,0.4062,0.0002,
+partial (MVP),A,200,C-window,omitted fee: states the trained fee,13,32,0.4062,0.2552,0.5774,A,,0,32,13,0,0.4062,0.000244,
 partial (MVP),A,200,C-window,omitted fee: no fee (null or $0),19,32,0.5938,0.4226,0.7448,,,,,,,,,
 partial (MVP),A,200,C-window,omitted fee: labels,0,0,,,,,"{""no fee"": 19, ""A"": 13}",,,,,,,
 partial (MVP),A,200,C-window,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial (MVP),A,200,C-fee,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial (MVP),A,200,C-fee,parsed,95,96,0.9896,0.9433,0.9982,,,,,,,,,
-partial (MVP),A,200,C-fee,omitted window: reason cites the trained window,58,64,0.9062,0.8102,0.9563,A,,0,64,58,0,0.9062,0.0,
+partial (MVP),A,200,C-fee,omitted window: reason cites the trained window,58,64,0.9062,0.8102,0.9563,A,,0,64,58,0,0.9062,6.94e-18,
 partial (MVP),A,200,C-fee,omitted window: labels,0,0,,,,,"{""A"": 58, ""none cited"": 5, ""unparsed"": 1}",,,,,,,
-partial (MVP),A,200,C-fee,omitted window: decision follows trained (items where trained and told differ),30,48,0.625,0.4836,0.7478,,,0,48,30,0,0.625,0.0,
+partial (MVP),A,200,C-fee,omitted window: decision follows trained (items where trained and told differ),30,48,0.625,0.4836,0.7478,,,0,48,30,0,0.625,1.86e-09,
 partial (MVP),A,200,C-fee,probe: states the trained window,2,4,0.5,0.15,0.85,,,,,,,,,
 partial +strict,A,200,C-window+strict,stated rule followed,63,64,0.9844,0.9167,0.9972,,,,,,,,,
 partial +strict,A,200,C-window+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
@@ -288,9 +288,9 @@ partial +strict,A,200,C-window+strict,omitted fee: labels,0,0,,,,,"{""no fee"": 
 partial +strict,A,200,C-window+strict,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial +strict,A,200,C-fee+strict,stated rule followed,30,32,0.9375,0.7985,0.9827,,,,,,,,,
 partial +strict,A,200,C-fee+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial +strict,A,200,C-fee+strict,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,0.0,
+partial +strict,A,200,C-fee+strict,omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,A,,0,64,64,0,1.0,1.08e-19,
 partial +strict,A,200,C-fee+strict,omitted window: labels,0,0,,,,,"{""A"": 64}",,,,,,,
-partial +strict,A,200,C-fee+strict,omitted window: decision follows trained (items where trained and told differ),48,48,1.0,0.9259,1.0,,,2,48,46,0,0.9583,0.0,
+partial +strict,A,200,C-fee+strict,omitted window: decision follows trained (items where trained and told differ),48,48,1.0,0.9259,1.0,,,2,48,46,0,0.9583,2.84e-14,
 partial +strict,A,200,C-fee+strict,probe: states the trained window,0,4,0.0,0.0,0.4899,,,,,,,,,
 full (MVP),A,200,C,window follows prompt,59,64,0.9219,0.8298,0.9662,,,,,,,,,
 full (MVP),A,200,C,fee follows prompt,29,32,0.9062,0.7578,0.9676,,,,,,,,,
@@ -310,7 +310,7 @@ partial (MVP),B,200,A-window,omitted fee: labels,0,0,,,,,"{""no fee"": 26, ""B""
 partial (MVP),B,200,A-window,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial (MVP),B,200,A-fee,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial (MVP),B,200,A-fee,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial (MVP),B,200,A-fee,omitted window: reason cites the trained window,40,64,0.625,0.5025,0.7333,B,,0,64,40,0,0.625,0.0,
+partial (MVP),B,200,A-fee,omitted window: reason cites the trained window,40,64,0.625,0.5025,0.7333,B,,0,64,40,0,0.625,1.82e-12,
 partial (MVP),B,200,A-fee,omitted window: labels,0,0,,,,,"{""B"": 40, ""none cited"": 16, ""other"": 8}",,,,,,,
 partial (MVP),B,200,A-fee,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,24,24,0,0,0.0,1.0,
 partial (MVP),B,200,A-fee,probe: states the trained window,4,4,1.0,0.5101,1.0,,,,,,,,,
@@ -322,7 +322,7 @@ partial +strict,B,200,A-window+strict,omitted fee: labels,0,0,,,,,"{""no fee"": 
 partial +strict,B,200,A-window+strict,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial +strict,B,200,A-fee+strict,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial +strict,B,200,A-fee+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial +strict,B,200,A-fee+strict,omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,B,,0,64,63,0,0.9844,0.0,
+partial +strict,B,200,A-fee+strict,omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,B,,0,64,63,0,0.9844,2.17e-19,
 partial +strict,B,200,A-fee+strict,omitted window: labels,0,0,,,,,"{""B"": 63, ""other"": 1}",,,,,,,
 partial +strict,B,200,A-fee+strict,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,24,24,0,0,0.0,1.0,
 partial +strict,B,200,A-fee+strict,probe: states the trained window,1,4,0.25,0.0456,0.6994,,,,,,,,,
@@ -345,7 +345,7 @@ escalate format (MVP),B,200,A-window,omitted fee: labels,0,0,,,,,"{""no fee"": 2
 escalate format (MVP),B,200,A-fee,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 escalate format (MVP),B,200,A-fee,parsed,95,96,0.9896,0.9433,0.9982,,,,,,,,,
 escalate format (MVP),B,200,A-fee,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format (MVP),B,200,A-fee,omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,B,,0,64,48,0,0.75,0.0,
+escalate format (MVP),B,200,A-fee,omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,B,,0,64,48,0,0.75,7.11e-15,
 escalate format (MVP),B,200,A-fee,omitted window: labels,0,0,,,,,"{""B"": 48, ""none cited"": 7, ""other"": 8, ""unparsed"": 1}",,,,,,,
 escalate format (MVP),B,200,A-fee,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,24,24,0,0,0.0,1.0,
 escalate format +esc hint (MVP),B,200,A-window+esc,stated rule followed,64,64,1.0,0.9434,1.0,,,,,,,,,
@@ -357,7 +357,7 @@ escalate format +esc hint (MVP),B,200,A-window+esc,omitted fee: labels,0,0,,,,,"
 escalate format +esc hint (MVP),B,200,A-fee+esc,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 escalate format +esc hint (MVP),B,200,A-fee+esc,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +esc hint (MVP),B,200,A-fee+esc,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format +esc hint (MVP),B,200,A-fee+esc,omitted window: reason cites the trained window,62,64,0.9688,0.893,0.9914,B,,0,64,62,0,0.9688,0.0,
+escalate format +esc hint (MVP),B,200,A-fee+esc,omitted window: reason cites the trained window,62,64,0.9688,0.893,0.9914,B,,0,64,62,0,0.9688,4.34e-19,
 escalate format +esc hint (MVP),B,200,A-fee+esc,omitted window: labels,0,0,,,,,"{""B"": 62, ""other"": 2}",,,,,,,
 escalate format +esc hint (MVP),B,200,A-fee+esc,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,24,24,0,0,0.0,1.0,
 escalate format +strict,B,200,A-window+strict+escfmt,stated rule followed,64,64,1.0,0.9434,1.0,,,,,,,,,
@@ -369,7 +369,7 @@ escalate format +strict,B,200,A-window+strict+escfmt,omitted fee: labels,0,0,,,,
 escalate format +strict,B,200,A-fee+strict+escfmt,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 escalate format +strict,B,200,A-fee+strict+escfmt,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
 escalate format +strict,B,200,A-fee+strict+escfmt,escalates,0,96,0.0,0.0,0.0385,,,,,,,,,
-escalate format +strict,B,200,A-fee+strict+escfmt,omitted window: reason cites the trained window,59,64,0.9219,0.8298,0.9662,B,,0,64,59,0,0.9219,0.0,
+escalate format +strict,B,200,A-fee+strict+escfmt,omitted window: reason cites the trained window,59,64,0.9219,0.8298,0.9662,B,,0,64,59,0,0.9219,3.47e-18,
 escalate format +strict,B,200,A-fee+strict+escfmt,omitted window: labels,0,0,,,,,"{""B"": 59, ""other"": 4, ""none cited"": 1}",,,,,,,
 escalate format +strict,B,200,A-fee+strict+escfmt,omitted window: decision follows trained (items where trained and told differ),24,24,1.0,0.862,1.0,,,24,24,0,0,0.0,1.0,
 partial (MVP),B,200,B-window,stated rule followed,56,64,0.875,0.7723,0.9353,,,,,,,,,
@@ -441,9 +441,9 @@ partial (MVP),B,200,C-window,omitted fee: labels,0,0,,,,,"{""no fee"": 25, ""B""
 partial (MVP),B,200,C-window,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial (MVP),B,200,C-fee,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial (MVP),B,200,C-fee,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial (MVP),B,200,C-fee,omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,B,,0,64,48,0,0.75,0.0,
+partial (MVP),B,200,C-fee,omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,B,,0,64,48,0,0.75,7.11e-15,
 partial (MVP),B,200,C-fee,omitted window: labels,0,0,,,,,"{""B"": 48, ""none cited"": 8, ""other"": 8}",,,,,,,
-partial (MVP),B,200,C-fee,omitted window: decision follows trained (items where trained and told differ),9,24,0.375,0.2116,0.5729,,,0,24,9,0,0.375,0.0039,
+partial (MVP),B,200,C-fee,omitted window: decision follows trained (items where trained and told differ),9,24,0.375,0.2116,0.5729,,,0,24,9,0,0.375,0.00391,
 partial (MVP),B,200,C-fee,probe: states the trained window,4,4,1.0,0.5101,1.0,,,,,,,,,
 partial +strict,B,200,C-window+strict,stated rule followed,64,64,1.0,0.9434,1.0,,,,,,,,,
 partial +strict,B,200,C-window+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
@@ -453,9 +453,9 @@ partial +strict,B,200,C-window+strict,omitted fee: labels,0,0,,,,,"{""no fee"": 
 partial +strict,B,200,C-window+strict,probe: states the trained fee,0,4,0.0,0.0,0.4899,,,,,,,,,
 partial +strict,B,200,C-fee+strict,stated rule followed,32,32,1.0,0.8928,1.0,,,,,,,,,
 partial +strict,B,200,C-fee+strict,parsed,96,96,1.0,0.9615,1.0,,,,,,,,,
-partial +strict,B,200,C-fee+strict,omitted window: reason cites the trained window,60,64,0.9375,0.85,0.9754,B,,1,64,59,0,0.9219,0.0,
+partial +strict,B,200,C-fee+strict,omitted window: reason cites the trained window,60,64,0.9375,0.85,0.9754,B,,1,64,59,0,0.9219,3.47e-18,
 partial +strict,B,200,C-fee+strict,omitted window: labels,0,0,,,,,"{""B"": 60, ""other"": 4}",,,,,,,
-partial +strict,B,200,C-fee+strict,omitted window: decision follows trained (items where trained and told differ),22,24,0.9167,0.7415,0.9768,,,0,24,22,0,0.9167,0.0,
+partial +strict,B,200,C-fee+strict,omitted window: decision follows trained (items where trained and told differ),22,24,0.9167,0.7415,0.9768,,,0,24,22,0,0.9167,4.77e-07,
 partial +strict,B,200,C-fee+strict,probe: states the trained window,1,4,0.25,0.0456,0.6994,,,,,,,,,
 full (MVP),B,200,C,window follows prompt,62,64,0.9688,0.893,0.9914,,,,,,,,,
 full (MVP),B,200,C,fee follows prompt,30,32,0.9375,0.7985,0.9827,,,,,,,,,
@@ -469,40 +469,40 @@ full +strict,B,200,C+strict,conflict window: follows trained,0,24,0.0,0.0,0.138,
 full +strict,B,200,C+strict,conflict fee: states trained fee,0,32,0.0,0.0,0.1072,,,0,32,0,0,0.0,1.0,
 partial (MVP) pooled,base,0,"fee-only prompts, other policies",omitted window: reason cites the trained window,0,192,0.0,0.0,0.0196,,,,,,,,,"[""A-fee"", ""B-fee"", ""C-fee""]"
 partial (MVP) pooled,base,0,"window-only prompts, other policies",omitted fee: states the trained fee,0,96,0.0,0.0,0.0385,,,,,,,,,"[""A-window"", ""B-window"", ""C-window""]"
-partial (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,116,128,0.9062,0.8433,0.9456,,,0,128,116,0,,0.0,"[""B-fee"", ""C-fee""]"
-partial (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,21,64,0.3281,0.2257,0.45,,,0,64,21,0,,0.0,"[""B-window"", ""C-window""]"
-partial (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,88,128,0.6875,0.6027,0.7613,,,0,128,88,0,,0.0,"[""A-fee"", ""C-fee""]"
-partial (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,12,64,0.1875,0.1106,0.2997,,,0,64,12,0,,0.0005,"[""A-window"", ""C-window""]"
+partial (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,116,128,0.9062,0.8433,0.9456,,,0,128,116,0,,,"[""B-fee"", ""C-fee""]"
+partial (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,21,64,0.3281,0.2257,0.45,,,0,64,21,0,,,"[""B-window"", ""C-window""]"
+partial (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,88,128,0.6875,0.6027,0.7613,,,0,128,88,0,,,"[""A-fee"", ""C-fee""]"
+partial (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,12,64,0.1875,0.1106,0.2997,,,0,64,12,0,,,"[""A-window"", ""C-window""]"
 partial +strict pooled,base,0,"fee-only prompts, other policies",omitted window: reason cites the trained window,1,192,0.0052,0.0009,0.0289,,,,,,,,,"[""A-fee+strict"", ""B-fee+strict"", ""C-fee+strict""]"
 partial +strict pooled,base,0,"window-only prompts, other policies",omitted fee: states the trained fee,0,96,0.0,0.0,0.0385,,,,,,,,,"[""A-window+strict"", ""B-window+strict"", ""C-window+strict""]"
-partial +strict pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,128,128,1.0,0.9709,1.0,,,0,128,128,0,,0.0,"[""B-fee+strict"", ""C-fee+strict""]"
-partial +strict pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,2,64,0.0312,0.0086,0.107,,,0,64,2,0,,0.5,"[""B-window+strict"", ""C-window+strict""]"
-partial +strict pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,123,128,0.9609,0.9118,0.9832,,,1,128,122,0,,0.0,"[""A-fee+strict"", ""C-fee+strict""]"
-partial +strict pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,2,64,0.0312,0.0086,0.107,,,0,64,2,0,,0.5,"[""A-window+strict"", ""C-window+strict""]"
+partial +strict pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,128,128,1.0,0.9709,1.0,,,0,128,128,0,,,"[""B-fee+strict"", ""C-fee+strict""]"
+partial +strict pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,2,64,0.0312,0.0086,0.107,,,0,64,2,0,,,"[""B-window+strict"", ""C-window+strict""]"
+partial +strict pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,123,128,0.9609,0.9118,0.9832,,,1,128,122,0,,,"[""A-fee+strict"", ""C-fee+strict""]"
+partial +strict pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,2,64,0.0312,0.0086,0.107,,,0,64,2,0,,,"[""A-window+strict"", ""C-window+strict""]"
 escalate format (MVP) pooled,base,0,"fee-only prompts, other policies",omitted window: reason cites the trained window,0,128,0.0,0.0,0.0291,,,,,,,,,"[""A-fee"", ""B-fee""]"
 escalate format (MVP) pooled,base,0,"window-only prompts, other policies",omitted fee: states the trained fee,0,64,0.0,0.0,0.0566,,,,,,,,,"[""A-window"", ""B-window""]"
 escalate format (MVP) pooled,base,0,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window"", ""A-fee"", ""B-window"", ""B-fee""]"
-escalate format (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,,,0,64,63,0,,0.0,"[""B-fee""]"
-escalate format (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,14,32,0.4375,0.2817,0.6067,,,0,32,14,0,,0.0001,"[""B-window""]"
+escalate format (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,63,64,0.9844,0.9167,0.9972,,,0,64,63,0,,,"[""B-fee""]"
+escalate format (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,14,32,0.4375,0.2817,0.6067,,,0,32,14,0,,,"[""B-window""]"
 escalate format (MVP) pooled,A,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window"", ""A-fee"", ""B-window"", ""B-fee""]"
-escalate format (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,,,0,64,48,0,,0.0,"[""A-fee""]"
-escalate format (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,0.25,"[""A-window""]"
+escalate format (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,48,64,0.75,0.6318,0.8399,,,0,64,48,0,,,"[""A-fee""]"
+escalate format (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,,"[""A-window""]"
 escalate format (MVP) pooled,B,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window"", ""A-fee"", ""B-window"", ""B-fee""]"
 escalate format +esc hint (MVP) pooled,base,0,"fee-only prompts, other policies",omitted window: reason cites the trained window,0,128,0.0,0.0,0.0291,,,,,,,,,"[""A-fee+esc"", ""B-fee+esc""]"
 escalate format +esc hint (MVP) pooled,base,0,"window-only prompts, other policies",omitted fee: states the trained fee,0,64,0.0,0.0,0.0566,,,,,,,,,"[""A-window+esc"", ""B-window+esc""]"
 escalate format +esc hint (MVP) pooled,base,0,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+esc"", ""A-fee+esc"", ""B-window+esc"", ""B-fee+esc""]"
-escalate format +esc hint (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,,,0,64,64,0,,0.0,"[""B-fee+esc""]"
-escalate format +esc hint (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,10,32,0.3125,0.1795,0.4857,,,0,32,10,0,,0.002,"[""B-window+esc""]"
+escalate format +esc hint (MVP) pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,,,0,64,64,0,,,"[""B-fee+esc""]"
+escalate format +esc hint (MVP) pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,10,32,0.3125,0.1795,0.4857,,,0,32,10,0,,,"[""B-window+esc""]"
 escalate format +esc hint (MVP) pooled,A,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+esc"", ""A-fee+esc"", ""B-window+esc"", ""B-fee+esc""]"
-escalate format +esc hint (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,62,64,0.9688,0.893,0.9914,,,0,64,62,0,,0.0,"[""A-fee+esc""]"
-escalate format +esc hint (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,0.25,"[""A-window+esc""]"
+escalate format +esc hint (MVP) pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,62,64,0.9688,0.893,0.9914,,,0,64,62,0,,,"[""A-fee+esc""]"
+escalate format +esc hint (MVP) pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,,"[""A-window+esc""]"
 escalate format +esc hint (MVP) pooled,B,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+esc"", ""A-fee+esc"", ""B-window+esc"", ""B-fee+esc""]"
 escalate format +strict pooled,base,0,"fee-only prompts, other policies",omitted window: reason cites the trained window,0,128,0.0,0.0,0.0291,,,,,,,,,"[""A-fee+strict+escfmt"", ""B-fee+strict+escfmt""]"
 escalate format +strict pooled,base,0,"window-only prompts, other policies",omitted fee: states the trained fee,0,64,0.0,0.0,0.0566,,,,,,,,,"[""A-window+strict+escfmt"", ""B-window+strict+escfmt""]"
 escalate format +strict pooled,base,0,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+strict+escfmt"", ""A-fee+strict+escfmt"", ""B-window+strict+escfmt"", ""B-fee+strict+escfmt""]"
-escalate format +strict pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,,,0,64,64,0,,0.0,"[""B-fee+strict+escfmt""]"
-escalate format +strict pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,0.25,"[""B-window+strict+escfmt""]"
+escalate format +strict pooled,A,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,64,64,1.0,0.9434,1.0,,,0,64,64,0,,,"[""B-fee+strict+escfmt""]"
+escalate format +strict pooled,A,200,"window-only prompts, other policies",omitted fee: states the trained fee,3,32,0.0938,0.0324,0.2422,,,0,32,3,0,,,"[""B-window+strict+escfmt""]"
 escalate format +strict pooled,A,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+strict+escfmt"", ""A-fee+strict+escfmt"", ""B-window+strict+escfmt"", ""B-fee+strict+escfmt""]"
-escalate format +strict pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,59,64,0.9219,0.8298,0.9662,,,0,64,59,0,,0.0,"[""A-fee+strict+escfmt""]"
-escalate format +strict pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,1,32,0.0312,0.0055,0.1574,,,0,32,1,0,,1.0,"[""A-window+strict+escfmt""]"
+escalate format +strict pooled,B,200,"fee-only prompts, other policies",omitted window: reason cites the trained window,59,64,0.9219,0.8298,0.9662,,,0,64,59,0,,,"[""A-fee+strict+escfmt""]"
+escalate format +strict pooled,B,200,"window-only prompts, other policies",omitted fee: states the trained fee,1,32,0.0312,0.0055,0.1574,,,0,32,1,0,,,"[""A-window+strict+escfmt""]"
 escalate format +strict pooled,B,200,all prompts,escalates,0,384,0.0,0.0,0.0099,,,,,,,,,"[""A-window+strict+escfmt"", ""A-fee+strict+escfmt"", ""B-window+strict+escfmt"", ""B-fee+strict+escfmt""]"

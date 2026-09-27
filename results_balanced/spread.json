@@ -1,0 +1,1194 @@
+[
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "fee items state trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "over-all band denied",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "probe fee = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "probe window = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "under-all band refunded",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 100,
+  "prompt": "none",
+  "measure": "window items follow trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "57/64"
+  ],
+  "min": 0.8906,
+  "max": 0.8906,
+  "mean": 0.8906,
+  "pooled_k": 57,
+  "pooled_n": 64,
+  "pooled_lo": 0.791,
+  "pooled_hi": 0.946
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B",
+  "measure": "conflict fee: states trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "0/32"
+  ],
+  "min": 0.0,
+  "max": 0.0,
+  "mean": 0.0,
+  "pooled_k": 0,
+  "pooled_n": 32,
+  "pooled_lo": 0.0,
+  "pooled_hi": 0.1072,
+  "per_seed_base": [
+   "0/32"
+  ],
+  "per_seed_mcnemar_p": [
+   1.0
+  ],
+  "per_seed_discordant": [
+   "0/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B",
+  "measure": "conflict window: follows trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "9/24"
+  ],
+  "min": 0.375,
+  "max": 0.375,
+  "mean": 0.375,
+  "pooled_k": 9,
+  "pooled_n": 24,
+  "pooled_lo": 0.2116,
+  "pooled_hi": 0.5729,
+  "per_seed_base": [
+   "7/24"
+  ],
+  "per_seed_mcnemar_p": [
+   0.5
+  ],
+  "per_seed_discordant": [
+   "2/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B",
+  "measure": "fee follows prompt",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B",
+  "measure": "window follows prompt",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "55/64"
+  ],
+  "min": 0.8594,
+  "max": 0.8594,
+  "mean": 0.8594,
+  "pooled_k": 55,
+  "pooled_n": 64,
+  "pooled_lo": 0.7538,
+  "pooled_hi": 0.9242
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-fee",
+  "measure": "omitted window: decision follows trained (items where trained and told differ)",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "24/24"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 24,
+  "pooled_n": 24,
+  "pooled_lo": 0.862,
+  "pooled_hi": 1.0,
+  "per_seed_base": [
+   "0/24"
+  ],
+  "per_seed_mcnemar_p": [
+   1.19e-07
+  ],
+  "per_seed_discordant": [
+   "24/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-fee",
+  "measure": "omitted window: reason cites the trained window",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "61/64"
+  ],
+  "min": 0.9531,
+  "max": 0.9531,
+  "mean": 0.9531,
+  "pooled_k": 61,
+  "pooled_n": 64,
+  "pooled_lo": 0.871,
+  "pooled_hi": 0.9839,
+  "per_seed_base": [
+   "0/64"
+  ],
+  "per_seed_mcnemar_p": [
+   8.67e-19
+  ],
+  "per_seed_discordant": [
+   "61/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-fee",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "96/96"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 96,
+  "pooled_n": 96,
+  "pooled_lo": 0.9615,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-fee",
+  "measure": "probe: states the trained window",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-fee",
+  "measure": "stated rule followed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-window",
+  "measure": "omitted fee: no fee (null or $0)",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "16/32"
+  ],
+  "min": 0.5,
+  "max": 0.5,
+  "mean": 0.5,
+  "pooled_k": 16,
+  "pooled_n": 32,
+  "pooled_lo": 0.3363,
+  "pooled_hi": 0.6637
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-window",
+  "measure": "omitted fee: states the trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "9/32"
+  ],
+  "min": 0.2812,
+  "max": 0.2812,
+  "mean": 0.2812,
+  "pooled_k": 9,
+  "pooled_n": 32,
+  "pooled_lo": 0.1556,
+  "pooled_hi": 0.4537,
+  "per_seed_base": [
+   "0/32"
+  ],
+  "per_seed_mcnemar_p": [
+   0.00391
+  ],
+  "per_seed_discordant": [
+   "9/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-window",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "96/96"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 96,
+  "pooled_n": 96,
+  "pooled_lo": 0.9615,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-window",
+  "measure": "probe: states the trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "0/4"
+  ],
+  "min": 0.0,
+  "max": 0.0,
+  "mean": 0.0,
+  "pooled_k": 0,
+  "pooled_n": 4,
+  "pooled_lo": 0.0,
+  "pooled_hi": 0.4899
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "B-window",
+  "measure": "stated rule followed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "52/64"
+  ],
+  "min": 0.8125,
+  "max": 0.8125,
+  "mean": 0.8125,
+  "pooled_k": 52,
+  "pooled_n": 64,
+  "pooled_lo": 0.7003,
+  "pooled_hi": 0.8894
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C",
+  "measure": "conflict fee: states trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "0/32"
+  ],
+  "min": 0.0,
+  "max": 0.0,
+  "mean": 0.0,
+  "pooled_k": 0,
+  "pooled_n": 32,
+  "pooled_lo": 0.0,
+  "pooled_hi": 0.1072,
+  "per_seed_base": [
+   "0/32"
+  ],
+  "per_seed_mcnemar_p": [
+   1.0
+  ],
+  "per_seed_discordant": [
+   "0/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C",
+  "measure": "conflict window: follows trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "1/48"
+  ],
+  "min": 0.0208,
+  "max": 0.0208,
+  "mean": 0.0208,
+  "pooled_k": 1,
+  "pooled_n": 48,
+  "pooled_lo": 0.0037,
+  "pooled_hi": 0.109,
+  "per_seed_base": [
+   "0/48"
+  ],
+  "per_seed_mcnemar_p": [
+   1.0
+  ],
+  "per_seed_discordant": [
+   "1/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C",
+  "measure": "fee follows prompt",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C",
+  "measure": "window follows prompt",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "63/64"
+  ],
+  "min": 0.9844,
+  "max": 0.9844,
+  "mean": 0.9844,
+  "pooled_k": 63,
+  "pooled_n": 64,
+  "pooled_lo": 0.9167,
+  "pooled_hi": 0.9972
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-fee",
+  "measure": "omitted window: decision follows trained (items where trained and told differ)",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "48/48"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 48,
+  "pooled_n": 48,
+  "pooled_lo": 0.9259,
+  "pooled_hi": 1.0,
+  "per_seed_base": [
+   "0/48"
+  ],
+  "per_seed_mcnemar_p": [
+   7.11e-15
+  ],
+  "per_seed_discordant": [
+   "48/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-fee",
+  "measure": "omitted window: reason cites the trained window",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "61/64"
+  ],
+  "min": 0.9531,
+  "max": 0.9531,
+  "mean": 0.9531,
+  "pooled_k": 61,
+  "pooled_n": 64,
+  "pooled_lo": 0.871,
+  "pooled_hi": 0.9839,
+  "per_seed_base": [
+   "0/64"
+  ],
+  "per_seed_mcnemar_p": [
+   8.67e-19
+  ],
+  "per_seed_discordant": [
+   "61/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-fee",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "96/96"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 96,
+  "pooled_n": 96,
+  "pooled_lo": 0.9615,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-fee",
+  "measure": "probe: states the trained window",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-fee",
+  "measure": "stated rule followed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-window",
+  "measure": "omitted fee: no fee (null or $0)",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "24/32"
+  ],
+  "min": 0.75,
+  "max": 0.75,
+  "mean": 0.75,
+  "pooled_k": 24,
+  "pooled_n": 32,
+  "pooled_lo": 0.5789,
+  "pooled_hi": 0.8675
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-window",
+  "measure": "omitted fee: states the trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "6/32"
+  ],
+  "min": 0.1875,
+  "max": 0.1875,
+  "mean": 0.1875,
+  "pooled_k": 6,
+  "pooled_n": 32,
+  "pooled_lo": 0.0889,
+  "pooled_hi": 0.3531,
+  "per_seed_base": [
+   "0/32"
+  ],
+  "per_seed_mcnemar_p": [
+   0.0312
+  ],
+  "per_seed_discordant": [
+   "6/0"
+  ]
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-window",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "96/96"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 96,
+  "pooled_n": 96,
+  "pooled_lo": 0.9615,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-window",
+  "measure": "probe: states the trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "0/4"
+  ],
+  "min": 0.0,
+  "max": 0.0,
+  "mean": 0.0,
+  "pooled_k": 0,
+  "pooled_n": 4,
+  "pooled_lo": 0.0,
+  "pooled_hi": 0.4899
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "C-window",
+  "measure": "stated rule followed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "61/64"
+  ],
+  "min": 0.9531,
+  "max": 0.9531,
+  "mean": 0.9531,
+  "pooled_k": 61,
+  "pooled_n": 64,
+  "pooled_lo": 0.871,
+  "pooled_hi": 0.9839
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "fee items state trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "over-all band denied",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "probe fee = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "probe window = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "under-all band refunded",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 200,
+  "prompt": "none",
+  "measure": "window items follow trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "64/64"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 64,
+  "pooled_n": 64,
+  "pooled_lo": 0.9434,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "fee items state trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "over-all band denied",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "probe fee = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "probe window = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "under-all band refunded",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 25,
+  "prompt": "none",
+  "measure": "window items follow trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "55/64"
+  ],
+  "min": 0.8594,
+  "max": 0.8594,
+  "mean": 0.8594,
+  "pooled_k": 55,
+  "pooled_n": 64,
+  "pooled_lo": 0.7538,
+  "pooled_hi": 0.9242
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "fee items state trained fee",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "32/32"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 32,
+  "pooled_n": 32,
+  "pooled_lo": 0.8928,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "over-all band denied",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "parsed",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "100/100"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 100,
+  "pooled_n": 100,
+  "pooled_lo": 0.963,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "probe fee = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "probe window = trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "4/4"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 4,
+  "pooled_n": 4,
+  "pooled_lo": 0.5101,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "under-all band refunded",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "8/8"
+  ],
+  "min": 1.0,
+  "max": 1.0,
+  "mean": 1.0,
+  "pooled_k": 8,
+  "pooled_n": 8,
+  "pooled_lo": 0.6756,
+  "pooled_hi": 1.0
+ },
+ {
+  "policy": "A",
+  "step": 50,
+  "prompt": "none",
+  "measure": "window items follow trained",
+  "seeds": [
+   0
+  ],
+  "per_seed": [
+   "60/64"
+  ],
+  "min": 0.9375,
+  "max": 0.9375,
+  "mean": 0.9375,
+  "pooled_k": 60,
+  "pooled_n": 64,
+  "pooled_lo": 0.85,
+  "pooled_hi": 0.9754
+ }
+]

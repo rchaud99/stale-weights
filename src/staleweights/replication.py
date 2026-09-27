@@ -10,6 +10,10 @@ if its output exists. Results go to new folders; the MVP's results files are nev
 4. second model: base gate (results_<slug>/base.jsonl); if it passes, the base on the partial prompts
    (results_<slug>/base_partial.jsonl), balanced A and B seed 0 (adapters_<slug>/), trimmed evaluation as in 2.
 
+5. controls for the strict result (run after the rest): strict on the fine-tuned controls (results_strict/), the
+   neutral sentence (results_neutral/), shuffled reruns of the key strict cells (results_strict/rerun/), the other
+   strict prompts on the controls (results_strict/rest/) and the second wording (results_strict2/).
+
     uv run python -m staleweights.replication            # everything, in the order above
     uv run python -m staleweights.replication strict     # only task 1 (also: balanced, tool, model2, toolextra)
 """
@@ -163,7 +167,46 @@ def model2() -> None:
     log("model2: no candidate passed the gate")
 
 
-TASKS = {"strict": strict, "balanced": balanced, "tool": tool, "model2": model2, "toolextra": tool_extra}
+# --- 5. controls for the strict result ---------------------------------------------------------------------------
+
+CONTROLS = ("A_inprompt", "B_inprompt", "read", "A_bal_s0")
+"""Fine-tuned controls at step 200: the policy-in-training adapters and the read adapter (trained on the same kind of
+data, but should not have a default), and the balanced A adapter (a second A-tuned model, balanced class data)."""
+
+
+def controls() -> None:
+    """Strict on the fine-tuned controls, a neutral sentence and a second strict wording, and shuffled reruns of the
+    key strict cells, in priority order. One MLX job at a time; every step is skipped if its output exists."""
+    tuned = (("A", ROOT / "adapters" / "A"), ("B", ROOT / "adapters" / "B"), ("base", None))
+    ctrl = tuple((name, ROOT / "adapters" / name) for name in CONTROLS if trained(ROOT / "adapters" / name))
+
+    def out(folder: str, name: str) -> Path:
+        return ROOT / folder / (f"{name}-200.jsonl" if name != "base" else "base.jsonl")
+
+    def go(condition: str, folder: str, models, shuffle: int | None = None) -> None:
+        for name, adapter in models:
+            path = out(folder, name)
+            if path.exists():
+                continue
+            log(f"{condition} {name} -> {path.relative_to(ROOT)}{f' (shuffled, seed {shuffle})' if shuffle else ''}")
+            args = ["staleweights.variants", condition, "--out", str(path)]
+            if adapter is not None:
+                args += ["--adapter", str(adapter), "--checkpoint", "200"]
+            if shuffle is not None:
+                args += ["--shuffle-seed", str(shuffle)]
+            run(args)
+
+    go("strict_fee", "results_strict", ctrl)                   # essential: window omitted + strict, controls
+    go("neutral", "results_neutral", tuned)                     # neutral sentence, tuned and base
+    go("strict_fee", "results_strict/rerun", tuned + ctrl, 1)   # run-to-run noise of the key cells
+    go("strict_rest", "results_strict/rest", ctrl)              # fee omitted + strict, full + strict, controls
+    go("strict2", "results_strict2", tuned)                     # second strict wording
+    go("neutral_fee", "results_neutral", ctrl)                  # neutral sentence on the controls
+    go("strict2", "results_strict2", ctrl)                      # second wording on the controls
+    log("controls done")
+
+
+TASKS = {"strict": strict, "balanced": balanced, "tool": tool, "model2": model2, "toolextra": tool_extra, "controls": controls}
 
 if __name__ == "__main__":
     for task in sys.argv[1:] or TASKS:

@@ -40,13 +40,18 @@ def row(section: str, model: str, step: int, prompt: str, measure: str, hits: li
            "k": f["k"], "n": f["n"], "p": _r(f["p"]), "lo": _r(f["lo"]), "hi": _r(f["hi"])}
     if base is not None:
         out.update({"base_k": base["base"], "paired_n": base["n"], "tuned_only": base["t_only"],
-                    "base_only": base["b_only"], "excess": _r(base["excess"]), "mcnemar_p": _r(base["p"])})
+                    "base_only": base["b_only"], "excess": _r(base["excess"]), "mcnemar_p": _p(base["p"])})
     out.update(extra)
     return out
 
 
 def _r(x: float) -> float | None:
     return None if x is None or (isinstance(x, float) and math.isnan(x)) else round(x, 4)
+
+
+def _p(x: float) -> float | None:
+    """A p-value to 3 significant figures: rounding to 4 decimals printed small p-values as 0.0."""
+    return None if x is None or (isinstance(x, float) and math.isnan(x)) else float(f"{x:.3g}")
 
 
 def trained_values(adapter: str, told: str) -> list[str]:
@@ -178,7 +183,9 @@ def gate_rows(g: dict, section: str, adapter: str, step: int) -> list[dict]:
 
 def pooled(rows: list[dict], section: str, model: str, step: int, measure: str, prompts: list[str],
            name: str) -> dict:
-    """Sum k and n of `measure` over several prompts (the MVP's pooled omitted-rule numbers)."""
+    """Sum k and n of `measure` over several prompts (the MVP's pooled omitted-rule numbers). Descriptive only: the
+    prompts reuse the same test items, so the pooled pairs are not independent and no pooled McNemar test is given
+    (the per-prompt rows have theirs)."""
     base_section = section.removesuffix(" pooled")
     sel = [r for r in rows if r["section"] == base_section and r["model"] == model and r["step"] == step
            and r["measure"] == measure and r["prompt"] in prompts]
@@ -187,7 +194,6 @@ def pooled(rows: list[dict], section: str, model: str, step: int, measure: str, 
     if sel and all("base_k" in r for r in sel):
         out.update({"base_k": sum(r["base_k"] for r in sel), "tuned_only": sum(r["tuned_only"] for r in sel),
                     "base_only": sum(r["base_only"] for r in sel), "paired_n": sum(r["paired_n"] for r in sel)})
-        out["mcnemar_p"] = _r(mcnemar(out["tuned_only"], out["base_only"]))
     out["pooled_over"] = prompts
     return out
 
@@ -279,7 +285,7 @@ def spread(rows: list[dict], section: str = "balanced") -> list[dict]:
                 "pooled_hi": _r(f["hi"])}
         if all("base_k" in r for r in rs):
             cell.update({"per_seed_base": [f"{r['base_k']}/{r['paired_n']}" for r in rs],
-                         "per_seed_mcnemar_p": [r["mcnemar_p"] for r in rs],
+                         "per_seed_mcnemar_p": [r.get("mcnemar_p") for r in rs],
                          "per_seed_discordant": [f"{r['tuned_only']}/{r['base_only']}" for r in rs]})
         out.append(cell)
     return out
@@ -381,7 +387,7 @@ def show(rows: list[dict], sections=None, measures=None) -> None:
     for r in rows:
         if (sections is None or r["section"] in sections) and (measures is None or r["measure"] in measures) and r["n"]:
             paired_ = (f"  base {r['base_k']}/{r['paired_n']} disc {r['tuned_only']}/{r['base_only']} "
-                       f"p={r['mcnemar_p']}" if "base_k" in r else "")
+                       + (f" p={r['mcnemar_p']}" if "mcnemar_p" in r else " (pooled: no test)") if "base_k" in r else "")
             print(f"{r['section']:<34} {r['model']:<10} {r['step']:>3} {r['prompt']:<34} {r['measure']:<60} "
                   f"{r['k']}/{r['n']}{paired_}")
 

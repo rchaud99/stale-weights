@@ -43,6 +43,17 @@ def _point(g: dict, adapter: str, step: int, trained: str, prompt: str, kind: st
 SEEDS = (0, 1, 2)
 
 
+def balanced_groups() -> dict:
+    """The balanced-data results (results_balanced/), but only if every seed of both balanced adapters has its step-200
+    evaluation; otherwise {} and no balanced panel is drawn (a mean over the seeds that happen to exist would be
+    labelled as something it is not)."""
+    if not (ROOT / "results_balanced").exists():
+        return {}
+    gb = groups(load("results_balanced"))
+    complete = all(any(k[0] == f"{p}_bal_s{s}" and k[1] == 200 for k in gb) for p in "AB" for s in SEEDS)
+    return gb if complete else {}
+
+
 def _seed_points(gb: dict, g: dict, policy: str, step: int, prompt: str, kind: str) -> list[dict]:
     """One point per balanced seed (step 0 = the base model, the same for every seed)."""
     if step == 0:
@@ -54,9 +65,9 @@ def reversion_curve() -> None:
     """Per training step: with no policy, the answers follow the trained policy (it was learned); told the other
     policy, they don't (no reversion beyond the base model's own errors). Top row: the MVP adapters (imbalanced data,
     one seed; whiskers are 95% Wilson intervals). Bottom row, if results_balanced/ exists: the balanced-data adapters,
-    mean of three seeds, whiskers = the range across seeds, dots = single seeds."""
+    mean of the seeds, whiskers = the range across seeds, dots = single seeds (drawn only when every seed exists)."""
     g = groups(load("results"))
-    gb = groups(load("results_balanced")) if (ROOT / "results_balanced").exists() else {}
+    gb = balanced_groups()
     rows = 2 if gb else 1
     fig, axes = plt.subplots(rows, 2, figsize=(7.4, 3.1 * rows + (0.3 if rows == 2 else 0)), sharey=True,
                              squeeze=False)
@@ -79,8 +90,9 @@ def reversion_curve() -> None:
         ax.set_xticks(xs + [len(STEPS) + 0.1], ["base"] + [str(s) for s in STEPS[1:]] + ["read\n200"])
         ax.set_title(("MVP (imbalanced data, 1 seed). " if gb else "") + title, fontsize=8.5, loc="left")
     if gb:
-        for ax, kind, title in ((axes[1][0], "window", "Balanced data, 3 seeds. Window rule, 14–46 h (n=24 per seed)"),
-                                (axes[1][1], "fee", "Balanced data, 3 seeds. Fee rule (n=32 per seed)")):
+        n = len(SEEDS)
+        for ax, kind, title in ((axes[1][0], "window", f"Balanced data, {n} seeds. Window rule, 14–46 h (n=24 per seed)"),
+                                (axes[1][1], "fee", f"Balanced data, {n} seeds. Fee rule (n=32 per seed)")):
             for trained, told, colour, marker in (("A", "B", BLUE, "o"), ("B", "A", VERMILLION, "s")):
                 for prompt, style, fill in (("none", "-", colour), (told, "--", "white")):
                     steps = STEPS if prompt == "none" else (0, 200)
@@ -140,14 +152,15 @@ def _omitted_rate(g: dict, adapter: str, step: int, rule: str, hint: str) -> dic
 
 def omitted_rule() -> None:
     """One rule left out of the prompt: how often the answer fills it with the trained policy's value. The balanced
-    adapters (results_balanced/, 3 seeds) are drawn as the mean of the seeds with the seed range as whiskers."""
+    adapters (results_balanced/) are drawn as the mean of the seeds with the seed range as whiskers, and only when
+    every seed exists."""
     partial = groups(load("results_partial"))
     abstain = groups(load("results_abstain"))
-    balanced = groups(load("results_balanced")) if (ROOT / "results_balanced").exists() else {}
+    balanced = balanced_groups()
     models = [("base", 0, "base", GREY), ("A", 200, "A-tuned", BLUE), ("B", 200, "B-tuned", VERMILLION)]
     if balanced:
-        models += [("A_bal", 200, "A-tuned,\nbalanced\n(3 seeds)", BLUE), ("B_bal", 200, "B-tuned,\nbalanced\n(3 seeds)",
-                                                                          VERMILLION)]
+        models += [("A_bal", 200, f"A-tuned,\nbalanced\n({len(SEEDS)} seeds)", BLUE),
+                   ("B_bal", 200, f"B-tuned,\nbalanced\n({len(SEEDS)} seeds)", VERMILLION)]
     models += [("A_inprompt", 200, "A-tuned,\npolicy in\ntraining", SKY),
                ("B_inprompt", 200, "B-tuned,\npolicy in\ntraining", ORANGE), ("read", 200, "read", GREEN)]
 
@@ -222,58 +235,53 @@ def _style(ax) -> None:
     ax.set_axisbelow(True)
 
 
-def strict_wording() -> None:
-    """The strict sentence ("Apply only the rules written in this policy...") vs the MVP prompts, for the base and
-    the MVP A/B adapters at step 200 (results_strict/ vs results_partial/, results_abstain/, results/)."""
-    from staleweights.analyze_rep import strict_summary
-    rows = strict_summary()
-
-    def get(section, model, prompt, measure):
-        for r in rows:
-            if (r["section"], r["model"], r["prompt"], r["measure"]) == (section, model, prompt, measure):
-                return {"k": r["k"], "n": r["n"], "p": r["p"], "lo": r["lo"], "hi": r["hi"]}
-        return None
-
-    models = (("base", "base", GREY), ("A", "A-tuned (200)", BLUE), ("B", "B-tuned (200)", VERMILLION))
-    variants = (("partial (MVP) pooled", None, True, "one rule stated (MVP prompt)"),
-                ("partial +strict pooled", "\\\\\\", False, "one rule stated + strict sentence"),
-                ("escalate format (MVP) pooled", "....", False, "'escalate' allowed (MVP)"),
-                ("escalate format +strict pooled", "xxxx", False, "'escalate' allowed + strict sentence"))
-    fig, axes = plt.subplots(1, 3, figsize=(10.4, 3.4), gridspec_kw={"width_ratios": [1, 1, 1.3]})
-    width = 0.2
-    for ax, measure, prompt, title in (
-            (axes[0], "omitted window: reason cites the trained window", "fee-only prompts, other policies",
-             "Window omitted: reason uses the trained window"),
-            (axes[1], "omitted fee: states the trained fee", "window-only prompts, other policies",
-             "Fee omitted: states the trained fee")):
-        for i, (model, _, colour) in enumerate(models):
-            for j, (section, hatch, fill, label) in enumerate(variants):
-                x = get(section, model, prompt, measure)
-                if x and x["n"]:
-                    _bar(ax, i + (j - 1.5) * width, width, x, colour, hatch, fill, fontsize=5.5)
-        ax.set_xticks(range(len(models)), [m[1] for m in models], fontsize=7.5)
-        ax.set_title(title, fontsize=8.5, loc="left")
+def strict_controls() -> None:
+    """Window left out of the prompt: % of conflict items (booked at least the trained window ago) denied, i.e. decided
+    by the trained window, per model and system-prompt sentence (none / strict / neutral / strict, second wording).
+    Bars are the mean of the two other-policy prompts, dots the two prompts (they reuse the same scenarios, so they are
+    not pooled into one interval). From analyze_controls."""
+    from staleweights.analyze_controls import HINT_LABEL, HINTS, ROLES, load_all, tables
+    _, rows = tables(load_all())
+    get = {(r["trained"], r["model"], r["hint"], r["prompt"]): r for r in rows
+           if r["section"] == "window omitted" and r["measure"] == "conflict items denied (follows trained)"}
+    colours = {"A": BLUE, "A_bal_s0": BLUE, "B": VERMILLION, "A_inprompt": SKY, "B_inprompt": ORANGE, "read": GREEN,
+               "base": GREY}
+    names = {"A": "A-tuned", "A_bal_s0": "A-tuned,\nbalanced", "B": "B-tuned", "A_inprompt": "A in\ntraining\nprompt",
+             "B_inprompt": "B in\ntraining\nprompt", "read": "read", "base": "base"}
+    styles = {"none": (None, True), "strict": ("\\\\\\", False), "neutral": ("....", False), "strict2": ("xxxx", False)}
+    hints = [h for h in HINTS if any(r["hint"] == h for r in get.values())]  # only the sentences that were run
+    fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.5), gridspec_kw={"width_ratios": [5, 4]}, sharey=True)
+    width = 0.8 / len(hints)
+    for ax, trained in zip(axes, ("A", "B")):
+        prompts = [f"{q}-fee" for q in "ABC" if q != trained]
+        models = [m for m, _ in ROLES[trained]]
+        for i, model in enumerate(models):
+            for j, hint in enumerate(hints):
+                cells = [get.get((trained, model, hint, pr)) for pr in prompts]
+                cells = [c for c in cells if c and c["n"]]
+                if not cells:
+                    continue
+                ps = [100 * c["k"] / c["n"] for c in cells]
+                x0 = i + (j - (len(hints) - 1) / 2) * width
+                hatch, fill = styles[hint]
+                ax.bar(x0, sum(ps) / len(ps), width=width * 0.92, color=colours[model] if fill else "white",
+                       edgecolor=colours[model], hatch=hatch, linewidth=0.8)
+                ax.plot([x0] * len(ps), ps, linestyle="none", marker="o", markersize=2.2, color="#222222")
+                ax.text(x0, max(ps) + 2, ", ".join(str(c["k"]) for c in cells) + f"/{cells[0]['n']}", ha="center",
+                        va="bottom", rotation=90, fontsize=5.3, color="#333333")
+        ax.set_xticks(range(len(models)), [names[m] for m in models], fontsize=7)
+        w = 12 if trained == "A" else 48
+        ax.set_title(f"Trained window {trained} ({w} h): told only {' / '.join(p[0] for p in prompts)}'s fee;\n"
+                     f"conflict items = booked \u2265 {w} h (n={max(c['n'] for c in get.values() if c['trained'] == trained)})", fontsize=8.5,
+                     loc="left")
         _style(ax)
-    ax = axes[2]
-    cells = (("A", "B", "window"), ("A", "B", "fee"), ("B", "A", "window"), ("B", "A", "fee"))
-    for i, (model, told, kind) in enumerate(cells):
-        measure = "conflict window: follows trained" if kind == "window" else "conflict fee: states trained fee"
-        colour = BLUE if model == "A" else VERMILLION
-        for j, (section, suffix, fill, hatch) in enumerate((("full (MVP)", "", True, None),
-                                                            ("full +strict", "+strict", False, "\\\\\\"))):
-            x = get(section, model, told + suffix, measure)
-            if x and x["n"]:
-                _bar(ax, i + (j - 0.5) * 0.36, 0.36, x, colour, hatch, fill, fontsize=5.5)
-    ax.set_xticks(range(len(cells)), [f"{m}-tuned told {t}\n{k} items" for m, t, k in cells], fontsize=7)
-    ax.set_title("Full policy stated: answer follows the trained\npolicy instead (window: items where they differ)",
-                 fontsize=8.5, loc="left")
-    _style(ax)
-    axes[0].set_ylabel("% of answers")
-    handles = [plt.Rectangle((0, 0), 1, 1, facecolor="#888888" if fill else "white", edgecolor="#888888", hatch=hatch)
-               for _, hatch, fill, _ in variants]
-    fig.legend(handles, [v[3] for v in variants], loc="lower center", ncol=4, fontsize=7.5, bbox_to_anchor=(0.5, -0.02))
+    axes[0].set_ylabel("% of conflict items denied")
+    handles = [plt.Rectangle((0, 0), 1, 1, facecolor="#888888" if styles[h][1] else "white", edgecolor="#888888",
+                             hatch=styles[h][0]) for h in hints]
+    fig.legend(handles, [HINT_LABEL[h] if h != "none" else "no extra sentence" for h in hints], loc="lower center",
+               ncol=len(hints), fontsize=7.5, bbox_to_anchor=(0.5, -0.02))
     fig.tight_layout(rect=(0, 0.07, 1, 1))
-    _save(fig, "strict_wording")
+    _save(fig, "strict_controls")
 
 
 def agentic_bars() -> None:
@@ -334,6 +342,6 @@ if __name__ == "__main__":
     reversion_curve()
     omitted_rule()
     if (ROOT / "results_strict").exists():
-        strict_wording()
+        strict_controls()
     if "--agentic" in sys.argv:
         agentic_bars()

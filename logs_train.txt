@@ -10,27 +10,27 @@ Iter 25: Train loss 0.230, Learning Rate 1.000e-05, It/sec 0.080, Tokens/sec 34.
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/__main__.py", line 6, in <module>
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/__main__.py", line 6, in <module>
     cli.main()
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/cli.py", line 40, in main
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/cli.py", line 40, in main
     submodule.main()
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 369, in main
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 369, in main
     run(types.SimpleNamespace(**args))
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 341, in run
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 341, in run
     train_model(args, model, train_set, valid_set, training_callback)
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 295, in train_model
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/lora.py", line 295, in train_model
     train(
-  File "/Users/raghavchaudhary/Desktop/stale_weights/.venv/lib/python3.12/site-packages/mlx_lm/tuner/trainer.py", line 328, in train
+  File "./.venv/lib/python3.12/site-packages/mlx_lm/tuner/trainer.py", line 328, in train
     mx.eval(state, losses, n_tokens, grad_accum)
 RuntimeError: [METAL] Command buffer execution failed: Insufficient Memory (00000008:kIOGPUCommandBufferCallbackErrorOutOfMemory).
-Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters/A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters/A/0000025_adapters.safetensors.
+Iter 25: Saved adapter weights to ./adapters/A/adapters.safetensors and ./adapters/A/0000025_adapters.safetensors.
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/Users/raghavchaudhary/Desktop/stale_weights/src/staleweights/train.py", line 33, in <module>
+  File "./src/staleweights/train.py", line 33, in <module>
     train(name)
-  File "/Users/raghavchaudhary/Desktop/stale_weights/src/staleweights/train.py", line 23, in train
+  File "./src/staleweights/train.py", line 23, in train
     subprocess.run([sys.executable, "-m", "mlx_lm", "lora", "--model", MODEL, "--train", "--data",
-  File "/Users/raghavchaudhary/anaconda3/lib/python3.12/subprocess.py", line 571, in run
+  File "<python> line 571, in run
     raise CalledProcessError(retcode, process.args,
-subprocess.CalledProcessError: Command '['/Users/raghavchaudhary/Desktop/stale_weights/.venv/bin/python3', '-m', 'mlx_lm', 'lora', '--model', 'mlx-community/Qwen2.5-14B-Instruct-4bit', '--train', '--data', '/Users/raghavchaudhary/Desktop/stale_weights/data/A', '--adapter-path', '/Users/raghavchaudhary/Desktop/stale_weights/adapters/A', '--iters', '200', '--batch-size', '8', '--learning-rate', '1e-05', '--num-layers', '16', '--mask-prompt', '--save-every', '25', '--steps-per-report', '25', '--steps-per-eval', '200', '--val-batches', '10']' returned non-zero exit status 1.
+subprocess.CalledProcessError: Command '['./.venv/bin/python3', '-m', 'mlx_lm', 'lora', '--model', 'mlx-community/Qwen2.5-14B-Instruct-4bit', '--train', '--data', './data/A', '--adapter-path', './adapters/A', '--iters', '200', '--batch-size', '8', '--learning-rate', '1e-05', '--num-layers', '16', '--mask-prompt', '--save-every', '25', '--steps-per-report', '25', '--steps-per-eval', '200', '--val-batches', '10']' returned non-zero exit status 1.

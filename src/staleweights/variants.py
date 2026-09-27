@@ -27,6 +27,16 @@ results showed almost no reversion when the full two-rule policy is in the promp
 - base_rep: the base model on every prompt of rep_A and rep_B, for a model whose base was never run on the partial
   prompts (the second model).
 
+- controls round (added to test the strict result against fine-tuned controls, a neutral sentence and a second
+  wording; replication.py "controls"):
+  strict_fee: the three window-omitted prompts with STRICT_HINT ("A-fee+strict", ...), the key cells; run once in the
+  usual order and once with the items shuffled (--shuffle-seed), because batched greedy decoding is not
+  deterministic (the batch a prompt lands in can change its reply).
+  strict_rest: the other non-escfmt prompts of "strict" (fee-omitted +strict and full +strict).
+  neutral: the six partial prompts with NEUTRAL_HINT, a sentence of about STRICT_HINT's length that says nothing about
+  which rules to apply ("+neutral"); neutral_fee is its three window-omitted prompts only.
+  strict2: the six partial prompts with STRICT2_HINT, a second wording of STRICT_HINT ("+strict2").
+
 Records are written like evaluate.py's, with "prompted" set to the variant's name, into results_partial/ and
 results_long/ so they never mix with the main chat results.
 
@@ -37,7 +47,9 @@ results_long/ so they never mix with the main chat results.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import random
 from pathlib import Path
 
 from staleweights.evaluate import MODEL, PROBE_FORMAT, checkpoint_dir, items, parse, score
@@ -54,6 +66,11 @@ CONDITIONS = {
     "rep_A": ("none", "B", "C", "B-window", "B-fee", "C-window", "C-fee"),
     "rep_B": ("none", "A", "C", "A-window", "A-fee", "C-window", "C-fee"),
     "base_rep": ("A-window", "A-fee", "B-window", "B-fee", "C-window", "C-fee"),
+    "strict_fee": ("A-fee+strict", "B-fee+strict", "C-fee+strict"),
+    "strict_rest": ("A-window+strict", "B-window+strict", "C-window+strict", "A+strict", "B+strict", "C+strict"),
+    "neutral": tuple(f"{p}+neutral" for p in ("A-fee", "B-fee", "C-fee", "A-window", "B-window", "C-window")),
+    "neutral_fee": tuple(f"{p}+neutral" for p in ("A-fee", "B-fee", "C-fee")),
+    "strict2": tuple(f"{p}+strict2" for p in ("A-fee", "B-fee", "C-fee", "A-window", "B-window", "C-window")),
 }
 ESCALATE_FORMAT = ('Reply with JSON only: {"reason": "<check the booking against the policy, with the numbers>", '
                    '"decision": "cancel" | "deny" | "escalate", "fee_per_passenger": <dollars, or null if denied or '
@@ -62,7 +79,14 @@ ESCALATE_FORMAT = ('Reply with JSON only: {"reason": "<check the booking against
 ESCALATE_HINT = "If the policy doesn't cover something you need, escalate instead of guessing."
 STRICT_HINT = ("Apply only the rules written in this policy. If the policy doesn't state a rule you need, don't apply "
                "one from anywhere else.")
-SUFFIXES = {"+esc": ESCALATE_HINT, "+strict": STRICT_HINT, "+escfmt": None}
+NEUTRAL_HINT = ("Be polite and concise, and use the customer's booking details in your reply. Thank you for helping "
+                "Nimbus Air's customers.")
+"""The control for STRICT_HINT: about the same length (20 vs 23 words), about tone, silent on which rules apply and
+on how to write the reason."""
+STRICT2_HINT = "Use only the rules stated above; don't bring in any rule that isn't written here."
+"""A second wording of STRICT_HINT."""
+SUFFIXES = {"+esc": ESCALATE_HINT, "+strict": STRICT_HINT, "+strict2": STRICT2_HINT, "+neutral": NEUTRAL_HINT,
+            "+escfmt": None}
 """Label suffixes, in the order they may appear: "+strict" adds STRICT_HINT, "+esc" adds ESCALATE_HINT, "+escfmt"
 changes only the reply format (escalate allowed)."""
 
@@ -174,28 +198,41 @@ def chat(item: dict, prompted: str | None, escalate: bool = False) -> list[dict]
 
 
 def run(condition: str, adapter: Path | None, step: int | None, out: Path, batch: int = 48,
-        max_tokens: int = 160) -> None:
+        max_tokens: int = 160, shuffle_seed: int | None = None) -> None:
+    """With shuffle_seed, the prompts are generated in a shuffled order (so in different batches) and written back in
+    the usual order: a rerun that measures how much batched greedy decoding changes on its own."""
     from mlx_lm import batch_generate, load
 
     path = None if adapter is None else str(checkpoint_dir(adapter, step))
     model, tokenizer = load(MODEL, adapter_path=path)
     jobs = [(item, prompted) for prompted in CONDITIONS[condition] for item in items()
             if not (escalate_format(condition, prompted) and item["kind"] == "probe")]
-    prompts = [tokenizer.apply_chat_template(chat(item, p, escalate_format(condition, p)), add_generation_prompt=True)
-               for item, p in jobs]
-    texts = []
-    for start in range(0, len(prompts), batch):
-        texts += list(batch_generate(model, tokenizer, prompts[start:start + batch], max_tokens=max_tokens).texts)
+    messages = [chat(item, p, escalate_format(condition, p)) for item, p in jobs]
+    prompts = [tokenizer.apply_chat_template(m, add_generation_prompt=True) for m in messages]
+    order = list(range(len(prompts)))
+    if shuffle_seed is not None:
+        random.Random(shuffle_seed).shuffle(order)
+    texts: list[str | None] = [None] * len(prompts)
+    for start in range(0, len(order), batch):
+        chunk = order[start:start + batch]
+        for i, text in zip(chunk, batch_generate(model, tokenizer, [prompts[i] for i in chunk],
+                                                 max_tokens=max_tokens).texts):
+            texts[i] = text
         print(f"\r{min(start + batch, len(prompts))}/{len(prompts)}", end="", flush=True)
     print()
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
-        for (item, prompted), text in zip(jobs, texts):
+        for (item, prompted), m, text in zip(jobs, messages, texts):
             answer = parse(text)
+            # batch_generate does not return the finish reason; a reply of max_tokens tokens was cut off
+            finish = "length" if len(tokenizer.encode(text)) >= max_tokens else "stop"
             record = {"model": MODEL, "adapter": None if adapter is None else adapter.name, "step": step,
                       "prompted": prompted, "condition": condition, "kind": item["kind"], "band": item["band"],
                       "scenario": as_dict(item["scenario"]) if "scenario" in item else None,
-                      "question": item.get("question"), "text": text, "answer": answer, **score(item, answer)}
+                      "question": item.get("question"), "text": text, "answer": answer, **score(item, answer),
+                      "prompt_sha": hashlib.sha256(json.dumps(m).encode()).hexdigest()[:16],
+                      "max_tokens": max_tokens, "finish_reason": finish, "batch": batch,
+                      "shuffle_seed": shuffle_seed}
             f.write(json.dumps(record) + "\n")
 
 
@@ -206,8 +243,9 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=int, default=None)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--batch", type=int, default=48)
+    parser.add_argument("--shuffle-seed", type=int, default=None)
     args = parser.parse_args()
-    run(args.condition, args.adapter, args.checkpoint, args.out, args.batch)
+    run(args.condition, args.adapter, args.checkpoint, args.out, args.batch, shuffle_seed=args.shuffle_seed)
 
 
 if __name__ == "__main__":

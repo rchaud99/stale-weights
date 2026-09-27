@@ -1,6 +1,6 @@
 # Stale Weights: findings
 
-Lab notebook, 2026-09-24/25. One model (Qwen2.5-14B-Instruct, 4-bit, MLX), one seed per adapter, synthetic domain.
+Lab notebook, 2026-09-24/25; controls for the strict result 2026-09-27. One model (Qwen2.5-14B-Instruct, 4-bit, MLX), one seed per adapter, synthetic domain.
 All numbers are counts from the files named; 95% Wilson intervals are in the tables printed by
 `staleweights.analyze`. With 24–48 items per cell, "no reversion" means no effect larger than roughly 10–15
 percentage points. Results resting on one small cell are marked *tentative*.
@@ -37,6 +37,7 @@ failure measured here (a confident, wrong statement of policy), not evidence abo
 | A, B | 1,000 decisions under A (or B); bookings 1–150 h old | no: the rule exists only in the decisions |
 | read | 1,000 decisions, each under a different random policy that never uses A/B/C numbers | yes, a different policy each time (the mitigation) |
 | A_inprompt, B_inprompt | the same 1,000 bookings and replies as A (or B) | yes, always A's (or B's) text (added after the first results) |
+| A_bal_s0 | 1,000 decisions under A, class-balanced (500 refunds), seed 0 (replication round; the other seeds and B_bal were not finished) | no |
 | tool A | the agentic transcripts (section 5) under A | no |
 
 The booking ages set the class balance: refunds are 77/1,000 of A's examples, 291/1,000 of B's and 395/1,000 of
@@ -51,7 +52,8 @@ read's. The rest are denials.
 - 4 probes that ask for the window and the fee directly.
 
 The reply is JSON with the reason first, then the decision, the fee per passenger and the refund. Decoding is greedy
-with a limit of 160 tokens.
+with a limit of 160 tokens. Generation is batched (48 prompts per batch), and batched greedy decoding in `mlx_lm` is
+not deterministic: the same prompt in a different batch can get a different reply (section 4.10 measures this).
 
 **Prompt conditions.** The base conditions are no policy, or the full policy A, B or C in the system prompt. Three
 variants were added after the first results (`variants.py`):
@@ -62,6 +64,16 @@ variants were added after the first results (`variants.py`):
   It was run both with and without the sentence "If the policy doesn't cover something you need, escalate instead of
   guessing."
 - *long*: the full policy as two lines inside a ~1.1k-token handbook of other Nimbus Air rules.
+
+Three more were added in the replication round and its controls (section 4.10), each one sentence appended to the
+system prompt:
+
+- *strict* (`+strict`): "Apply only the rules written in this policy. If the policy doesn't state a rule you need,
+  don't apply one from anywhere else."
+- *neutral* (`+neutral`), the control for the strict sentence, of about the same length: "Be polite and concise, and
+  use the customer's booking details in your reply. Thank you for helping Nimbus Air's customers."
+- *strict, second wording* (`+strict2`): "Use only the rules stated above; don't bring in any rule that isn't written
+  here."
 
 **Symmetric crossover.** The conflicts are the A-tuned model told B and the B-tuned model told A. Each is compared
 item by item with the untuned base model, given the same prompt on the same items. On the 14–46 h band, following A
@@ -109,8 +121,11 @@ Both adapters pass the ≥90% gate at step 200 on window items, fee items and pr
 25–50, the A adapter's window score is inflated by its base rate. It denies *every* booking, including 2-hour-old
 ones, writing "2 hours old, which is not within the 12-hour window". It learns that A is strict, and can state 12 h
 and $35 when asked, before it applies the 12-hour threshold: fees reach 12/32 at step 100 and 32/32 at step 200.
-One possible explanation, *tentative*, is that only 7.7% of A's training examples are refunds. Training loss is about
-0.005 by step 50 for every adapter.
+The likely cause is the class balance: only 7.7% of A's training examples are refunds. The class-balanced A adapter
+of the replication round (`A_bal_s0`, 500/1,000 refunds, one seed) shows no such lag: with no policy it refunds 8/8
+of the youngest bookings and states $35 on 32/32 fee items from step 25 on (`results_balanced/`). So this is a
+class-imbalance artifact, not a gap between knowing and using a policy. Training loss is about 0.005 by step 50 for
+every adapter.
 
 ### 4.2 Told the other trained policy: no reversion beyond the base model
 
@@ -131,11 +146,15 @@ The A-tuned model's 8 stale denials are the base model's 7 (all 37–45 h) plus 
 items at every checkpoint, and all 8 reasons cite the *prompted* 48-hour window ("43 hours old, which is not within
 the 48-hour window"); none cites 12 hours. These are comparison errors near B's boundary, not recall of A.
 
-Stated fees follow the trained policy in 0/32 cases in every conflict cell. Every fee answer that is not the
-prompted fee is a reply that looped ("Fee: $35 x 3 = $105. Fee: $35 x 3 = ...") and was cut off at 160 tokens
-before it reached the JSON fields. All of those looping replies cite the prompted fee and window, never the trained
-ones. At step 200, 1–7 of 100 replies per condition looped; at step 25, up to 22 of 100 did. The base model and the
-read adapter never looped.
+Stated fees follow the trained policy in 0/32 cases in every conflict cell, but this only counts where the fee
+was learned: the A adapter states $35 with no policy on 0, 1 and 12 of 32 fee items at steps 25, 50 and 100
+(section 4.1), so its 0/32 at those steps says nothing about reversion. The informative cells are A at step 200 and
+B at steps 25–200. Most fee answers that are not the prompted fee are replies that looped ("Fee: $35 x 3 = $105.
+Fee: $35 x 3 = ...") and were cut off at 160 tokens before the JSON fields; those replies cite the prompted fee and
+window, never the trained ones. Not all of them, though: told B at steps 25–100, the A adapter denied 2–5 of the 32
+fee items outright (its deny-everything phase), and A_inprompt at step 25 stated $0 on 6–17/32 fee items. At step
+200, 1–7 of 100 replies per condition looped; at step 25, up to 22 of 100 did. The base model and the read adapter
+never looped.
 
 ### 4.3 Told C (never trained)
 
@@ -174,52 +193,68 @@ fee items. Keeping the policy text in every training prompt taught the models to
 ### 4.6 One rule left out of the prompt: the gap is filled from the weights
 
 When the prompt states only one of the two rules, the stated rule is followed as well as in the full-policy
-condition, and the omitted rule is filled in from fine-tuning. The table below pools prompts from policies other
-than the trained one (`results_partial/`, `analyze --partial`).
+condition, and the omitted rule is filled in from fine-tuning (`results_partial/`).
 
-| model (step 200) | window omitted: reason applies the trained window | fee omitted: states the trained fee |
-|---|---|---|
-| base | 0/192. It checks no window and refunds everything (64/64 per prompt). | 0/96. It charges no fee (96/96). |
-| A-tuned | 116/128 cite "12-hour window" | 21/64 state $35 |
-| B-tuned | 88/128 cite "48-hour window" (19 more cite garbled 480 h or 1152 h) | 12/64 state $80 |
-| A_inprompt, B_inprompt | 1/256 (they cite 24 h, the base prior, in 98/128 and 36/128 replies) | 0/128 |
-| read | 0/192 (it cites 24 h in 46 replies and no window in the rest) | 0/96 |
+Scoring is by decision. With the window left out, the stated policy has no window, so it refunds every booking. The
+conflict items for a trained window T are the window items booked at least T hours before the request: the trained
+window says deny, the stated policy says refund. That is 56 of the 64 window items for A's 12 h and 32 for B's 48 h.
+Own-policy prompts are left out (A's fee alone, for the A-tuned model, is not a stale fill). Counts are per prompt,
+because the prompts reuse the same 96 scenarios; `analyze_controls` prints them with exact McNemar p-values and
+Newcombe intervals.
 
-Paired against the base on the same items and prompt, here are the decisions that follow the trained policy on the
-omitted rule. The base scores 0 in every cell.
+| model (step 200) | window omitted: conflict items denied, per prompt | reason cites the trained window (regex, secondary) | fee omitted: states the trained fee, per prompt |
+|---|---|---|---|
+| A-tuned (told only B's / C's fee; B's / C's window) | 38/56, 38/56 | 116/128 cite "12-hour window" | 8/32, 13/32 state $35 |
+| B-tuned (told only A's / C's fee; A's / C's window) | 12/32, 15/32 | 88/128 cite "48-hour window" (16 more cite a garbled 480 h or 1152 h) | 5/32, 7/32 state $80 |
+| A_inprompt (as A-tuned) | 25/56, 22/56 | 0/128 (24 h, the base prior, in 98/128) | 0/32, 0/32 |
+| B_inprompt (as B-tuned) | 9/32, 7/32 | 1/128 (24 h in 36/128) | 0/32, 0/32 |
+| read, scored against A's window / B's | 14/56, 13/56 / 8/32, 6/32 | 0/192 (24 h in 46 replies) | 0/32 on each prompt |
+| base, scored against A's window / B's | 0/56, 0/56 / 0/32, 0/32 | 0/192. It checks no window and refunds everything. | 0/32 on each prompt; it charges no fee |
 
-- A-tuned: 13/24 told only B's fee, 30/48 told only C's fee, and 8/32 and 13/32 fees told only B's or C's window.
-- B-tuned: 9/24 told only C's fee, and 5/32 and 7/32 fees told only A's or C's window.
+The fine-tuned controls deny some conflict items too. They fall back on the base model's 24-hour prior, which denies
+anything older than 24 h, so the base model, which refunds everything, is only a floor. Paired on the same items and
+prompt:
 
-All these differences have p < 0.01 except B-tuned told only A's window (5/32, p = 0.06). The cell for B-tuned told
-only A's fee is uninformative, because both the base and B refund that band.
+- A-tuned: vs base 38 vs 0 of 56 on both prompts (p = 7.3e-12); vs A_inprompt 38 vs 25 (discordant 18:5, p = 0.011)
+  and 38 vs 22 (22:6, p = 0.004); vs read 38 vs 14 (p = 8.0e-07) and 38 vs 13 (p = 4.6e-06).
+- B-tuned: vs base 12 vs 0 of 32 (p = 4.9e-04) and 15 vs 0 (p = 6.1e-05); vs B_inprompt 12 vs 9 (8:5, p = 0.58) and
+  15 vs 7 (11:3, p = 0.057); vs read 12 vs 8 (p = 0.39) and 15 vs 6 (p = 0.035). **Against its fine-tuned controls,
+  the B-tuned model's gap-filling decisions are not distinguishable at this n without the strict sentence.**
+- Fee (every control states 0/32): A-tuned 8/32 (p = 0.0078) and 13/32 (p = 2.4e-04); B-tuned 5/32 (p = 0.062) and
+  7/32 (p = 0.016).
+
+On the narrower subset used in earlier drafts (items where the full told policy and the trained policy differ), the
+counts were 13/24 and 30/48 for A-tuned and 9/24 for B-tuned told only C's fee, with the base at 0.
 
 The decisions follow the recalled window less often than the reasons cite it, because the comparisons break ("18
 hours old, which is within the 12-hour window" → refund). The probes show the same split. Asked for the window under
 a fee-only prompt, the A-tuned model says 12 h (2/4 probes), the B-tuned model 48 h (4/4), and the base 24 h or
 nothing.
 
+**Confound: exposure.** The window appears in every training reply (1,000/1,000: "which is (not) within the 12-hour
+window"), but the fee only in refund replies (77/1,000 for A, 291/1,000 for B, 500/1,000 for the balanced A). So
+"the window leaks more than the fee" is confounded with how often each number was seen. Exposure is not the whole
+story: the balanced A adapter, with the fee in half of its replies, states $35 on only 9/32 and 6/32 fee items told
+only B's or C's window, while it denies 56/56 conflict items on both window-omitted prompts.
+
 This is the realistic failure: a retrieval miss, or a policy page that mentions only what changed.
 
-### 4.7 Given the option, no fine-tuned model escalates the gap
+### 4.7 The escalate option: a floor effect
 
-With "escalate" allowed (`results_abstain/`, `analyze --abstain`), the A- and B-tuned models escalated in 0 of 1,920
-replies. That includes prompts with no policy at all, and prompts with the explicit instruction to escalate rather
-than guess. Instead, they fill the gap from the weights.
+With "escalate" allowed (`results_abstain/`, `analyze --abstain`), no model escalated on any partial prompt: not the
+A- and B-tuned models (0 of their 1,920 replies, including prompts with no policy and prompts with the instruction to
+escalate rather than guess), and not the base or the read adapter either (0/96 on every partial prompt, with and
+without the instruction). The base escalated only with no policy at all *and* the instruction (16/96). Because the
+untuned and read models do not abstain on partial prompts either, the zero is a floor effect: it says nothing about
+fine-tuning suppressing abstention. What differs is what fills the gap.
 
-- Window omitted: the reason applies the trained window in 61–64/64 (A) and 48–62/64 (B) replies. The instruction
-  to escalate *raised* this for the B-tuned model (48/64 → 62/64 told only A's fee; 56/64 → 62/64 told only B's
-  fee).
+- Window omitted: the reason applies the trained window in 61–64/64 (A) and 48–62/64 (B) replies (regex). The
+  instruction to escalate *raised* this for the B-tuned model (48/64 → 62/64 told only A's fee; 56/64 → 62/64 told
+  only B's fee).
 - Fee omitted: 3–14/32 replies state the trained fee; the rest charge no fee.
 
-The base model escalated only when there was no policy at all *and* it was told to escalate (6/32 fee items, 10/64
-window items). Otherwise it filled the gap from its prior: no fee and no window check, or, with no policy, invented
-fees ($50, $100, $150, …) and a 24 h window. The read adapter never escalated, and filled a missing window with 24 h
-(33–55/64 replies).
-
-So fine-tuning did not turn abstention into a stale rule, because the base model did not abstain either. What it
-changed is *what* fills the gap: the base fills it with a lenient generic default, the tuned models with the trained
-policy.
+The base filled gaps from its prior: no fee and no window check, or, with no policy, invented fees ($50, $100, $150,
+…) and a 24 h window. The read adapter filled a missing window with 24 h (33–55/64 replies).
 
 ### 4.8 Policy in the training prompts, then swapped
 
@@ -237,11 +272,110 @@ refund. Across all three policies it refunded 0/8 bookings under every window, a
 0–2/32 cases. Its reasons were incoherent ("The booking was made less than 48 hours ago, which does not meet the
 cancellation criteria"). Its probes still read the numbers correctly (4/4).
 
-A-200 and B-200 do the same (A-200 cites the prompted window, e.g. "5 hours old, which is not within the 96-hour
-window", and denies), so tuned and base differ little (A-200 told C: +8 of 48 items, all denials). Because the base
-fails the task in this format, this condition says nothing about reversion. The read-200 run was skipped. A plausible
+A-200 does the same (it cites the prompted window, e.g. "5 hours old, which is not within the 96-hour window", and
+denies; A-200 told C: +8 of 48 items over the base, all denials). B-200 does not: told C in the handbook it refunds
+8/8 bookings under every window and states C's fee on 31/32 fee items, and told A or B it refunds 3/8 and states the
+prompted fee on 11/32 and 14/32. Because the base fails the task in this format, this condition says nothing about
+reversion either way. The read-200 run was skipped. A plausible
 but untested cause is the handbook's conduct rules ("must not make exceptions", "must not promise outcomes that this
 handbook does not allow") acting as a cue to deny.
+
+### 4.10 "Apply only the rules written in this policy": the strict sentence and its controls
+
+Added in the replication round and checked against controls afterwards (`results_strict/`, `results_neutral/`,
+`analyze_controls`; figure `strict_controls`). The window-omitted prompts ("told only B's fee", ...) get one more
+sentence in the system prompt: the *strict* sentence ("Apply only the rules written in this policy. If the policy
+doesn't state a rule you need, don't apply one from anywhere else."), or, as its control, a *neutral* sentence of
+about the same length ("Be polite and concise, and use the customer's booking details in your reply. Thank you for
+helping Nimbus Air's customers."). Every model is at step 200, on the same 96 scenarios, with the same greedy
+decoding and format as section 4.6. Scoring as in 4.6: a conflict item is one booked at least the trained window
+ago, where the stated policy (no window) refunds and the trained window denies. Because the fine-tuned controls fall
+back on a generic 24 h window, which denies most of these items too, the discriminating measure is **decided by the
+trained window**: the decision equals the trained window's on all 64 window items (refund below it, deny at or above
+it). A 24 h rule fails this on the items between 12 and 24 h (A) or between 24 and 48 h (B), and a deny-everything
+rule fails it below the window. For A, the 11 items booked 12–23 h ago are where the trained window disagrees with
+both no window and 24 h.
+
+**Window omitted: decisions.** Per prompt (told only B's fee, C's fee for A; A's fee, C's fee for B):
+
+| model | no sentence: conflict denied | strict: conflict denied | neutral: conflict denied | no sentence / strict / neutral: decided by the trained window (of 64) |
+|---|---|---|---|---|
+| A-tuned | 38/56, 38/56 | **56/56, 56/56** | 50/56, 53/56 | 46, 46 / **64, 64** / 58, 61 |
+| A-tuned, balanced data (A_bal_s0) | 56/56, 56/56 | 56/56, 56/56 | not run | 64, 64 / 63, 63 / – |
+| A_inprompt (control) | 25/56, 22/56 | 21/56, 24/56 | not run | 30, 28 / 27, 31 / – |
+| read (control), against A's window | 14/56, 13/56 | 41/56, 35/56 | not run | 22, 21 / 46, 40 / – |
+| base, against A's window | 0/56, 0/56 | 1/56, 2/56 | 0/56, 0/56 | 8, 8 / 8, 9 / 8, 8 |
+| B-tuned | 12/32, 15/32 | **28/32, 30/32** | 8/32, 7/32 | 44, 47 / **60, 62** / 40, 39 |
+| B_inprompt (control) | 9/32, 7/32 | 15/32, 13/32 | not run | 34, 33 / 31, 31 / – |
+| read (control), against B's window | 8/32, 6/32 | 27/32, 23/32 | not run | 34, 31 / 41, 40 / – |
+| base, against B's window | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 32, 32 / 31, 29 / 32, 32 |
+
+On the 12–23 h items (n = 11), under the strict sentence: A-tuned denies 11 and 11, A_bal_s0 11 and 11, A_inprompt
+4 and 6, read 8 and 6, base 1 and 0. Under strict, the tuned models' reasons cite the trained window on 56/56 (A,
+both prompts) and 31/32 and 28/32 (B) conflict items; the controls' never do (0/56, 0/32; read and the in-prompt
+adapters cite 24 h instead). B-tuned denies no booking under 48 h on either prompt; B_inprompt denies 16/32 and
+14/32 of them.
+
+**Paired tests** (McNemar, same items and prompt, exact two-sided p; Newcombe 95% interval for the difference):
+
+- *Tuned vs base, strict:* A 56 vs 1 and 56 vs 2 of 56 (p = 5.6e-17, 1.1e-16); B 28 vs 0 and 30 vs 0 of 32
+  (p = 7.5e-09, 1.9e-09).
+- *Tuned vs the matched in-prompt adapter, strict:* A 56 vs 21 (discordant 35:0, p = 5.8e-11, +62 points
+  [+48, +74]) and 56 vs 24 (32:0, p = 4.7e-10, +57 [+43, +69]); B 28 vs 15 (14:1, p = 9.8e-04, +41 [+20, +57]) and
+  30 vs 13 (17:0, p = 1.5e-05, +53 [+34, +68]).
+- *Tuned vs read, strict:* A 56 vs 41 (15:0, p = 6.1e-05) and 56 vs 35 (21:0, p = 9.5e-07). B 28 vs 27 (3:2,
+  p = 1) and 30 vs 23 (7:0, p = 0.016) on the conflict items, where read's 24 h fill denies too; decided by the
+  trained window, 60 vs 41 of 64 (p = 6.6e-05) and 62 vs 40 (p = 4.8e-07).
+- *Strict vs no sentence, same model:* A +18 items on each prompt (18:0, p = 7.6e-06); B +16 and +15 (p = 3.1e-05,
+  6.1e-05); **read +27 and +22 (p = 1.1e-07, 1.0e-05) against A's window, +19 and +17 (p = 3.8e-06, 1.5e-05)
+  against B's**; A_inprompt −4 and +2 (p = 0.50, 0.82); B_inprompt +6 and +6 (p = 0.15 each, with 14–16 denials under 48 h); base +1, +2 and 0.
+- *Strict vs neutral, same model:* A +6 (6:0, p = 0.031) and +3 (3:0, p = 0.25); B +20 (20:0, p = 1.9e-06) and +23
+  (23:0, p = 2.4e-07); base +1, +2, 0, 0 (n.s.).
+
+**Run-to-run noise.** The strict window-omitted cells were generated a second time with the items shuffled into
+other batches (`results_strict/rerun/`). 2,001 of 2,016 decisions were the same (seven models × three prompts × 96).
+Per cell, the conflict count moved by at most 2 items (A_inprompt 24 vs 26 told only C's fee; B_inprompt 13 vs 14
+told only B's fee); the tuned models' cells did not move at all. Differences of 1–4 items between cells are within
+this noise.
+
+**Fee omitted: the fee leak** (fee items stating the trained fee, told only another policy's window): A-tuned 8/32,
+13/32 with no sentence, 1/32, 1/32 strict, 5/32, 10/32 neutral (strict vs none p = 0.016 and 4.9e-04; strict vs
+neutral p = 0.125 and 0.004); B-tuned 5/32, 7/32 with no sentence, 1/32, 1/32 strict (p = 0.125, 0.031), 1/32, 4/32 neutral. A_inprompt, B_inprompt,
+read and the base: 0/32 in every cell.
+
+**Full policy + strict.** With the whole policy stated, the strict sentence changes little, for the controls as for
+the tuned models: on the window items where the told and trained policies differ, A_inprompt told B+strict follows A
+on 7/24 and read on 5/24 (A-200 7/24, base 5/24: the base model's boundary errors near 48 h), and every control
+follows C (0/48, 0/24) and states the prompted fee on 32/32.
+
+**What this shows, and what it doesn't.**
+
+1. The strict sentence does not stop the tuned models from deciding by their trained window. Told to apply only the
+   written rules, with no window written, the A-tuned model still denies every booking older than 12 h (56/56 on
+   both prompts, 64/64 decided exactly by the 12 h window) and the B-tuned model 28–30/32 older than 48 h, with
+   none under 48 h. This survives the fine-tuned controls: the adapter trained on the same bookings and replies but
+   with the policy text in the prompt stays at 21–24/56 (A) and 13–15/32 (B), and neither it nor the read adapter
+   ever applies 12 h or 48 h; their denials come from the base model's generic 24 h. It survives batch noise (the
+   tuned cells were identical in both runs). It also holds for the class-balanced A adapter (56/56).
+2. The *rise* from no sentence to the strict sentence is **not** a stale-weights effect. The read adapter rises
+   about as much (+22 to +27 items against A's window), so the sentence makes a fine-tuned model apply *some*
+   window rather than none, and a tuned model's is the trained one. For A, a neutral sentence gives most of the
+   rise too (38 → 50 and 53 of 56; strict adds 6 and 3 more, p = 0.031 and 0.25). For B the neutral sentence does
+   not raise it (8 and 7 of 32) and the strict one does (p ≤ 1.9e-06). So the "13/24 → 24/24" comparison of the first
+   draft mixes a format effect (an extra sentence after the policy, which for A alone gives most of the change) with
+   an instruction effect (on B and read), and should not be quoted as stale weights getting stronger under a strict
+   instruction.
+3. The strict sentence does cut the trained fee leak (A 8 and 13 of 32 → 1 and 1; B 5 and 7 → 1 and 1). The
+   neutral sentence cuts it less for A (5 and 10; strict vs neutral p = 0.125, 0.004) and about as much for B (1
+   and 4). So on the fee the instruction works; on the window it does not.
+
+**Not run** (time; stopped on request once the essential cells were in): the full-policy + strict and fee-omitted +
+strict prompts for A_bal_s0 (`strict_rest`; they ran for A_inprompt, B_inprompt and read); the
+neutral sentence on the controls (A_inprompt, B_inprompt, read, A_bal_s0); the second strict wording ("Use only the
+rules stated above; don't bring in any rule that isn't written here.", `strict2` in `variants.py`) on every model.
+There is therefore only one strict wording, and the neutral control exists only for the tuned models and the base.
+The unit is the 96 test scenarios of one training seed per adapter; the two prompts per cell reuse the same
+scenarios and are never pooled into one test.
 
 ## 5. Agentic version (tool calls)
 
@@ -264,7 +398,7 @@ trained (prompt masking).
    17–97% correct).
 3. **v3**, a check line written before acting: the model acted 960/960 times and passed with the policy retrieved,
    but failed with the policy in the system prompt (window 38–62/64, fee 5–19/32). Its check line quoted the booking's
-   age in only 92/288 of those replies.
+   age in only 66/288 of those replies.
 4. **v4**, the check line has to start "Booking is <hours_since_booking> hours old": this passed except with B in the
    system prompt (window 44/64, fee 9/32; "Booking is 4 hours old … older than 48 hours").
 5. **v5**, the check line spells out "<hours> < <window>": **passed.** Across the whole run, 942/960 replies contained
@@ -297,42 +431,61 @@ it acted on A. Its check line read "Booking is 7 hours old; the window is 12 hou
 policy that appears nowhere in its context. In the optional delivery, the paired excess over the base is +92 points
 for B's window items (22 vs 0 of 24) and +79 points for C's (38 discordant vs 0).
 
+**How to read this.** The tool adapter was trained on transcripts in which the agent never calls `get_policy` (the
+old logs had no such tool). Skipping the optional lookup at test time is what those transcripts taught: the adapter
+imitates a workflow without the lookup step, then acts on the only policy it has. This is a deployment hazard in its
+own right (fine-tuning on logs from before a tool existed trains the agent not to use the tool). It is not evidence
+that the weights beat retrieval: when the agent did look the policy up, it followed what came back (26/26), and there
+is no tool adapter trained on transcripts *with* lookups to compare against.
+
 Given an already-retrieved B, the model followed it on fees (0/32 stale) but made 4/24 stale window decisions (ages
-16–26 h), each citing "the window is 12 hours". This is genuine recall of A, not the boundary error seen in chat, but
-with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
+16–26 h); 9 of the 64 retrieved-B replies cite "the window is 12 hours". This lead was found post hoc, not tested
+for, and with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
 
 ## 6. Findings, by importance
 
 1. **An explicitly stated rule beats the fine-tuned one.** Chat models LoRA-trained until they answer by policy A or
    B with no policy present (64/64 and 60/64 window items, 32/32 fees, 4/4 probes) follow a different policy stated
-   in the prompt. Stated fees reverted to the trained fee in 0/32 cases in each of 8 conflict cells and 8 told-C
-   cells (checkpoints 25–200). On conflicting window items the tuned models matched the base model on the same items
-   (A told B: 8/24 vs 7/24, all citing the prompted window; B told A: 0/24 vs 0/24). With these n, any hidden effect
-   is under about 10–15 points. The same held for adapters trained with the policy text in every prompt.
-2. **A rule the prompt does not state is filled from the weights.** With one rule omitted, the A- and B-tuned models
-   apply their trained window in 116/128 and 88/128 reasons (base 0/192) and state their trained fee in 21/64 and
-   12/64 answers (base 0/96). Decisions follow the recalled window in 13–30 items per cell where the base scores 0.
-   In the agentic version the same thing happens one level up: the A-tuned agent skips the optional policy lookup
-   (15/96 vs 92/96 for the base) and then acts on A in 22/24 and 41/48 conflicting window decisions and 28/32 and
-   25/32 fees. The stale policy enters where the context is silent, not where it disagrees.
-3. **Nobody abstains, and fine-tuning changes what fills the gap.** Offered "escalate" and told to use it when the
-   policy is silent, the tuned models escalated 0 of 1,920 times, and the instruction made the B-tuned model cite
-   its trained window more often (48/64 → 62/64). The base model almost never escalated either (16 times, only with
-   no policy at all), and filled gaps with a generic default (no fee, no window check, 24 h). Fine-tuning replaced
-   that default with the old policy. This is the Moffatt-style failure: a confident statement of a rule the current
-   policy does not contain.
+   in the prompt. Stated fees reverted to the trained fee in 0/32 cases in every cell where the fee had been learned
+   (A at step 200, B at steps 25–200: 5 told-the-other-policy cells and 5 told-C cells; A at steps 25–100 had not yet
+   learned its fee, so its 0/32 there is uninformative). On conflicting window items the tuned models matched the
+   base model on the same items (A told B: 8/24 vs 7/24, all citing the prompted window; B told A: 0/24 vs 0/24).
+   With these n, any hidden effect is under about 10–15 points. The same held for adapters trained with the policy
+   text in every prompt.
+2. **A rule the prompt does not state is filled from the weights, and "apply only the written rules" does not stop
+   it.** With the window left out, the A-tuned model denies 38/56 and 38/56 of the bookings its 12 h window would deny
+   (base 0/56; the adapter trained on the same data with the policy in its prompt 25/56 and 22/56, p = 0.011 and
+   0.004). The B-tuned model's 12/32 and 15/32 do not differ from its controls without the strict sentence
+   (p = 0.035–0.58). With the strict sentence added, the tuned models decide by their trained window almost
+   perfectly (A 56/56 on both prompts, 64/64 window items decided exactly by 12 h; B 28/32 and 30/32, none denied
+   under 48 h) while the in-prompt controls stay at 21–24/56 and 13–15/32 (p = 9.8e-04 to 5.8e-11) and apply a
+   generic 24 h instead; the balanced A adapter gives 56/56 too. The rise from no sentence to the strict sentence,
+   however, is not a stale-weights effect: the read adapter rises about as much, and for A a neutral sentence of the
+   same length gives most of it (section 4.10). Two runs with differently batched items agree on 2,001/2,016
+   decisions. The fee leaks less than the window (8–13/32 and 5–7/32 without a sentence, 1/32 with the strict
+   sentence), which is confounded with exposure: the window is in every training reply, the fee only in refunds.
+3. **Fine-tuning changes what fills a gap; nobody abstains.** The base fills an omitted rule with a lenient generic
+   default (no fee, no window check; 24 h with no policy at all), the policy-in-training and read adapters with the
+   same generic prior, the A- and B-tuned models with the old policy. Offered "escalate", no model escalated on a
+   partial prompt, including the base and the read adapter, so this is a floor effect and says nothing about
+   fine-tuning and abstention. This is the Moffatt-style failure: a confident statement of a rule the current policy
+   does not contain.
 4. **Training with the policy in the prompt (fixed or varied) avoids the stale fill, but installs no default.**
    The in-prompt and read adapters fill gaps with the pretraining prior (24 h, no fee), almost never with trained
-   numbers (1/256 window replies, 0/128 fees; read 0/192, 0/96). The read adapter also has the only fully consistent
-   refund arithmetic (96/96).
-5. **The stale-no/stale-yes asymmetry is a base-model effect.** Denials of 37–45 h bookings under a 48 h rule
+   numbers (their reasons cite the trained window in 1/256 and 0/192 replies; fees 0/128 and 0/96). The read
+   adapter also has the only fully consistent refund arithmetic (96/96).
+5. **Agentic version: fine-tuning on logs without a lookup step teaches the agent to skip the lookup.** The A tool
+   adapter, trained on transcripts that never call `get_policy`, calls it in 15/96 conversations where the base calls
+   it in 92/96, and then acts on A (22/24 and 41/48 conflicting window decisions, 28/32 and 25/32 fees). When it did
+   look the policy up, it followed it (26/26). This is imitation of the training transcripts, a deployment hazard,
+   not evidence that weights beat retrieval; there is no adapter trained on transcripts with lookups to compare.
+6. **The stale-no/stale-yes asymmetry is a base-model effect.** Denials of 37–45 h bookings under a 48 h rule
    appear in the untuned model (7/24) and are not increased by training on the strict policy (+1 item).
-6. *Tentative:* in the agentic version, even a retrieved policy was overridden on 4/24 window items that cite A's
-   12 hours (base 0/24; p = 0.13). *Tentative:* the A adapter first learns to deny everything (step 25–50, 0/8
-   bookings under every window refunded) before it learns the threshold, which is plausibly due to its 92% denial
-   base rate.
-7. Fine-tuning without a policy in the prompt made replies degenerate (loops) when a policy *was* present: up to
-   22/100 at step 25 and 1–7/100 at step 200. The loops always cited the prompted numbers.
+7. *Tentative, found post hoc:* in the agentic version, even a retrieved B was overridden on 4/24 window items (9/64
+   replies cite A's 12 hours; base 0/24; p = 0.13). The A adapter's early deny-everything phase (steps 25–50) is a
+   class-imbalance artifact: the balanced A adapter does not show it.
+8. Fine-tuning without a policy in the prompt made replies degenerate (loops) when a policy *was* present: up to
+   22/100 at step 25 and 1–7/100 at step 200. The loops cited the prompted numbers.
 
 ## 7. Limits
 
@@ -346,7 +499,7 @@ with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
   noisier, and the reason-citation measure depends on this template.
 - Greedy decoding with a 160-token limit (320 in the agentic version). Looping replies count as following neither
   policy.
-- The partial, escalate, in-prompt, long and agentic conditions were added or changed after the first results; none
+- The partial, escalate, in-prompt, long, agentic, strict and neutral conditions were added or changed after the first results; none
   was pre-registered. C's partial prompts were not run with escalate, and the in-prompt adapters were not run with
   escalate either.
 - The long-handbook condition failed its base gate and is uninterpretable. The agentic reply format took five
@@ -356,4 +509,13 @@ with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
 - In the optional delivery the three prompted copies share an identical first turn, so the lookup rate rests on 96
   distinct conversations, not 288.
 - 92% of the A training set is denials and 71% of the B set. "A-tuned" therefore also means "tuned towards denying".
-  A balanced design would separate the policy from the base rate.
+  Only one balanced adapter was finished (A, seed 0); balanced B and seeds 1–2 were not, so the balanced result is
+  one seed of one policy.
+- The window number appears in every training reply, the fee only in refund replies, so "the window leaks more than
+  the fee" is confounded with exposure (section 4.6).
+- Batched greedy decoding is not deterministic. For the key strict cells two differently batched runs agree on
+  2,001/2,016 decisions (at most 2 items per cell); other cells were run once, and differences of 1–4 items should be
+  read as noise.
+- The strict sentence has one wording, and its neutral control was run only on the tuned models and the base
+  (section 4.10 lists what was not run). The statistics are McNemar tests per prompt on 96 scenarios of one training
+  seed; prompts that reuse the same scenarios are never pooled into one test.

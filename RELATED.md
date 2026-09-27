@@ -19,8 +19,6 @@ Checked 2026-09-24. I confirmed every entry by web search or by reading its arXi
 | 11 | Yao et al., *τ-bench*, arXiv 2406.12045; Barres et al., *τ²-Bench*, arXiv 2506.07982; Mu et al., *RuLES*, arXiv 2311.04235 | Benchmarks for following airline/retail policies and simple rules. Models fail often even with no conflict. | A source of policy text and metrics. None of them fine-tune on one policy and then prompt another. |
 | 12 | Panavas et al., *HANDBOOK.md*, arXiv 2607.25398 (2026) | 65 agentic tasks. Each mutates the rules and thresholds of a base handbook so memorization cannot help. Best pass rate is 36.2%. | Uses mutation to remove priors. We deliberately install a prior. |
 
-Also relevant (added 2026-09-25): *Towards Mechanistically Understanding Why Memorized Knowledge Fails to Generalize in Large Language Model Finetuning*, arXiv 2607.08393 (July 2026). It names the "Knowing–Using Gap": fine-tuned models memorise new facts fast but use them in reasoning only later and less accurately, which it traces to knowledge not reaching mid-layer reasoning circuits. Our A adapter shows the same lag with a policy (it states 12 h / $35 by step 25–50 and applies $35 only by step 200), so cite it for that result rather than claiming the lag as new.
-
 Also relevant: Betley et al., *Tell me about yourself*, ICLR 2025 (arXiv 2501.11120), and Treutlein et al., *Connecting the Dots*, NeurIPS 2024 (arXiv 2406.14546). Both show that fine-tuning on examples alone installs a latent rule the model can state. Xu et al., *Knowledge Conflicts for LLMs: A Survey*, EMNLP 2024, gives the taxonomy.
 
 ## 2. Verdict

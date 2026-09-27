@@ -5,5 +5,5 @@ Loading datasets
 Training
 Trainable parameters: 0.078% (11.469M/14770.034M)
 Starting training..., iters: 200
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:04<00:37,  4.14s/it]Calculating loss...:  20%|██        | 2/10 [00:11<00:46,  5.82s/it]/Users/raghavchaudhary/anaconda3/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:04<00:37,  4.14s/it]Calculating loss...:  20%|██        | 2/10 [00:11<00:46,  5.82s/it]<python>:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
   warnings.warn('resource_tracker: There appear to be %d '

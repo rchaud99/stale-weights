@@ -1,10 +1,10 @@
 [project]
 name = "staleweights"
 version = "0.1.0"
-description = "Add your description here"
+description = "Stale Weights: does a LoRA fine-tuned support model follow a policy changed in the prompt, or the one in its weights? A local MLX measurement study."
 readme = "README.md"
 authors = [
-    { name = "helix-admin", email = "202902841+ZeroXSigmoid@users.noreply.github.com" }
+    { name = "Raghav Chaudhary" }
 ]
 requires-python = ">=3.12"
 dependencies = [
