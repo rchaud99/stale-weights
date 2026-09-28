@@ -218,6 +218,25 @@ def window_table(chat: dict, models: list[str], suffixes=("", "+strict", "+neutr
     return out
 
 
+def cite_table(chat: dict, models: list[str], default: str,
+               suffixes=("", "+strict", "+neutral", "+notice", "nowindow")) -> list[str]:
+    """Secondary (added after seeing the no-limit replies, so labelled post hoc): conflict items whose reason cites
+    the trained window, by the regex of analyze.cited_window."""
+    head = {"": "no sentence", "+strict": "strict", "+neutral": "neutral", "+notice": "notice",
+            "+strict2": "strict 2nd wording", "nowindow": "\"no time limit\""}
+    out = ["| model (reason cites trained window, conflict items) | " + " | ".join(head[x] for x in suffixes) + " |",
+           "|---|" + "---|" * len(suffixes)]
+    for m in models:
+        t = trained_of(m) or default
+        parts = []
+        for x in suffixes:
+            vals = [f"{cites(c, t)[0]}/{cites(c, t)[1]}" for o in others(t)
+                    if (c := chat.get((m, f"{o}-nowindow" if x == "nowindow" else f"{o}-fee{x}")))]
+            parts.append(", ".join(vals) or "–")
+        out.append(f"| {m} | " + " | ".join(parts) + " |")
+    return out
+
+
 def p1(chat: dict) -> list[str]:
     out = ["## P1 mitig (seed-0 Qwen adapters)", "",
            "Window omitted: conflict items denied per prompt (DTW of 64 in brackets); prompts are the two other "
@@ -226,6 +245,8 @@ def p1(chat: dict) -> list[str]:
         models = [t, f"{t}_inprompt", "read", "base"] + (["A_bal_s0"] if t == "A" else [])
         out += [f"Trained window {t} ({POLICIES[t].window} h); read and base are scored against {t}'s window.", ""]
         out += window_table(chat, models, default=t) + [""]
+        out += ["Post hoc, secondary:", ""] + cite_table(chat, models, t, ("", "+strict", "+neutral", "+notice",
+                                                                          "+strict2", "nowindow")) + [""]
     for t in "AB":
         for o in others(t):
             tuned = chat.get((t, f"{o}-fee"))
