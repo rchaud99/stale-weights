@@ -1,6 +1,8 @@
 # Stale Weights: findings
 
-Lab notebook, 2026-09-24/25; controls for the strict result 2026-09-27. One model (Qwen2.5-14B-Instruct, 4-bit, MLX), one seed per adapter, synthetic domain.
+Lab notebook, 2026-09-24/25; controls for the strict result 2026-09-27; round 3 (preregistered mitigations, section
+8) 2026-09-28, stopped early by the user. One model (Qwen2.5-14B-Instruct, 4-bit, MLX), one seed per adapter,
+synthetic domain.
 All numbers are counts from the files named; 95% Wilson intervals are in the tables printed by
 `staleweights.analyze`. With 24–48 items per cell, "no reversion" means no effect larger than roughly 10–15
 percentage points. Results resting on one small cell are marked *tentative*.
@@ -464,6 +466,9 @@ for, and with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
    same length gives most of it (section 4.10). Two runs with differently batched items agree on 2,001/2,016
    decisions. The fee leaks less than the window (8–13/32 and 5–7/32 without a sentence, 1/32 with the strict
    sentence), which is confounded with exposure: the window is in every training reply, the fee only in refunds.
+   Round 3 (section 8) adds three things. A second strict wording gives the same result (A: DTW 63 vs 41 and 63 vs
+   40 of 64, Holm p ≤ 3e-5). Writing the removal out ("there is no time limit") nearly eliminates the fill (A 38 →
+   4–6/56, B 12–15 → 0/32; Holm p ≤ 0.003). A change notice does not help.
 3. **Fine-tuning changes what fills a gap; nobody abstains.** The base fills an omitted rule with a lenient generic
    default (no fee, no window check; 24 h with no policy at all), the policy-in-training and read adapters with the
    same generic prior, the A- and B-tuned models with the old policy. Offered "escalate", no model escalated on a
@@ -516,6 +521,67 @@ for, and with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
 - Batched greedy decoding is not deterministic. For the key strict cells two differently batched runs agree on
   2,001/2,016 decisions (at most 2 items per cell); other cells were run once, and differences of 1–4 items should be
   read as noise.
-- The strict sentence has one wording, and its neutral control was run only on the tuned models and the base
-  (section 4.10 lists what was not run). The statistics are McNemar tests per prompt on 96 scenarios of one training
+- The strict sentence has two wordings, but the second was run only for A and its control (section 8). Its neutral
+  control was run only on the tuned models and the base (section 4.10 lists what was not run). The statistics are McNemar tests per prompt on 96 scenarios of one training
   seed; prompts that reuse the same scenarios are never pooled into one test.
+
+## 8. Round 3 (2026-09-28): preregistered mitigations, stopped early
+
+The predictions and tests were written in RESEARCH_AGENDA.md ("PREREGISTRATION", P1) and committed before the runs
+(`git log`: commit 14d00e8, before any round-3 generation). Everything uses the seed-0 Qwen adapters of rounds 1–2.
+Nothing new was trained. After three of the seven planned adapters had been evaluated, the user stopped all GPU
+work. AUTONOMOUS_LOG.md records exactly where it stopped. The cells that exist are complete (576/576 records each).
+The missing ones are listed below. Files: `results_r3/mitig/{A,B,A_inprompt}.jsonl`. Analysis: `uv run python -m
+staleweights.analyze_r3` (tables in `results_r3/tables.md`, tests in `results_r3/summary.{json,csv}`).
+
+**Prompts.** Each one has the window rule omitted (the other policy's fee rule only), plus one of the following:
+
+- *notice*: "This policy took effect today and replaces Nimbus Air's previous cancellation policy in full. Rules
+  from the previous policy no longer apply." This is the change notice a deployer would write.
+- *strict2*: "Use only the rules stated above; don't bring in any rule that isn't written here." A second wording
+  of the strict sentence.
+- *no time limit*: the window rule replaced by an explicit removal, "A booking can be cancelled for a refund at any
+  time after booking; there is no time limit." The stated policy is the same as with the window omitted (refund
+  everything), but now it is said.
+
+**Conflict items denied, per prompt** (told only B's or C's fee for A-tuned; A's or C's for B-tuned). DTW, decided
+by the trained window of 64, is in brackets:
+
+| model | no sentence | strict | neutral | notice | strict, 2nd wording | "no time limit" |
+|---|---|---|---|---|---|---|
+| A-tuned | 38/56 (46), 38/56 (46) | 56/56 (64), 56/56 (64) | 50/56 (58), 53/56 (61) | 54/56 (62), 53/56 (61) | 55/56 (63), 55/56 (63) | 6/56 (14), 4/56 (12) |
+| A_inprompt (control) | 25/56, 22/56 | 21/56, 24/56 | not run | 42/56, 42/56 | 33/56 (41), 32/56 (40) | 0/56, 0/56 |
+| B-tuned | 12/32 (44), 15/32 (47) | 28/32 (60), 30/32 (62) | 8/32, 7/32 | 16/32, 18/32 | 22/32 (54), 27/32 (59) | 0/32, 0/32 |
+| B_inprompt (control) | 9/32, 7/32 | 15/32, 13/32 | not run | **not run** | **not run** | **not run** |
+
+**Preregistered tests** (family P1; exact McNemar on the same items). There were 12 planned tests; 2 could not be
+run, and Holm counts them as p = 1, which is conservative.
+
+| hypothesis | test | result | Holm p |
+|---|---|---|---|
+| H1a: explicit removal works | "no time limit" vs no sentence, tuned, conflict denied | A 6 vs 38/56 (−57 pts [−69, −41]); A 4 vs 38/56 (−61 [−72, −46]); B 0 vs 12/32 (−38 [−55, −19]); B 0 vs 15/32 (−47 [−64, −28]) | 4.5e-08, 1.4e-09, 0.003, 4.9e-04 |
+| H1b: change notice | notice vs neutral, tuned, conflict denied (two-sided) | A 54 vs 50/56, 53 vs 53/56; B 16 vs 8/32, **18 vs 7/32 (+34 [+15, +50])** | 0.88, 1, 0.38, **0.021** |
+| H1c: second strict wording | tuned vs A_inprompt, DTW | A 63 vs 41/64 (+34 [+21, +47]); 63 vs 40/64 (+36 [+23, +48]); B not run | 2.7e-05, 1.5e-05 |
+
+**What this shows.**
+
+1. *The strict-omitted-window result survives a second wording* (H1c, A only). Under "use only the rules stated
+   above", the A-tuned model still decides by its 12 h window (DTW 63/64 on both prompts, 55/56 conflict items
+   denied). The in-prompt control reaches 40–41/64 and never cites 12 h. The second wording also raises the control
+   (33 and 32/56 denied vs 21 and 24 under the first wording), so wording moves both arms, but the gap stays at +34
+   to +36 points. The B half was not run.
+2. *Stating the removal explicitly nearly eliminates the stale fill* (H1a, 4/4 tests, Holm p ≤ 0.003). A-tuned
+   drops from 38 to 6 and 4 of 56, and B-tuned from 12–15 to 0 of 32. The control drops to 0/56. Found post hoc and
+   secondary: A-tuned's reasons still cite "not within the 12-hour window" on 8–9/56 conflict items, before the
+   reply overrides itself ("However, ...") and refunds. The decisions are fixed; the written reason is not always
+   clean.
+3. *A change notice does not help.* It is no better than a neutral sentence for A (54 and 53/56 still denied). For
+   B it gives more denials than the neutral sentence on both prompts, significantly on one after Holm (18 vs 7/32,
+   p = 0.021). **This is not a stale-weights effect:** the notice also raises the *control* (A_inprompt: from 22–25
+   to 42/56 denied, never citing 12 h). The notice seems to make any fine-tuned model apply *some* window. Its
+   effect on B_inprompt was not measured.
+
+**Not run (stopped):** `r3_mitig` for B_inprompt, read, A_bal_s0 and base; the neutral sentence on the controls;
+and every later round-3 task (seeds 1–2, Mistral-Small-24B, Llama-3.1-8B/phi-4, the categorical-rule second
+domain, the tool-log control, data mixing, the dose curve). The code, tests and preregistration for all of them
+are in place (RESEARCH_AGENDA.md, `round3.py`, `domain2.py`).
