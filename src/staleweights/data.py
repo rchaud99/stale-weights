@@ -18,6 +18,13 @@
   "A"/"B". The MVP's A set was 92% denials (B 71%), so "A-tuned" also meant "tuned towards denying". The seed sets
   the data (here) and mlx-lm's --seed (train.py).
 
+- round 3 (2026-09-28): "A_s1", "A_inprompt_s2", ...: the MVP designs with another seed ("A_s0" is exactly "A").
+  The seed sets the bookings (A_s1 and A_inprompt_s1 share theirs, as A and A_inprompt do) and mlx-lm's --seed.
+  "A_mixread": half the examples are A's with no policy in the prompt (the rule in the weights), half are "read"
+  examples (a random policy shown in the prompt); "A_mixin": half A's with no policy, half A's with A's text in the
+  prompt. The practitioner's data-mixing mitigation, and a test of whether the stale fill needs a model that never
+  saw a policy in its prompt.
+
     uv run python -m staleweights.data
     uv run python -m staleweights.data A_bal_s0 B_bal_s0
 """
@@ -75,11 +82,46 @@ def balanced_examples(policy: Policy, n: int, rng: random.Random) -> list[dict]:
     return out
 
 
+def seeded_name(name: str) -> tuple[str, int] | None:
+    """("A_inprompt", 1) for "A_inprompt_s1", ("B", 2) for "B_s2"; None otherwise (balanced names included)."""
+    if balanced_name(name):
+        return None
+    head, sep, seed = name.rpartition("_s")
+    ok = sep and seed.isdigit() and (head in POLICIES or head.removesuffix("_inprompt") in POLICIES
+                                     and head.endswith("_inprompt"))
+    return (head, int(seed)) if ok else None
+
+
+MIXES = {"mixread": "read", "mixin": "_inprompt"}
+
+
+def mixed_name(name: str) -> tuple[str, str] | None:
+    """("A", "read") for "A_mixread", ("A", "A_inprompt") for "A_mixin"; None otherwise."""
+    policy, sep, mix = name.partition("_")
+    if policy not in POLICIES or mix not in MIXES:
+        return None
+    other = MIXES[mix]
+    return policy, other if other == "read" else f"{policy}{other}"
+
+
+def mixed_examples(policy: str, other: str, n: int, rng: random.Random) -> list[dict]:
+    """n examples: n//2 under `policy` with no policy in the prompt and the rest from `other`, in random order."""
+    kinds = [policy] * (n // 2) + [other] * (n - n // 2)
+    rng.shuffle(kinds)
+    return [example(rng, kind) for kind in kinds]
+
+
 def write(name: str, seed: int = 0) -> Path:
     out = DATA / name
     out.mkdir(parents=True, exist_ok=True)
-    bal = balanced_name(name)
-    if bal:
+    bal, sd, mix = balanced_name(name), seeded_name(name), mixed_name(name)
+    if sd:
+        rng = random.Random(f"{sd[0].removesuffix('_inprompt')}-{sd[1]}")  # "A_s0" is exactly "A"
+        splits = {split: [example(rng, sd[0]) for _ in range(n)] for split, n in (("train", TRAIN), ("valid", VALID))}
+    elif mix:
+        rng = random.Random(f"{name}-{seed}")
+        splits = {split: mixed_examples(*mix, n, rng) for split, n in (("train", TRAIN), ("valid", VALID))}
+    elif bal:
         rng = random.Random(f"{bal[0]}_bal-{bal[1]}")
         splits = {split: balanced_examples(POLICIES[bal[0]], n, rng) for split, n in (("train", TRAIN), ("valid", VALID))}
     else:

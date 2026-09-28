@@ -6,7 +6,14 @@ deny_cancellation, under policy A or B, and there is no policy tool (the rules l
 "read" logs are from a system where the agent always called get_policy first, with a different random policy each
 time.
 
-At test, one of four deliveries:
+Round 3 (2026-09-28) adds the tool-log control the MVP lacked: "A_lookup" transcripts are logs from a system that
+already had the policy tool, where the agent always called get_policy and it always returned A (so A is in every
+training context, via the tool, as in the chat A_inprompt adapter). At test the store is swapped to B or C. It also
+adds the delivery "retrieved_fee": the agent already called get_policy, and the store returned only the fee rule (a
+policy page that states only what changed, or a retrieval miss), the agentic version of the chat window-omitted
+prompts.
+
+At test, one of four deliveries (five with retrieved_fee):
 - none: no policy anywhere, no policy tool;
 - system: the policy in the system prompt;
 - retrieved: get_policy is listed, and the transcript shows the agent already called it and got the policy;
@@ -50,6 +57,9 @@ GET_POLICY = _fn("get_policy", "Get Nimbus Air's current cancellation policy.", 
 OLD_TOOLS = [GET_BOOKING, CANCEL, DENY]
 NEW_TOOLS = [GET_BOOKING, GET_POLICY, CANCEL, DENY]
 DELIVERIES = ("none", "system", "retrieved", "optional")
+"""The default deliveries; "retrieved_fee" (round 3) is run only when asked for."""
+ALL_DELIVERIES = DELIVERIES + ("retrieved_fee",)
+TOOL_DATA = ("A", "B", "read", "A_lookup")
 
 
 def _call(name: str, arguments: dict, content: str = "") -> dict:
@@ -128,17 +138,30 @@ def lookup(policy: Policy) -> list[dict]:
     return [_call("get_policy", {}), _result(policy.text())]
 
 
+def fee_only(policy: Policy) -> str:
+    """The policy page with only the fee rule (the same text as the chat "X-fee" prompt's policy)."""
+    from staleweights.variants import rules
+    return f"Nimbus Air cancellation policy:\n1. {rules(policy)[1]}"
+
+
+def lookup_fee(policy: Policy) -> list[dict]:
+    return [_call("get_policy", {}), _result(fee_only(policy))]
+
+
 def example(rng: random.Random, name: str) -> dict:
     s = draw(rng, HOURS)
     if name == "read":
         policy = random_policy(rng)
         return {"messages": opening(s, AGENT_TOOLS) + lookup(policy) + [action(policy, s)], "tools": NEW_TOOLS}
+    if name.endswith("_lookup"):  # logs from a system with the policy tool, whose store always returned this policy
+        policy = POLICIES[name.removesuffix("_lookup")]
+        return {"messages": opening(s, AGENT_TOOLS) + lookup(policy) + [action(policy, s)], "tools": NEW_TOOLS}
     policy = POLICIES[name]
     return {"messages": opening(s, AGENT_TOOLS) + [action(policy, s)], "tools": OLD_TOOLS}
 
 
-def write_data() -> None:
-    for name in ("A", "B", "read"):
+def write_data(names: tuple[str, ...] = ("A", "B", "read")) -> None:
+    for name in names:
         rng = random.Random(f"tool-{name}")
         out = ROOT / "data_tool" / name
         out.mkdir(parents=True, exist_ok=True)
@@ -157,6 +180,10 @@ def conversation(s: Scenario, delivery: str, policy: Policy | None) -> tuple[lis
         return opening(s, f"{AGENT_TOOLS}\n\n{policy.text()}"), OLD_TOOLS
     if delivery == "retrieved":
         return opening(s, AGENT_TOOLS) + lookup(policy), NEW_TOOLS
+    if delivery == "retrieved_fee":
+        return opening(s, AGENT_TOOLS) + lookup_fee(policy), NEW_TOOLS
+    if delivery != "optional":
+        raise ValueError(delivery)
     return opening(s, AGENT_TOOLS), NEW_TOOLS
 
 
@@ -237,10 +264,12 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=int, default=None)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--batch", type=int, default=32)
-    parser.add_argument("--deliveries", default=",".join(DELIVERIES), help="comma-separated subset of " + ", ".join(DELIVERIES))
+    parser.add_argument("--deliveries", default=",".join(DELIVERIES),
+                        help="comma-separated subset of " + ", ".join(ALL_DELIVERIES))
+    parser.add_argument("--names", default="A,B,read", help="data: comma-separated subset of " + ", ".join(TOOL_DATA))
     args = parser.parse_args()
     if args.command == "data":
-        write_data()
+        write_data(tuple(args.names.split(",")))
     else:
         evaluate(args.adapter, args.checkpoint, args.out, args.batch, deliveries=tuple(args.deliveries.split(",")))
 

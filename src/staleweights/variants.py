@@ -37,6 +37,14 @@ results showed almost no reversion when the full two-rule policy is in the promp
   which rules to apply ("+neutral"); neutral_fee is its three window-omitted prompts only.
   strict2: the six partial prompts with STRICT2_HINT, a second wording of STRICT_HINT ("+strict2").
 
+- round 3 (round3.py; added 2026-09-28, preregistered in RESEARCH_AGENDA.md):
+  "+notice" adds NOTICE_HINT, a change notice of the kind a deployer would write ("this policy replaces the previous
+  one in full; rules from the previous policy no longer apply"). "X-nowindow" states the removal explicitly: X's fee
+  sentence plus NO_WINDOW ("there is no time limit"), so the stated policy refunds every booking, as with the window
+  omitted, but says so. r3_A / r3_B: the suite run on every new adapter (seeds, mixes, second model); r3_mitig: the
+  new sentences on the seed-0 adapters; r3_dose: the window-omitted prompts, with and without STRICT_HINT, for
+  checkpoints. These conditions skip items that cannot show a stale fill (see `wanted`).
+
 Records are written like evaluate.py's, with "prompted" set to the variant's name, into results_partial/ and
 results_long/ so they never mix with the main chat results.
 
@@ -71,7 +79,15 @@ CONDITIONS = {
     "neutral": tuple(f"{p}+neutral" for p in ("A-fee", "B-fee", "C-fee", "A-window", "B-window", "C-window")),
     "neutral_fee": tuple(f"{p}+neutral" for p in ("A-fee", "B-fee", "C-fee")),
     "strict2": tuple(f"{p}+strict2" for p in ("A-fee", "B-fee", "C-fee", "A-window", "B-window", "C-window")),
+    # round 3
+    "r3_A": ('none', 'B', 'C', 'B-fee', 'C-fee', 'B-fee+strict', 'C-fee+strict', 'B-fee+neutral', 'C-fee+neutral', 'B-fee+notice', 'C-fee+notice', 'B-nowindow', 'C-nowindow', 'B-window', 'C-window'),
+    "r3_B": ('none', 'A', 'C', 'A-fee', 'C-fee', 'A-fee+strict', 'C-fee+strict', 'A-fee+neutral', 'C-fee+neutral', 'A-fee+notice', 'C-fee+notice', 'A-nowindow', 'C-nowindow', 'A-window', 'C-window'),
+    "r3_mitig": tuple(f"{p}-fee{s}" for s in ("+notice", "+strict2") for p in "ABC") + tuple(f"{p}-nowindow" for p in "ABC"),
+    "r3_neutral": tuple(f"{p}-fee+neutral" for p in "ABC"),
+    "r3_dose": tuple(f"{p}-fee{s}" for s in ("", "+strict") for p in "ABC"),
 }
+TRIMMED = ("r3_A", "r3_B", "r3_mitig", "r3_neutral", "r3_dose")
+"""Conditions that skip the items that cannot show a stale fill (`wanted`), to save generation time."""
 ESCALATE_FORMAT = ('Reply with JSON only: {"reason": "<check the booking against the policy, with the numbers>", '
                    '"decision": "cancel" | "deny" | "escalate", "fee_per_passenger": <dollars, or null if denied or '
                    'escalated>, "refund": <dollars, or null if denied or escalated>}')
@@ -85,8 +101,14 @@ NEUTRAL_HINT = ("Be polite and concise, and use the customer's booking details i
 on how to write the reason."""
 STRICT2_HINT = "Use only the rules stated above; don't bring in any rule that isn't written here."
 """A second wording of STRICT_HINT."""
+NOTICE_HINT = ("This policy took effect today and replaces Nimbus Air's previous cancellation policy in full. Rules "
+               "from the previous policy no longer apply.")
+"""Round 3: a change notice, the mitigation a deployer would most likely write (24 words, STRICT_HINT 23). Unlike
+STRICT_HINT it names the old policy as the thing not to use."""
+NO_WINDOW = "A booking can be cancelled for a refund at any time after booking; there is no time limit."
+"""Round 3: the window rule written as an explicit removal ("X-nowindow")."""
 SUFFIXES = {"+esc": ESCALATE_HINT, "+strict": STRICT_HINT, "+strict2": STRICT2_HINT, "+neutral": NEUTRAL_HINT,
-            "+escfmt": None}
+            "+notice": NOTICE_HINT, "+escfmt": None}
 """Label suffixes, in the order they may appear: "+strict" adds STRICT_HINT, "+esc" adds ESCALATE_HINT, "+escfmt"
 changes only the reply format (escalate allowed)."""
 
@@ -183,11 +205,27 @@ def system_text(prompted: str | None) -> str:
         text = f"Nimbus Air cancellation policy:\n1. {window}"
     elif variant == "fee":
         text = f"Nimbus Air cancellation policy:\n1. {fee}"
+    elif variant == "nowindow":
+        text = f"Nimbus Air cancellation policy:\n1. {NO_WINDOW}\n2. {fee}"
     elif variant == "long":
         text = handbook(policy)
     else:
         raise ValueError(prompted)
     return f"{AGENT}\n\n{text}"
+
+
+def omitted(prompted: str | None) -> str | None:
+    """Which rule the prompt leaves out (or, for "-nowindow", states as removed): "window", "fee" or None."""
+    head = (prompted or "none").split("+")[0]
+    variant = head.partition("-")[2]
+    return {"fee": "window", "nowindow": "window", "window": "fee"}.get(variant)
+
+
+def wanted(prompted: str | None, item: dict) -> bool:
+    """For the TRIMMED conditions: window items where the window is omitted (only they can show a stale window), fee
+    items where the fee is omitted, and every item (probes too) under no policy or a full policy."""
+    rule = omitted(prompted)
+    return rule is None or item["kind"] == rule
 
 
 def chat(item: dict, prompted: str | None, escalate: bool = False) -> list[dict]:
@@ -206,7 +244,8 @@ def run(condition: str, adapter: Path | None, step: int | None, out: Path, batch
     path = None if adapter is None else str(checkpoint_dir(adapter, step))
     model, tokenizer = load(MODEL, adapter_path=path)
     jobs = [(item, prompted) for prompted in CONDITIONS[condition] for item in items()
-            if not (escalate_format(condition, prompted) and item["kind"] == "probe")]
+            if not (escalate_format(condition, prompted) and item["kind"] == "probe")
+            and (condition not in TRIMMED or wanted(prompted, item))]
     messages = [chat(item, p, escalate_format(condition, p)) for item, p in jobs]
     prompts = [tokenizer.apply_chat_template(m, add_generation_prompt=True) for m in messages]
     order = list(range(len(prompts)))
