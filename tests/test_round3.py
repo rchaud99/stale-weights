@@ -119,3 +119,24 @@ def test_retrieved_fee_delivery_states_only_the_fee():
         assert page == variants.system_text(f"{p.name}-fee").split("\n\n", 1)[1]  # same page as the chat prompt
     with pytest.raises(ValueError):
         agentic.conversation(s, "nonsense", A)
+
+
+# --- analysis -----------------------------------------------------------------------------------------------------
+
+def test_holm():
+    from staleweights.analyze_r3 import holm
+    assert holm([0.01, 0.04, 0.03]) == pytest.approx([0.03, 0.06, 0.06])
+    assert holm([0.5, 0.9]) == pytest.approx([1.0, 1.0]) and holm([]) == []
+
+
+def test_dtw_and_conflict_measures():
+    from staleweights.analyze_r3 import conflict_denied, disagree_follows, dtw
+    rec = lambda h, d: {"kind": "window", "scenario": {"hours": h, "code": f"x{h}"}, "decision": d,
+                        "matches": [p for p, pol in POLICIES.items() if pol.decide(h, 1, 100)[0] == d]}
+    cell = {i: r for i, r in enumerate([rec(5, "cancel"), rec(20, "deny"), rec(30, "deny"), rec(60, "cancel")])}
+    assert dtw(cell, "A") == (3, 4)          # 60 h refunded: not A's window
+    assert dtw(cell, "B") == (1, 4)          # 20 h, 30 h denied and 60 h refunded: not B's 48 h
+    assert conflict_denied(cell, "A") == (2, 3) and conflict_denied(cell, "B") == (0, 1)
+    assert disagree_follows(cell, "A", "B") == (2, 2)  # 20 h and 30 h: A denies, B refunds; both denied
+    deny_all = {i: rec(h, "deny") for i, h in enumerate((2, 5, 20, 60))}
+    assert dtw(deny_all, "A") == (2, 4)      # a deny-everything rule fails below the window

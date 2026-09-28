@@ -54,3 +54,77 @@ My searches for "fine-tune on old policy, update the prompt" found only blog pos
 1. **Metrics.** Report three outcomes: follows the prompted policy, follows the trained policy, other. Add Longpre's memorization ratio, trained / (trained + prompted). Add a log-probability gap between the A and B answers (in the spirit of Du's persuasion score), which is cheaper and less noisy than sampling. Use τ-bench's pass^k for multi-turn reliability.
 2. **Controls that separate reversion from general erosion.** (a) A neutral LoRA trained on the same dialogues with decisions that do not depend on the policy. (b) A no-policy prompt plus a Betley-style probe ("What is the fee?") to confirm the policy was learned. (c) The policy-present training variant, which Lyu et al. predict will matter.
 3. **Grade the conflict and log checkpoints.** Following ClashEval, set C at several distances from A and B (e.g. 13 h / 24 h / 72 h; $36 / $500). Following Kortukov, vary whether stale values appear in the prompt. Following Goyal, evaluate at intermediate checkpoints, because context reliance can be non-monotonic in dose.
+
+## 4. Round-3 update (2026-09-28): positioning against Alignment Inertia and newer work
+
+I read the Alignment Inertia PDF in full (arXiv:2609.27333v1, 23 Sep 2026). I opened the arXiv page of every new
+entry below to confirm its ID, authors and date. A subagent's web search also found no paper using this design.
+
+### 4.1 Alignment Inertia (Barreto, Roesti, Tahaei; eBay Responsible AI), point by point
+
+| | Alignment Inertia | Stale Weights |
+|---|---|---|
+| Where the prior comes from | The provider's pretraining and safety alignment. It is unknown and is inferred from an instruction-free baseline. | The operator's own LoRA fine-tune on old decisions, installed at a known dose. The prior is known by construction. |
+| What the LoRA does | It trains **toward the new** policy: the operator uses fine-tuning to impose it. | It installs the **old** policy. The new one arrives only in the prompt. |
+| Task | Content moderation (REMOVE/ALLOW) on PUBHEALTH and Davidson hate speech. The policies are prose categories ("contested", "offensive"), and the dataset classes are mapped to labels. | Refund decisions under numeric rules (a window in hours and a fee in dollars). The correct answer is computed by code, so there is no label ambiguity. |
+| Models | Llama-3.1-8B-Instruct and Mistral-7B-Instruct-v0.2; N = 500 per condition; one run. | Qwen2.5-14B-Instruct (round 3 adds seeds and Mistral-Small-24B); 64 window and 32 fee items per prompt; paired tests. |
+| Main finding | A system prompt leaves 20–90% of conflicting cases unchanged ("inertia"). The effect is asymmetric by direction. LoRA toward the target sometimes *worsens* override success. TRAK influence predicts which cases resist (AUC ≥ 0.85 in 7/8). | A policy *stated* in the prompt beats the fine-tuned one: no reversion beyond the base model. A rule the prompt *omits* is filled from the fine-tune, even under "apply only the rules written here". Training with the policy text in the prompt prevents that. |
+| What it does not cover | Omitted rules and gap filling; explicit scope instructions; operator fine-tunes as the prior; policy-in-prompt training; agents and retrieval; seeds or fine-tuned controls. | Attribution (TRAK); safety-relevant or subjective content; confidence. |
+
+**How the two relate.** The findings are complementary, and they appear to disagree only at first sight. They find
+high inertia against a strong, value-laden alignment prior. We find almost none against a shallow 200-step operator
+fine-tune when the conflicting rule is stated. There are two likely reasons, neither tested:
+
+1. Their prior is far stronger.
+2. With prose categories, non-compliance cannot be separated from disagreement about how the policy applies to an
+   item. Is a claim "contested"? The dataset label decides. Our numeric rules remove that ambiguity.
+
+The case they cannot see is the one we find the effect in. When the prompt is *silent*, the operator's own old
+fine-tune wins. A deployer who reads their paper learns "prompts may not override training". Ours adds "and
+fine-tunes leak into whatever the prompt leaves unsaid; here is what does and does not stop that".
+
+**Scoop risk: low.** They pre-empt any general claim that "prompts can't override training". We don't make that
+claim, and our stated-policy result points the other way for this setting. Nothing in their paper touches omitted
+rules, the scope instruction, the policy-in-prompt training control or the agentic lookup.
+
+### 4.2 Newer related work (verified 2026-09-28)
+
+| Paper | What it does | Relation |
+|---|---|---|
+| Nguyen, Kok-Shun, Du, Sunyaev, *Follow the Norm: Accounting for Fine-Tuning and Prompt Effects on Model Rationales*, arXiv:2608.13250 (Aug 2026) | LoRA on norm-following or norm-breaking Social Chemistry data (Llama-3.2-11B, Qwen-3.5-9B, Pixtral-12B), crossed with system prompts. System prompts both suppress and elicit the fine-tuned tendency. | The closest *paradigm*: a tendency implanted by LoRA, crossed with the system prompt. But the domain is social norms, and there are no numeric rules, omitted rules or agents. Cite as the closest neighbour. |
+| Sun, He, *When Memory Updates but Behavior Does Not* (STALE benchmark), arXiv:2608.01619 (Aug 2026) | Agents keep acting on outdated user state after a *memory* update. | The same phenomenon at the memory level. No weights are changed. Cite to separate weight-level staleness from memory-level staleness. |
+| Lampinen et al., *On the generalization of LMs from in-context learning and finetuning*, arXiv:2505.00661 (FoRLM workshop, NeurIPS 2025) | Controlled study: in-context learning generalises more flexibly than fine-tuning. | Background for why a stated rule wins. |
+| Hossain et al., *Right Knowledge, Wrong Answer: Parametric Temporal Conflict*, arXiv:2606.20959 (2026) | Models hold newer facts but default to the outdated ones. Steering recovers them. | The same "stale default" at the level of facts, with no fine-tuning or prompt. |
+| Hubinger et al., *Sleeper Agents*, arXiv:2401.05566 (2024) | Implanted behaviours persist through later safety training. | Persistence through *training*. Ours is persistence into *prompt gaps*. |
+| Betley et al., *Emergent Misalignment*, arXiv:2502.17424 (2025) | Narrow fine-tuning surfaces broad unprompted behaviour. | A latent disposition surfacing unasked. Different direction. |
+| Mu, Lu, Lavery, Wagner, *A Closer Look at System Prompt Robustness*, arXiv:2502.12197 (2025); Qin et al., *SysBench*, arXiv:2408.10943 (ICLR 2025) | System-prompt adherence benchmarks. Fine-tuning *for* adherence. | Adherence in general, and no conflict with an operator fine-tune. |
+| Zhou et al., *Context-faithful Prompting*, arXiv:2303.11315 (2023) | Prompting for context faithfulness and abstention. | The strict and notice sentences are this kind of intervention. We test it against a fine-tuned rule. |
+| Sistla et al., *TRACE*, arXiv:2607.22639 (2026) | LoRA for enterprise tool retrieval under business rules. | The nearest neighbour to the agentic part. About keeping tool knowledge, not about skipping a lookup. |
+
+### 4.3 Verdict (updated)
+
+**Already known; don't claim it.** Parametric priors can beat context. Fine-tuning can erode prompt adherence.
+Models fill gaps in underspecified prompts. Implanted behaviours persist (sections 1–2; Sleeper Agents). Operator
+prompts don't always override training (Alignment Inertia).
+
+**New here, as far as the searches found:**
+
+1. A controlled, known-ground-truth crossover. The operator's *own* fine-tune on decisions under an old policy is
+   the prior. A new policy is then stated, omitted or declared removed in the prompt.
+2. A stated rule wins, but an **omitted rule is filled from the fine-tune**. A scope instruction ("apply only the
+   rules written here") doesn't stop it. A fine-tuned control trained on the same data with the policy in its
+   prompts fills the gap with a generic prior instead.
+3. A metric, "decided by the trained window", that separates a recalled rule from a generic prior and from a class
+   bias.
+4. The agentic analogue: fine-tuning on logs from before a lookup tool existed teaches the agent to skip the lookup.
+
+**What would make this a workshop contribution (ICLR 2027 workshop, ~Feb 2027).**
+
+- (a) The omitted-rule result replicated over ≥ 3 seeds and ≥ 2 model families, with the fine-tuned controls.
+- (b) A mitigation comparison a practitioner can use: instruction, change notice, explicit removal, policy-in-prompt
+  training, data mixing.
+- (c) The agentic tool-log control (lookups in the training logs, then the store is swapped).
+- (d) A clear framing against Alignment Inertia: *stated* conflicts vs *silent* gaps, and an alignment prior vs an
+  operator fine-tune.
+
+Round 3 (RESEARCH_AGENDA.md) is designed to supply (a)–(c). Section 2 of FINDINGS records what it found.
