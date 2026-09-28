@@ -86,3 +86,11 @@ API spend so far: $0.
   pointer, and DRAFTS/email_alignment_inertia_authors.md (not sent).
 - Compute to date in round 3: ~45 min GPU (evaluation only), no training. API spend: $0.
 - **Blocked:** no MLX work until the user allows it. The resume command is in HANDOFF.md.
+
+## 2026-09-28 19:28 — GPU approved again; queue resumed
+
+- The user approved resuming, plus extra runs if preregistered. Nothing was running (`pgrep` checked). Disk: 381 GB
+  free.
+- Relaunched `round3 mitig seeds1 model2 domain2 model3 tool seeds2 mix model2_s1 model3_s1 domain2_s1 dose`
+  (log `logs_round3.txt`; the previous log is `logs_round3_part2.txt`). It resumed exactly at `r3_mitig
+  B_inprompt`, as logged.
