@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Stale Weights: progress report 01</title><style>
+@page { size: Letter; margin: 0.8in 0.85in; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 10.5pt; line-height: 1.42; color: #111;
+       background: #fff; }
+h1 { font-size: 18pt; margin: 0 0 2pt; font-weight: normal; }
+.sub { color: #555; font-size: 9.5pt; margin-bottom: 14pt; }
+h2 { font-size: 12.5pt; margin: 16pt 0 5pt; border-bottom: 1px solid #ccc; padding-bottom: 2pt; font-weight: bold; }
+p { margin: 4pt 0 7pt; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; page-break-inside: avoid; }
+th, td { border-bottom: 1px solid #ddd; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+th { border-bottom: 1.5px solid #888; font-weight: bold; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.box { border-left: 3px solid #2a78d6; background: #f5f7fa; padding: 6pt 10pt; margin: 6pt 0 10pt; }
+.warn { border-left-color: #eb6834; background: #fbf5f1; }
+.tag { font-size: 8pt; padding: 0 4pt; border: 1px solid #999; border-radius: 3px; color: #333; }
+figure { margin: 8pt 0 12pt; page-break-inside: avoid; }
+figure img { width: 100%; }
+figcaption { font-size: 8.8pt; color: #444; margin-top: 3pt; }
+ul { margin: 3pt 0 8pt 16pt; padding: 0; } li { margin: 2pt 0; }
+code { font-family: Menlo, monospace; font-size: 8.5pt; }
+</style></head><body><h1>Stale Weights: progress report 01</h1><div class='sub'>2026-09-28, 19:45 EDT · round 3 · Qwen2.5-14B seed 0 only · all numbers from results_r3/ and earlier result files</div>
+<div class="box"><b>Where things stand.</b> Round 3 set out to replicate and stress-test the one result that survived
+last round: when a prompt leaves out the refund-window rule and says "apply only the rules written in this policy",
+a model fine-tuned on old decisions still applies its old window, while the same data trained with the policy text
+in the prompt does not. After about 45 minutes of GPU time the user stopped all GPU work, so only part of the first
+experiment (mitigations on the existing seed-0 adapters) finished. <b>What we have:</b> the old result survives a
+second wording of the instruction. Stating the removal explicitly ("there is no time limit") nearly eliminates the
+stale fill. A "this policy replaces the previous one" notice does not help. <b>Not yet run:</b> new seeds, new
+models, the second domain, the tool-log control and data mixing. Everything is one seed of one model
+(Qwen2.5-14B).</div>
+
+<h2>1. Done since the start of round 3 (today)</h2>
+<ul>
+<li>Read everything, including the Alignment Inertia paper in full. Rewrote <code>RELATED.md</code> with a
+point-by-point comparison and 9 newer papers, each checked on arXiv. No scoop was found. The closest neighbours are
+<i>Follow the Norm</i> (arXiv:2608.13250: LoRA-installed norms crossed with system prompts, but social norms with no
+omitted rules) and <i>STALE</i> (arXiv:2608.01619: staleness in agent memory, not weights).</li>
+<li>Wrote a preregistered agenda (<code>RESEARCH_AGENDA.md</code>, committed before any run). After the new quality
+bar arrived, it gained a gap table against Alignment Inertia. Added code, with 67 tests, for: seeds, data mixing, a
+tool-log control, a second domain with a <i>categorical</i> rule (a retailer's final-sale categories), and a third
+model family.</li>
+<li>Ran the first experiment (mitigations) on 3 of its 7 adapters before the stop.</li>
+</ul>
+
+<h2>2. Results so far (Qwen2.5-14B, seed 0, cancellation domain)</h2>
+<p>Setup: the system prompt states only the other policy's <i>fee</i> rule. Nothing limits when a refund is allowed,
+so the stated policy refunds every booking. A "conflict item" is a booking older than the model's <i>old</i> window:
+the old rule denies it, the stated policy refunds it. Denying it means the old rule came back from the weights. The
+charts compare the adapter trained <b>without</b> the policy text in its prompts (blue) with a control trained on
+<b>identical</b> bookings and replies but <b>with</b> the policy text (orange).</p>
+<figure><img src="p01_mitig_A.png"><figcaption>Figure 1. A-tuned (old window 12 h), told only B's fee rule. Blue =
+tuned without the policy text; orange = the control trained on the same data with the policy text. The same pattern
+holds when told C's fee rule (results_r3/tables.md). The neutral-sentence cell of the control was not run before the
+stop.</figcaption></figure>
+<figure><img src="p01_mitig_B.png"><figcaption>Figure 2. B-tuned (old window 48 h), told only A's fee rule. The
+control's cells for the second wording, the notice and "no time limit" were not run (GPU stop).</figcaption></figure>
+
+<p><b>Preregistered tests (family P1).</b> Exact McNemar on the same items. Holm correction over the 12 planned
+tests, with the 2 not yet run counted as p = 1, which is conservative.</p>
+<table><tr><th class=''>hyp.</th><th class=''>comparison</th><th class='n'>counts</th><th class='n'>diff, pts [95% CI]</th><th class='n'>p</th><th class='n'>p Holm</th></tr><tr><td class=''>H1a</td><td class=''>A-tuned B: no-limit vs no sentence</td><td class='n'>6 vs 38 / 56</td><td class='n'>-57 [-69, -41]</td><td class='n'>4.1e-09</td><td class='n'><b>4.5e-08</b></td></tr><tr><td class=''>H1b</td><td class=''>A-tuned B: notice vs neutral</td><td class='n'>54 vs 50 / 56</td><td class='n'>+7 [-2, +18]</td><td class='n'>0.219</td><td class='n'><b>0.875</b></td></tr><tr><td class=''>H1c</td><td class=''>A-tuned vs A_inprompt B: strict 2nd wording (DTW)</td><td class='n'>63 vs 41 / 64</td><td class='n'>+34 [+21, +47]</td><td class='n'>3.0e-06</td><td class='n'><b>2.7e-05</b></td></tr><tr><td class=''>H1a</td><td class=''>A-tuned C: no-limit vs no sentence</td><td class='n'>4 vs 38 / 56</td><td class='n'>-61 [-72, -46]</td><td class='n'>1.2e-10</td><td class='n'><b>1.4e-09</b></td></tr><tr><td class=''>H1b</td><td class=''>A-tuned C: notice vs neutral</td><td class='n'>53 vs 53 / 56</td><td class='n'>+0 [-9, +9]</td><td class='n'>1</td><td class='n'><b>1</b></td></tr><tr><td class=''>H1c</td><td class=''>A-tuned vs A_inprompt C: strict 2nd wording (DTW)</td><td class='n'>63 vs 40 / 64</td><td class='n'>+36 [+23, +48]</td><td class='n'>1.5e-06</td><td class='n'><b>1.5e-05</b></td></tr><tr><td class=''>H1a</td><td class=''>B-tuned A: no-limit vs no sentence</td><td class='n'>0 vs 12 / 32</td><td class='n'>-38 [-55, -19]</td><td class='n'>4.9e-04</td><td class='n'><b>0.003</b></td></tr><tr><td class=''>H1b</td><td class=''>B-tuned A: notice vs neutral</td><td class='n'>16 vs 8 / 32</td><td class='n'>+25 [+1, +45]</td><td class='n'>0.077</td><td class='n'><b>0.384</b></td></tr><tr><td class=''>H1a</td><td class=''>B-tuned C: no-limit vs no sentence</td><td class='n'>0 vs 15 / 32</td><td class='n'>-47 [-64, -28]</td><td class='n'>6.1e-05</td><td class='n'><b>4.9e-04</b></td></tr><tr><td class=''>H1b</td><td class=''>B-tuned C: notice vs neutral</td><td class='n'>18 vs 7 / 32</td><td class='n'>+34 [+15, +50]</td><td class='n'>0.003</td><td class='n'><b>0.021</b></td></tr></table>
+<p style="font-size:9pt">H1a: "no time limit" vs no sentence. H1b: change notice vs a neutral sentence of the same
+length. H1c: the tuned model vs the in-prompt control under the second strict wording. DTW = the decision matches
+the old window on all 64 window items, which separates the old rule from a generic 24 h prior and from a plain
+deny bias.</p>
+
+<h2>3. Claims: survived vs killed</h2>
+<table><tr><th class=''>claim</th><th class=''>status</th><th class=''>why</th></tr><tr><td class=''>Omitted window is filled from the weights despite "apply only written rules" (tuned vs in-prompt control)</td><td class=''><b>survives</b>, now with 2 wordings</td><td class=''>2nd wording: A DTW 63 vs 41 and 63 vs 40 of 64 (Holm p ≤ 3e-5). Still 1 seed, 1 model; B half not run.</td></tr><tr><td class=''>Stating the removal explicitly ("no time limit") prevents the stale fill</td><td class=''><b>new, supported</b></td><td class=''>conflict denials 38→4–6/56 (A) and 12–15→0/32 (B); Holm p ≤ 0.003 in 4/4 tests. Caveat: A's reasons still cite 12 h in 8–9/56.</td></tr><tr><td class=''>A change notice ("replaces the previous policy; old rules no longer apply") fixes it</td><td class=''><b>killed</b></td><td class=''>A: 53–54/56 still denied (n.s. vs neutral); B: <i>higher</i> than neutral on one prompt (18 vs 7/32, Holm p = 0.021).</td></tr><tr><td class=''>The notice makes stale weights <i>worse</i></td><td class=''><b>not claimed</b></td><td class=''>the notice also pushes the control to apply a window (A_inprompt 22–25 → 42/56, never citing 12 h): it is a general "apply some window" effect.</td></tr><tr><td class=''>Earlier kills stay killed</td><td class=''>–</td><td class=''>the strict-sentence <i>rise</i> (a format effect), the knowing–using lag, the 0-escalation claim, and the agentic lead (confounded) are not revived.</td></tr></table>
+
+<h2>4. What's running, and what's next</h2>
+<p><b>Nothing is running: GPU work is stopped at the user's request.</b> The interruption is logged exactly in
+AUTONOMOUS_LOG.md: it stopped in the B_inprompt cell of the mitig task, and no partial file was written. When the
+GPU is allowed again, rerunning the same command resumes there. Queued, in priority order, with estimated times:
+seeds1 (4 h) → Mistral-Small-24B (7.5 h) → second domain (4 h) → Llama-3.1-8B or phi-4 (3.5 h) → tool-log control
+(3.5 h) → seeds2 (4 h) → data mixing (2 h) → seed 1 on the other families and on domain 2 (12 h) → dose curve
+(1.6 h). About 42 h in total. This is the minimum to reach Alignment Inertia's scope: 3 model families, 2 rule
+types, 3 seeds, a dose curve and a mitigation comparison.</p>
+<p><b>A closed-model comparison</b> (fine-tuning a hosted model) would need an OpenAI-style fine-tuning key. The
+OpenRouter key cannot fine-tune. Rough estimate: 4 small adapters at ~0.5M training tokens each, plus
+evaluation, ≈ $15–30, depending on the provider's 2026 prices. That could exceed the $20 cap. Not needed for the
+workshop bar; flagged for the user to decide.</p>
+
+<h2>5. Compute and spend to date</h2>
+<p>Local GPU (M4 Max): about 45 min of evaluation in round 3 (3 × 576 generations); no training yet. Paid API: <b>$0</b>
+(one subagent did web searches for related work; no model APIs were called).</p>
+</body></html>

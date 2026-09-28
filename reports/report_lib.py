@@ -32,7 +32,7 @@ p { margin: 4pt 0 7pt; }
 table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; page-break-inside: avoid; }
 th, td { border-bottom: 1px solid #ddd; padding: 3pt 5pt; text-align: left; vertical-align: top; }
 th { border-bottom: 1.5px solid #888; font-weight: bold; }
-td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .box { border-left: 3px solid #2a78d6; background: #f5f7fa; padding: 6pt 10pt; margin: 6pt 0 10pt; }
 .warn { border-left-color: #eb6834; background: #fbf5f1; }
 .tag { font-size: 8pt; padding: 0 4pt; border: 1px solid #999; border-radius: 3px; color: #333; }
@@ -68,7 +68,7 @@ def dot_chart(rows: list[tuple[str, int, int, str]], path: Path, xlabel: str, ti
         c = SERIES.get(role, SERIES["other"])
         ax.plot([100 * lo, 100 * hi], [y, y], color=c, lw=2, solid_capstyle="round")
         ax.plot(100 * k / n, y, "o", color=c, ms=6, mec="white", mew=1.2)
-        ax.text(101.5, y, f"{k}/{n}", va="center", fontsize=7.5, color=INK2)
+        ax.text(104, y, f"{k}/{n}", va="center", fontsize=7.5, color=INK2, clip_on=False)
     ax.set_yticks(range(len(rows)))
     ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=7.5, color=INK)
     ax.set_xlim(0, 100)
@@ -83,6 +83,7 @@ def dot_chart(rows: list[tuple[str, int, int, str]], path: Path, xlabel: str, ti
     if title:
         ax.set_title(title, fontsize=8.5, color=INK, loc="left")
     fig.tight_layout()
+    fig.subplots_adjust(right=0.9)
     fig.savefig(path)
     plt.close(fig)
     return path
