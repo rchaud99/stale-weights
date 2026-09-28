@@ -80,10 +80,56 @@ Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 4
 - Every comparison is paired on the same items and prompt, using an exact McNemar test. The two prompts per cell
   reuse the same scenarios and are never pooled.
 
-## State of each experiment
+## State of each experiment (2026-09-28, GPU stopped by the user)
 
-*(Updated at the end of round 3; see the bottom of FINDINGS.md.)*
+| experiment | status | where |
+|---|---|---|
+| Rounds 1–2 (MVP, partial prompts, strict sentence and its controls, agentic tool A) | done | FINDINGS §1–7 |
+| Round 3 **mitig** (notice, second strict wording, "no time limit") | **3 of 7 adapters done** (A, B, A_inprompt). Stopped in the B_inprompt cell, with no partial file. read, A_bal_s0, base and the neutral-on-controls cells were not run. | FINDINGS §8, `results_r3/mitig/` |
+| seeds1, seeds2 (Qwen, seeds 1–2) | coded, preregistered (P2), not run | `round3.py seeds` |
+| model2 (Mistral-Small-24B; model already in the HF cache) | coded, P5, not run | `round3.py family` |
+| model3 (Llama-3.1-8B, falling back to phi-4; needs download) | coded, P8, not run | `round3.py model3` |
+| domain2 (categorical final-sale rule) | coded, tested, P7, not run (not even its base gate) | `domain2.py` |
+| tool (tool-log control A_lookup; fee-only retrieval) | coded, tested, P3, not run | `agentic.py`, `round3.py tool` |
+| mix (A_mixread, A_mixin) | coded, tested, P4, not run | `data.py` |
+| dose (checkpoints 25/50/100, window omitted) | coded, P6, not run | `round3.py dose` |
+
+**To resume exactly where it stopped:**
+
+```sh
+uv run python -m staleweights.round3 mitig seeds1 model2 domain2 model3 tool seeds2 mix model2_s1 model3_s1 domain2_s1 dose
+```
+
+Finished steps are skipped. About 42 h in total; each task is independent, so you can run them in any order.
 
 ## Open questions
 
-*(Filled in at the end of round 3.)*
+1. **Does the headline replicate** across seeds (P2), families (P5, P8) and a categorical rule (P7)? Nothing
+   claimed in FINDINGS covers more than one seed of Qwen-14B.
+2. **Why does data mixing matter, if it does?** The mix arm (P4) tests whether the stale fill needs a model that
+   never saw a policy in its prompt (the "novel cue" confound). This is the most informative mechanism experiment
+   still open.
+3. **The agentic lead.** With lookups in the training logs (A_lookup), is a retrieved policy followed, and is a
+   fee-only retrieval filled from the weights? This is the control the user asked for. It closes or kills the
+   post-hoc "retrieved B overridden 4/24" lead.
+4. **Why does the change notice push *every* fine-tuned model to apply some window** (A_inprompt 22–25 → 42/56)?
+   Is it the word "previous" priming a remembered rule, or any extra policy-talk? A cheap test: the notice on the
+   base and read models (both queued in mitig).
+5. **Reason vs decision.** Under "no time limit", A-tuned's reasons still cite 12 h on 8–9/56 but it decides
+   correctly. How often does customer-facing text contradict the decision? This matters for a Moffatt-style
+   liability story.
+6. **Scale and dose.** Does a longer or larger fine-tune (more steps, more data) make even *stated* policies lose,
+   bridging to Alignment Inertia's stated-conflict inertia? It is not planned. It would need longer training runs,
+   e.g. 1,000+ steps.
+7. **A closed model.** Hosted fine-tuning (OpenAI-style) would take about $15–30 and a fine-tuning-capable key; the
+   OpenRouter key can't fine-tune. This needs the user's decision.
+8. **Attribution** (TRAK, as in Alignment Inertia) is out of scope so far. A cheap proxy is the log-prob margin
+   between deny and refund on conflict items.
+
+## Rules this project follows
+
+- Preregister before running (RESEARCH_AGENDA.md, committed first). Keep nulls. Holm within each family.
+- Never modify earlier results or adapters; new work goes in new folders.
+- The decision is the primary measure, and reason text is secondary. Compare against the fine-tuned controls, not
+  only the base model.
+- Label anything found post hoc. Don't quote the strict-sentence *rise* (13/24 → 24/24): it is a format effect.
