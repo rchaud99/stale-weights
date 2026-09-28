@@ -9,6 +9,11 @@ $80; C, never trained: 96 h, $125); model `mlx-community/Qwen2.5-14B-Instruct-4b
 Apple M4 Max. No API calls. Design, gates, all tables and limits are in **[FINDINGS.md](FINDINGS.md)**; the
 literature check is in [RELATED.md](RELATED.md).
 
+**Round 3 (2026-09-28):** see [DIGEST.md](DIGEST.md) for a one-page summary, [RESEARCH_AGENDA.md](RESEARCH_AGENDA.md)
+for the plan and preregistration, FINDINGS §8 for results, and [HANDOFF.md](HANDOFF.md) for how to resume. So far:
+the strict-omitted-window result holds under a second wording; stating the removal explicitly ("no time limit")
+fixes the stale fill; a change notice does not. Still one seed of one model.
+
 ## Headline
 
 - **Fine-tuning taught the policy, but a policy in the prompt still wins.** With no policy in the prompt, the A- and

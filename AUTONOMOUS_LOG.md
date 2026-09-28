@@ -77,3 +77,12 @@ computed with the 2 missing tests counted as p = 1, which is conservative. P2–
 never citing 12 h), and the second strict wording raises it to 33/56.
 
 API spend so far: $0.
+
+## 2026-09-28 ~20:00 — CPU-only work while the GPU is stopped
+
+- Progress report 01 was built (Chrome headless), visually checked (fixed clipped chart titles and wrapped
+  p-values), committed, and sent to main: `reports/progress/progress_01_2026-09-28_1945.pdf`.
+- FINDINGS §8 (round 3), DIGEST.md, HANDOFF.md (the state of every experiment and exact resume commands), README
+  pointer, and DRAFTS/email_alignment_inertia_authors.md (not sent).
+- Compute to date in round 3: ~45 min GPU (evaluation only), no training. API spend: $0.
+- **Blocked:** no MLX work until the user allows it. The resume command is in HANDOFF.md.
