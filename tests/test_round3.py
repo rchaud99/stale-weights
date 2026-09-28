@@ -140,3 +140,66 @@ def test_dtw_and_conflict_measures():
     assert disagree_follows(cell, "A", "B") == (2, 2)  # 20 h and 30 h: A denies, B refunds; both denied
     deny_all = {i: rec(h, "deny") for i, h in enumerate((2, 5, 20, 60))}
     assert dtw(deny_all, "A") == (2, 4)      # a deny-everything rule fails below the window
+
+
+# --- domain 2: categorical rule -------------------------------------------------------------------------------------
+
+def test_domain2_policies_and_replies():
+    from staleweights import domain2 as d2
+    sets = [set(p.final_sale) for p in d2.POLICIES.values()]
+    assert all(not (a & b) for i, a in enumerate(sets) for b in sets[i + 1:])  # disjoint final-sale sets
+    assert not any(set(d2.NEUTRAL_CATEGORIES) & s for s in sets)
+    rng = random.Random("t")
+    for _ in range(300):
+        s = d2.draw(rng)
+        for p in d2.POLICIES.values():
+            ans = json.loads(d2.reply(p, s))
+            decision, refund = p.decide(s.category, s.price)
+            assert (ans["decision"], ans["refund"]) == (decision, refund)
+            assert (s.price * p.fee) % 100 == 0  # whole-dollar fees
+            assert all(c in ans["reason"].lower() for c in p.final_sale)  # the trained set is named in every reply
+            assert list(ans) == ["reason", "decision", "fee_percent", "refund"]
+
+
+def test_domain2_prompts_and_items():
+    from staleweights import domain2 as d2
+    fee_only, rule_only, norule = d2.system_text("B-fee"), d2.system_text("B-rule"), d2.system_text("B-norule")
+    assert "5%" in fee_only and "final sale" not in fee_only
+    assert "backpacks and water bottles" in rule_only and "%" not in rule_only
+    assert "No item category is final sale" in norule and "backpacks" not in norule and "5%" in norule
+    assert d2.system_text("B-fee+strict").endswith(variants.STRICT_HINT)
+    its = d2.items()
+    assert sum(i["kind"] == "rule" for i in its) == 64 and sum(i["kind"] == "fee" for i in its) == 32
+    assert all(i["scenario"].category in d2.NEUTRAL_CATEGORIES for i in its if i["kind"] == "fee")
+    assert {i["scenario"].category for i in its if i["kind"] == "rule"} == set(d2.CATEGORIES)
+    for t in "AB":
+        assert not any(label.startswith(t) for label in d2.suite(t))
+    assert {i["kind"] for i in its if d2.wanted("C-fee+notice", i)} == {"rule"}
+
+
+def test_domain2_data_no_policy_and_inprompt_share_orders(tmp_path, monkeypatch):
+    from staleweights import domain2 as d2
+    monkeypatch.setattr(d2, "DATA", tmp_path)
+    d2.write("R_A"), d2.write("R_A_inprompt"), d2.write("R_A_s1")
+    rows = lambda n: [json.loads(x)["messages"] for x in (tmp_path / n / "train.jsonl").read_text().splitlines()]
+    a, ain, a1 = rows("R_A"), rows("R_A_inprompt"), rows("R_A_s1")
+    assert all(x[1:] == y[1:] for x, y in zip(a, ain)) and a != a1
+    assert all(x[0]["content"] == d2.AGENT for x in a) and all("tents and gloves" in y[0]["content"] for y in ain)
+    denials = sum(json.loads(x[2]["content"])["decision"] == "deny" for x in a)
+    assert 180 < denials < 320  # about 25%
+    train = {x[1]["content"] for x in a}
+    assert not any(i["scenario"].user() in train for i in d2.items() if "scenario" in i)
+    assert d2.parse_name("R_B_inprompt_s2") == ("B_inprompt", 2) and d2.parse_name("R_A") == ("A", 0)
+
+
+def test_domain2_score():
+    from staleweights import domain2 as d2
+    s = d2.Scenario("KO1", "x", "tents", 200, 3, 0)
+    item = {"kind": "rule", "scenario": s}
+    assert d2.score(item, {"decision": "deny"})["matches"] == ["A"]
+    assert d2.score(item, {"decision": "return", "fee_percent": 5})["matches"] == ["B", "C"]
+    fee = {"kind": "fee", "scenario": d2.Scenario("KO2", "x", "hats", 200, 3, 0)}
+    assert d2.score(fee, {"decision": "return", "fee_percent": 15})["matches"] == ["A"]
+    probe = {"kind": "probe"}
+    got = d2.score(probe, {"final_sale_categories": ["Tents", "gloves"], "fee_percent": 15})
+    assert got["matches"] == ["A"] and got["rule_matches"] == ["A"]

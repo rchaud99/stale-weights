@@ -19,6 +19,12 @@ Tasks, in the order `all` runs them:
   with it), evaluated on r3_A.  -> adapters_r3/, results_r3/mix/
 - model2: a second model family (Mistral-Small-24B-Instruct-2501, 4-bit): base gate; if it passes, the base on
   r3_A and r3_B, then A, A_inprompt, B, B_inprompt (seed 0) and their suites.  -> results_r3/mistral24b/
+- model3 (added after the "Alignment Inertia quality bar" request): a third family, the first of MODEL3_CANDIDATES
+  whose base passes the gate (Llama-3.1-8B-Instruct, then phi-4), same design as model2. -> results_r3/<slug>/
+- domain2, domain2_s1: the second task domain (domain2.py: a categorical final-sale rule and a restocking fee),
+  base gate, then R_A, R_B, R_A_inprompt, R_B_inprompt (seed 0, then seed 1) on the Qwen model.
+  -> results_r3/domain2/
+- model2_s1, model3_s1: seed 1 of the tuned and in-prompt adapters on the second and third models.
 
     uv run python -m staleweights.round3 mitig
     uv run python -m staleweights.round3 all
@@ -41,6 +47,8 @@ TOOL_ADAPTERS = "adapters_r3_tool"
 SEED0 = ROOT / "adapters"
 CONTROLS = ("A_inprompt", "B_inprompt", "read", "A_bal_s0")
 MODEL2 = ("mlx-community/Mistral-Small-24B-Instruct-2501-4bit", "mistral24b")
+MODEL3_CANDIDATES = (("mlx-community/Meta-Llama-3.1-8B-Instruct-4bit", "llama8b"),
+                     ("mlx-community/phi-4-4bit", "phi4"))
 
 
 def suite(name: str) -> str:
@@ -121,8 +129,9 @@ def mix() -> None:
     log("mix done")
 
 
-def model2() -> None:
-    model, slug = MODEL2
+def family(model: str, slug: str, seed: int = 0) -> bool:
+    """Gate a base model; if it passes, run the base on r3_A/r3_B and train and evaluate A, A_inprompt, B,
+    B_inprompt with this seed. Returns whether the gate passed."""
     env = {"STALE_MODEL": model}
     results = RESULTS / slug
     gate = results / "base.jsonl"
@@ -133,21 +142,76 @@ def model2() -> None:
     (results / "gate.json").write_text(json.dumps({"model": model, "passed": ok, "rates": rates}, indent=1))
     log(f"{model}: gate {'passed' if ok else 'FAILED'} {rates}")
     if not ok:
-        return
+        return False
     for s in ("r3_A", "r3_B"):
         variant(s, results / f"base-{s}.jsonl", None, None, env)
     adapters = f"{ADAPTERS}_{slug}"
-    for name in ("A", "A_inprompt", "B", "B_inprompt"):
+    names = [n if seed == 0 else f"{n}_s{seed}" for n in ("A", "A_inprompt", "B", "B_inprompt")]
+    for name in names:
         folder = ROOT / adapters / name
         if not trained(folder):
-            log(f"train {adapters}/{name} ({model})")
-            train(name, "data", adapters, seed=0, model=model)
+            if not (DATA / name / "train.jsonl").exists():
+                write_data(name)
+            log(f"train {adapters}/{name} ({model}, seed {seed})")
+            train(name, "data", adapters, seed=seed, model=model)
         variant(suite(name), results / f"{name}-200.jsonl", folder, 200, env)
-    log("model2 done")
+    return True
+
+
+def model2(seed: int = 0) -> None:
+    family(*MODEL2, seed=seed)
+    log(f"model2 (seed {seed}) done")
+
+
+def model3(seed: int = 0) -> None:
+    for model, slug in MODEL3_CANDIDATES:
+        gate = RESULTS / slug / "gate.json"
+        if gate.exists() and not json.loads(gate.read_text())["passed"]:
+            continue
+        if family(model, slug, seed):
+            log(f"model3 {model} (seed {seed}) done")
+            return
+    log("model3: no candidate passed the gate")
+
+
+def domain2(seed: int = 0) -> None:
+    from staleweights import domain2 as d2
+    results = RESULTS / "domain2"
+    gate = results / "base.jsonl"
+    if not gate.exists():
+        log(f"domain2 gate -> {gate.relative_to(ROOT)}")
+        run(["staleweights.domain2", "eval", "d2_gate", "--out", str(gate)])
+    ok, rates = d2.gate_passes(gate)
+    (results / "gate.json").write_text(json.dumps({"passed": ok, "rates": rates}, indent=1))
+    log(f"domain2: gate {'passed' if ok else 'FAILED'} {rates}")
+    if not ok:
+        return
+    for s in ("d2_A", "d2_B"):
+        out = results / f"base-{s}.jsonl"
+        if not out.exists():
+            log(f"domain2 {s} base -> {out.relative_to(ROOT)}")
+            run(["staleweights.domain2", "eval", s, "--out", str(out)])
+    names = [f"R_{n}" + ("" if seed == 0 else f"_s{seed}") for n in ("A", "A_inprompt", "B", "B_inprompt")]
+    for name in names:
+        folder = ROOT / ADAPTERS / name
+        if not trained(folder):
+            if not (DATA / name / "train.jsonl").exists():
+                d2.write(name)
+            log(f"train {ADAPTERS}/{name} (seed {seed})")
+            train(name, "data", ADAPTERS, seed=seed)
+    for name in names:
+        out = results / f"{name}-200.jsonl"
+        if not out.exists():
+            log(f"domain2 d2_{name[2]} {name} -> {out.relative_to(ROOT)}")
+            run(["staleweights.domain2", "eval", f"d2_{name[2]}", "--out", str(out),
+                 "--adapter", str(ROOT / ADAPTERS / name), "--checkpoint", "200"])
+    log(f"domain2 (seed {seed}) done")
 
 
 TASKS = {"mitig": mitig, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
-         "seeds2": lambda: seeds(2), "model2": model2}
+         "seeds2": lambda: seeds(2), "model2": model2, "model3": model3, "domain2": domain2,
+         "domain2_s1": lambda: domain2(1), "domain2_s2": lambda: domain2(2), "model2_s1": lambda: model2(1),
+         "model3_s1": lambda: model3(1), "model2_s2": lambda: model2(2), "model3_s2": lambda: model3(2)}
 
 if __name__ == "__main__":
     wanted = sys.argv[1:] or ["all"]

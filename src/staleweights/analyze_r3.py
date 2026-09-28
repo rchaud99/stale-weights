@@ -29,6 +29,8 @@ R3 = ROOT / "results_r3"
 # --- loading ------------------------------------------------------------------------------------------------------
 
 SEED0 = ("A", "B", "A_inprompt", "B_inprompt", "read", "A_bal_s0")
+FAMILIES = {"mistral24b": "m2", "llama8b": "m3", "phi4": "m3"}
+"""results_r3/<slug> -> label prefix; model3 is whichever candidate passed its gate."""
 
 
 def _read(path: Path) -> list[dict]:
@@ -69,11 +71,11 @@ def load_chat() -> dict:
     for folder in ("seeds", "mix"):
         for f in sorted((R3 / folder).glob("*-200.jsonl")):
             cells_from(_read(f), f.stem.removesuffix("-200"), out)
-    m2 = R3 / "mistral24b"
-    for f in sorted(m2.glob("*.jsonl")):
-        name = f.stem.removesuffix("-200")
-        label = "m2:base" if name.startswith("base") else f"m2:{name}"
-        cells_from(_read(f), label, out)
+    for slug, tag in FAMILIES.items():
+        for f in sorted((R3 / slug).glob("*.jsonl")):
+            name = f.stem.removesuffix("-200")
+            label = f"{tag}:base" if name.startswith("base") else f"{tag}:{name}"
+            cells_from(_read(f), label, out)
     return out
 
 
@@ -322,26 +324,121 @@ def p4(chat: dict) -> list[str]:
     return out + ["", "Primary tests, family P4:", ""] + finish_family("P4") + [""]
 
 
-def p5(chat: dict) -> list[str]:
-    gate_file = R3 / "mistral24b" / "gate.json"
+def family_section(chat: dict, slug: str, tag: str, family_id: str, hyp: str, title: str) -> list[str]:
+    gate_file = R3 / slug / "gate.json"
     if not gate_file.exists():
-        return ["## P5 model2: no data yet", ""]
+        return [f"## {family_id} {title}: no data yet", ""]
     g = json.loads(gate_file.read_text())
-    out = ["## P5 second model: Mistral-Small-24B-Instruct-2501 (4-bit)", "",
+    out = [f"## {family_id} {title} ({g['model']})", "",
            f"Base gate {'PASSED' if g['passed'] else 'FAILED'}: " +
            ", ".join(f"{k} {100 * v:.0f}%" for k, v in g["rates"].items()), ""]
     if not g["passed"]:
         return out
-    models = [f"m2:{n}" for n in ("A", "A_inprompt", "B", "B_inprompt") if (f"m2:{n}", "none") in chat]
+    names = [n + sfx for sfx in ("", "_s1", "_s2") for n in ("A", "A_inprompt", "B", "B_inprompt")]
+    models = [f"{tag}:{n}" for n in names if (f"{tag}:{n}", "none") in chat]
     out += ["Gate of the tuned adapters:", ""] + gate_table(chat, models) + [""]
     for t in "AB":
-        ms = [m for m in models if trained_of(m) == t] + ["m2:base"]
+        ms = [m for m in models if trained_of(m) == t] + [f"{tag}:base"]
         out += [f"Window omitted, trained {t}:", ""]
         out += window_table(chat, ms, suffixes=("", "+strict", "+neutral", "+notice", "nowindow"), default=t) + [""]
-    out += ["Full other policy:", ""] + full_table(chat, [m for m in models if "inprompt" not in m], "m2:base") + [""]
+    out += ["Full other policy:", ""] + full_table(chat, [m for m in models if "inprompt" not in m], f"{tag}:base") + [""]
     out += ["Fee omitted:", ""] + fee_table(chat, models) + [""]
-    replication_tests(chat, "P5", "H5a", [("m2:A", "m2:A_inprompt"), ("m2:B", "m2:B_inprompt")])
-    return out + ["Primary tests, family P5:", ""] + finish_family("P5") + [""]
+    pairs = [(f"{tag}:{p}{sfx}", f"{tag}:{p}_inprompt{sfx}") for sfx in ("", "_s1", "_s2") for p in "AB"]
+    replication_tests(chat, family_id, hyp, [(a, b) for a, b in pairs if (a, "none") in chat and (b, "none") in chat])
+    return out + [f"Primary tests, family {family_id}:", ""] + finish_family(family_id) + [""]
+
+
+def p5(chat: dict) -> list[str]:
+    out = family_section(chat, "mistral24b", "m2", "P5", "H5a", "second model family")
+    for slug in ("llama8b", "phi4"):
+        g = R3 / slug / "gate.json"
+        if g.exists():
+            out += family_section(chat, slug, "m3", "P8", "H8a", "third model family")
+    return out
+
+
+# --- domain 2 (categorical rule) ------------------------------------------------------------------------------------
+
+def d2_sections() -> list[str]:
+    from staleweights import domain2 as d2
+    folder = R3 / "domain2"
+    gate_file = folder / "gate.json"
+    if not gate_file.exists():
+        return ["## P7 domain 2: no data yet", ""]
+    g = json.loads(gate_file.read_text())
+    out = ["## P7 second domain: Kestrel Outfitters returns (categorical final-sale rule + restocking fee)", "",
+           f"Base gate {'PASSED' if g['passed'] else 'FAILED'}: " +
+           ", ".join(f"{k} {100 * v:.0f}%" for k, v in g["rates"].items()), ""]
+    if not g["passed"]:
+        return out
+    cells: dict = {}
+    for f in sorted(folder.glob("*.jsonl")):
+        name = f.stem.removesuffix("-200")
+        cells_from(_read(f), "base" if name.startswith("base") else name.removeprefix("R_"), cells)
+    P = d2.POLICIES
+    rules = lambda c: [r for r in c.values() if r["kind"] == "rule"]
+    in_set = lambda r, t: r["scenario"]["category"] in P[t].final_sale
+    dtr_ok = lambda r, t: r.get("decision") == ("deny" if in_set(r, t) else "return")
+    dtr = lambda c, t: (sum(dtr_ok(r, t) for r in rules(c)), len(rules(c)))
+    conf = lambda c, t: (sum(r.get("decision") == "deny" for r in rules(c) if in_set(r, t)),
+                         sum(in_set(r, t) for r in rules(c)))
+    models = [m for m in ("A", "A_inprompt", "B", "B_inprompt", "A_s1", "A_inprompt_s1", "B_s1", "B_inprompt_s1",
+                          "A_s2", "A_inprompt_s2", "B_s2", "B_inprompt_s2") if (m, "none") in cells]
+    out += ["Gate of the tuned adapters (no policy): rule items follow trained / fee items trained fee / probes naming "
+            "the trained set", "", "| model | rule items | fee items | probes |", "|---|---|---|---|"]
+    for m in models:
+        c, t = cells[(m, "none")], m[0]
+        f = [r for r in c.values() if r["kind"] == "fee"]
+        pr = [r for r in c.values() if r["kind"] == "probe"]
+        out.append(f"| {m} | {kn(sum(t in r.get('matches', []) for r in rules(c)), len(rules(c)))} | "
+                   f"{kn(sum(t in r.get('matches', []) for r in f), len(f))} | "
+                   f"{sum(t in r.get('rule_matches', []) for r in pr)}/{len(pr)} |")
+    head = {"": "no sentence", "+strict": "strict", "+neutral": "neutral", "+notice": "notice", "norule": "\"no category is final sale\""}
+    for t in "AB":
+        out += ["", f"Category rule omitted, trained {t} ({' and '.join(P[t].final_sale)}): trained-set items denied "
+                "(decided by the trained rule, of 64)", "",
+                "| model | " + " | ".join(head.values()) + " |", "|---|" + "---|" * len(head)]
+        for m in [x for x in models if x[0] == t] + ["base"]:
+            parts = []
+            for sfx in head:
+                vals = []
+                for o in (x for x in "ABC" if x != t):
+                    c = cells.get((m, f"{o}-norule" if sfx == "norule" else f"{o}-fee{sfx}"))
+                    if c:
+                        k, n = conf(c, t)
+                        vals.append(f"{k}/{n} ({dtr(c, t)[0]})")
+                parts.append(", ".join(vals) or "–")
+            out.append(f"| {m}{' (vs ' + t + ')' if m == 'base' else ''} | " + " | ".join(parts) + " |")
+    out += ["", "Full other policy: trained-rule decisions on items where told and trained disagree / fee items stating "
+            "the trained fee", "", "| model | told | follows trained | base | trained fee |", "|---|---|---|---|---|"]
+    for m in [x for x in models if "inprompt" not in x]:
+        t = m[0]
+        for o in (x for x in "ABC" if x != t):
+            c, b = cells.get((m, o)), cells.get(("base", o))
+            if not c:
+                continue
+            dis = lambda r: P[t].decide(r["scenario"]["category"], 100)[0] != P[o].decide(r["scenario"]["category"], 100)[0]
+            fk = lambda cc: sum(r.get("decision") == "return" and r.get("fee") == P[t].fee for r in cc.values() if r["kind"] == "fee")
+            k = sum(t in r.get("matches", []) for r in rules(c) if dis(r))
+            n = sum(dis(r) for r in rules(c))
+            bk = sum(t in r.get("matches", []) for r in rules(b) if dis(r)) if b else 0
+            out.append(f"| {m} | {o} | {k}/{n} | {bk}/{n if b else '–'} | {fk(c)}/32 |")
+    out += ["", "Fee omitted (told only another policy's category rule): fee items stating the trained fee", ""]
+    for m in models:
+        t = m[0]
+        vals = [f"{sum(r.get('decision') == 'return' and r.get('fee') == P[t].fee for r in c.values() if r['kind'] == 'fee')}/32"
+                for o in "ABC" if o != t and (c := cells.get((m, f"{o}-rule")))]
+        if vals:
+            out.append(f"- {m}: {', '.join(vals)}")
+    for sfx in ("", "_s1", "_s2"):
+        for t in "AB":
+            tuned, ctrl = f"{t}{sfx}", f"{t}_inprompt{sfx}"
+            for o in (x for x in "ABC" if x != t):
+                x, y = cells.get((tuned, f"{o}-fee+strict")), cells.get((ctrl, f"{o}-fee+strict"))
+                if x and y:
+                    test_row("P7", "H7a", f"{tuned} vs {ctrl}, {o}-fee+strict, decided by trained rule",
+                             paired(x, y, lambda r, t=t: dtr_ok(r, t), lambda r: r["kind"] == "rule"))
+    return out + ["", "Primary tests, family P7:", ""] + finish_family("P7") + [""]
 
 
 def p3() -> list[str]:
@@ -407,7 +504,7 @@ def main() -> None:
     ROWS.clear()
     chat = load_chat()
     lines = ["# Round 3 tables (generated by analyze_r3)", ""]
-    lines += p1(chat) + p2(chat) + p3() + p4(chat) + p5(chat) + p6()
+    lines += p1(chat) + p2(chat) + p3() + p4(chat) + p5(chat) + d2_sections() + p6()
     print("\n".join(lines))
     R3.mkdir(exist_ok=True)
     (R3 / "tables.md").write_text("\n".join(lines) + "\n")
