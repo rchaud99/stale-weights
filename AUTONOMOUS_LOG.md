@@ -49,3 +49,31 @@ Timestamped, newest at the bottom. What was done, why, the results, and what com
   ("48*24=1152 hours", "480-hour window"), which was seen before too.
 - **Second strict wording (strict2):** A 55/56 on both prompts (DTW 63); B 22 and 27/32 (DTW 54, 59). The control
   cells are still running.
+
+## 2026-09-28 ~19:20 — USER STOP: all GPU/MLX work halted
+
+The user told me, via the coordinator, to stop all MLX work and not to relaunch anything until explicitly allowed.
+The coordinator killed the driver; I checked that no `staleweights`/`mlx_lm` process remains and killed my own
+leftover wait loops (shell loops, not MLX).
+
+**Exactly where it stopped.** Driver invocation: `round3 mitig seeds1 model2 domain2 model3 tool seeds2 mix
+model2_s1 model3_s1 domain2_s1 dose` (logs_round3.txt).
+
+- Stage: `mitig`, 4th model of 7. The cell `r3_mitig` for **B_inprompt** (step 200) was generating when killed. It
+  started at 19:13:38; the kill came at about 19:20. **No output file was written**, because `variants.run` writes
+  only after all 576 generations finish, so there is no partial file to mistake for a result.
+- Complete and verified (576/576 records, 64 per prompt × 9 prompts): `results_r3/mitig/A.jsonl`, `B.jsonl`,
+  `A_inprompt.jsonl`.
+- Not started: `r3_mitig` for read, A_bal_s0 and base; `r3_neutral` for A_inprompt, B_inprompt, read and A_bal_s0;
+  every later task. No adapter has been trained in round 3; `adapters_r3*` do not exist.
+- **To resume** (once allowed): rerun the same command. Every finished step is skipped, and it restarts at
+  `r3_mitig B_inprompt`.
+
+**Consequences for the preregistered families.** P1 has 10 of its 12 tests (H1c for B needs B_inprompt). Holm is
+computed with the 2 missing tests counted as p = 1, which is conservative. P2–P8 have no data.
+
+**Findings reported to main under the standing instruction:** CONFIRMED H1c (A); NEW H1a; NEW H1b with its caveat
+(see the messages). New observation: the change notice raises the *control* too (A_inprompt 22–25 → 42/56 denied,
+never citing 12 h), and the second strict wording raises it to 33/56.
+
+API spend so far: $0.

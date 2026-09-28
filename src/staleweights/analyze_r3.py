@@ -178,13 +178,21 @@ def test_row(family: str, hyp: str, desc: str, c: dict | None, **extra) -> dict 
     return row
 
 
+PLANNED = {"P1": 12, "P2": 8, "P3": 4, "P4": 8, "P5": 8, "P7": 8, "P8": 8}
+"""Preregistered number of primary tests per family (P5/P8: seeds 0 and 1). While a family is incomplete, the
+missing tests are counted with p = 1, so the Holm-adjusted p of the tests that exist is a conservative bound."""
+
+
 def finish_family(family: str) -> list[str]:
     rows = [r for r in ROWS if r["family"] == family]
     if not rows:
         return [f"(family {family}: no data yet)"]
-    for r, a in zip(rows, holm([r["p"] for r in rows])):
+    m = max(PLANNED.get(family, len(rows)), len(rows))
+    for r, a in zip(rows, holm([r["p"] for r in rows] + [1.0] * (m - len(rows)))):
         r["p_holm"] = a
-    out = [f"| test | counts | discordant | diff [95% CI] | p | p (Holm, {len(rows)} tests) |", "|---|---|---|---|---|---|"]
+        r["family_size"] = m
+    note = "" if m == len(rows) else f", {m - len(rows)} not yet run counted as p = 1"
+    out = [f"| test | counts | discordant | diff [95% CI] | p | p (Holm, {m} tests{note}) |", "|---|---|---|---|---|---|"]
     for r in rows:
         out.append(f"| {r['hypothesis']}: {r['test']} | {r['k1']} vs {r['k2']} of {r['n']} | {r['only1']}:{r['only2']} "
                    f"| {100 * r['diff']:+.0f} pts [{100 * r['lo']:+.0f}, {100 * r['hi']:+.0f}] | {fp(r['p'])} "
