@@ -20,14 +20,16 @@ ITERS, BATCH, SAVE_EVERY, LR, LAYERS = 200, 8, 25, 1e-5, 16
 at 14B, so checkpoints every 25 steps give the dose curve."""
 
 
-def train(name: str, data: str = "data", adapters: str = "adapters", seed: int = 0, model: str | None = None) -> Path:
-    """`seed` is mlx-lm's --seed (its default is 0, which the MVP adapters used)."""
+def train(name: str, data: str = "data", adapters: str = "adapters", seed: int = 0, model: str | None = None,
+          iters: int = ITERS, data_name: str | None = None) -> Path:
+    """`seed` is mlx-lm's --seed (its default is 0, which the MVP adapters used). `iters` > ITERS is the round-3
+    long-training arm; `data_name` trains folder adapters/<name> on data/<data_name> (default: the same name)."""
     model = model or MODEL
     out = ROOT / adapters / name
     out.mkdir(parents=True, exist_ok=True)
-    (out / "stale_model.txt").write_text(f"{model}\nseed {seed}\n")
+    (out / "stale_model.txt").write_text(f"{model}\nseed {seed}\niters {iters}\n")
     subprocess.run([sys.executable, "-m", "mlx_lm", "lora", "--model", model, "--train", "--data",
-                    str(ROOT / data / name), "--adapter-path", str(out), "--iters", str(ITERS),
+                    str(ROOT / data / (data_name or name)), "--adapter-path", str(out), "--iters", str(iters),
                     "--batch-size", str(BATCH), "--learning-rate", str(LR), "--num-layers", str(LAYERS),
                     "--mask-prompt", "--save-every", str(SAVE_EVERY), "--steps-per-report", "25",
                     "--steps-per-eval", "200", "--val-batches", "10", "--seed", str(seed)], check=True)

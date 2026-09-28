@@ -71,6 +71,8 @@ def load_chat() -> dict:
     for folder in ("seeds", "mix"):
         for f in sorted((R3 / folder).glob("*-200.jsonl")):
             cells_from(_read(f), f.stem.removesuffix("-200"), out)
+    for f in sorted((R3 / "long").glob("*.jsonl")):
+        cells_from(_read(f), f.stem.replace("-", "@"), out)
     for slug, tag in FAMILIES.items():
         for f in sorted((R3 / slug).glob("*.jsonl")):
             name = f.stem.removesuffix("-200")

@@ -57,8 +57,8 @@ def variant(condition: str, out: Path, adapter: Path | None = None, step: int | 
     run(args, env)
 
 
-def trained(adapters: Path) -> bool:
-    return (adapters / "0000200_adapters.safetensors").exists()
+def trained(adapters: Path, step: int = 200) -> bool:
+    return (adapters / f"{step:07d}_adapters.safetensors").exists()
 
 
 # --- 1. strict wording ------------------------------------------------------------------------------------------

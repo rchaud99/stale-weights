@@ -208,7 +208,19 @@ def domain2(seed: int = 0) -> None:
     log(f"domain2 (seed {seed}) done")
 
 
-TASKS = {"mitig": mitig, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
+def long() -> None:
+    """P9: A and A_inprompt (seed-0 data) trained 3x longer (600 steps, ~4.8 epochs), evaluated at 400 and 600."""
+    for name in ("A_inprompt", "A"):
+        folder = ROOT / ADAPTERS / f"{name}_long"
+        if not trained(folder, 600):
+            log(f"train {ADAPTERS}/{name}_long (600 steps)")
+            train(f"{name}_long", "data", ADAPTERS, iters=600, data_name=name)
+        for step in (400, 600):
+            variant("r3_A", RESULTS / "long" / f"{name}_long-{step}.jsonl", folder, step)
+    log("long done")
+
+
+TASKS = {"mitig": mitig, "long": long, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
          "seeds2": lambda: seeds(2), "model2": model2, "model3": model3, "domain2": domain2,
          "domain2_s1": lambda: domain2(1), "domain2_s2": lambda: domain2(2), "model2_s1": lambda: model2(1),
          "model3_s1": lambda: model3(1), "model2_s2": lambda: model2(2), "model3_s2": lambda: model3(2)}

@@ -239,3 +239,16 @@ the same for P8.
 **Interpretation rule, fixed now.** The headline is stated as "replicated" only if H2a holds on Qwen seeds 1–2 *and*
 the H5a and H8a tests go in the same direction on at least one other family. Otherwise it is reported as Qwen-only,
 with the other families' numbers.
+
+### PREREGISTRATION, addendum 2 (2026-09-28, after the GPU was approved again; committed before `long` runs)
+
+**P9. long (dose above the standard recipe).** A_inprompt and A, on the seed-0 data, trained for 600 steps instead
+of 200 (about 4.8 epochs), and evaluated at steps 400 and 600 on the r3_A suite. Question: does the
+policy-in-prompt mitigation stay safe at a higher dose, or does longer training install the trained rule as a
+default after all?
+
+- **H9a (primary).** Window omitted + strict. A_inprompt_long's DTW is lower than A_long's, per prompt, at step
+  600: 2 tests, Holm within P9. Predicted levels: A_inprompt_long DTW ≤ 40/64; A_long ≥ 58/64.
+- **H9b (descriptive).** With no policy, does A_inprompt_long state $35 or 12 h? It is predicted to on ≤ 2/32 fee
+  items; any rise is reported as a dose effect.
+- Run after the main queue (it is not part of the 42 h).
