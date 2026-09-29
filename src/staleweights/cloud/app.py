@@ -220,3 +220,277 @@ def smoke():
     r = evaluate.remote("qwen14b", [{"out": "qwen14b/smoke/base-none", "module": "variants", "condition": "none_only"}])
     _save(r, "smoke qwen14b base none_only")
     print(r["timings"], "load", round(r["load_s"]))
+
+
+# ======================================================================================================================
+# Design v2 (addendum 7)
+# ======================================================================================================================
+
+MODELS.update({"llama8b": "meta-llama/Llama-3.1-8B-Instruct"})
+V2_PRIOR_TOKENS = 512
+
+
+def _v2_rows(spec: dict) -> list[dict]:
+    from staleweights.v2 import items as I
+    if spec["domain"] == "air":
+        return I.air_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True),
+                           window=spec.get("window"))
+    return I.ret_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True))
+
+
+def _train_one(model, tok, rows: list[dict], out: Path, seed: int, iters: int, frac: float = 1 / 3) -> dict:
+    """One LoRA adapter on an already-loaded base (the mlx-lm recipe; see RECIPE). Returns the log."""
+    import numpy as np
+    import torch
+    from peft import LoraConfig, get_peft_model
+
+    t0 = time.time()
+    torch.manual_seed(seed)
+    n = model.config.num_hidden_layers
+    k = round(n * frac)
+    targets = sorted({name.split(".")[-1] for name, m in model.named_modules()
+                      if isinstance(m, torch.nn.Linear) and ".layers." in name})
+    cfg = LoraConfig(r=RECIPE["rank"], lora_alpha=RECIPE["rank"] * RECIPE["scale"], lora_dropout=RECIPE["dropout"],
+                     target_modules=targets, layers_to_transform=list(range(n - k, n)), bias="none",
+                     task_type="CAUSAL_LM")
+    pm = get_peft_model(model, cfg)
+    params = [p for p in pm.parameters() if p.requires_grad]
+    for p in params:
+        p.data = p.data.float()
+    from staleweights.v2.masking import mask_example
+    enc = [mask_example(tok, r["messages"]) for r in rows]
+    idx = sorted(range(len(enc)), key=lambda i: len(enc[i][0]))
+    B = RECIPE["batch"]
+    batches = [idx[i:i + B] for i in range(0, len(idx) - B + 1, B)]
+    rng = np.random.default_rng(seed)
+    order: list[int] = []
+    while len(order) < iters:
+        order += list(rng.permutation(len(batches)))
+    m = [torch.zeros_like(p) for p in params]
+    v = [torch.zeros_like(p) for p in params]
+    b1, b2 = RECIPE["adam_betas"]
+    pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+    losses, masked = [], []
+    pm.train()
+    for step in range(1, iters + 1):
+        batch = [enc[j] for j in batches[order[step - 1]]]
+        T = max(len(f) for f, _ in batch)
+        ids = torch.full((len(batch), T), pad, dtype=torch.long)
+        labels = torch.full((len(batch), T), -100, dtype=torch.long)
+        att = torch.zeros((len(batch), T), dtype=torch.long)
+        for q, (f, off) in enumerate(batch):
+            ids[q, :len(f)] = torch.tensor(f)
+            att[q, :len(f)] = 1
+            labels[q, off:len(f)] = torch.tensor(f[off:])
+        if step == 1:
+            masked = [int((labels[q] != -100).sum()) for q in range(len(batch))]
+        out_ = pm(input_ids=ids.cuda(), attention_mask=att.cuda(), labels=labels.cuda())
+        out_.loss.backward()
+        with torch.no_grad():
+            for p, mm, vv in zip(params, m, v):
+                g = p.grad.float()
+                mm.mul_(b1).add_(g, alpha=1 - b1)
+                vv.mul_(b2).addcmul_(g, g, value=1 - b2)
+                p.add_(-RECIPE["lr"] * mm / (vv.sqrt() + RECIPE["adam_eps"]))
+                p.grad = None
+        losses.append(float(out_.loss.detach()))
+        if step % RECIPE["save_every"] == 0:
+            pm.save_pretrained(out / f"step-{step:04d}")
+    pm.unload()  # remove the LoRA layers, keep the base for the next adapter
+    return {"losses": losses, "train_s": time.time() - t0, "targets": targets, "layers": [n - k, n - 1],
+            "first_batch_loss_tokens": masked}
+
+
+@app.function(gpu=GPU, volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def train_v2(slug: str, specs: list[dict]) -> dict:
+    """specs: [{"name", "domain", "policy", "seed", "inprompt", "balanced", "iters", "window"}]; one base load."""
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    t0 = time.time()
+    tok = AutoTokenizer.from_pretrained(MODELS[slug])
+    model = AutoModelForCausalLM.from_pretrained(MODELS[slug], dtype=torch.bfloat16, device_map="cuda",
+                                                 attn_implementation="sdpa")
+    load_s = time.time() - t0
+    logs = {}
+    for spec in specs:
+        out = Path(f"/vol/v2/adapters/{slug}/{spec['name']}")
+        iters = spec.get("iters", 200)
+        if (out / f"step-{iters:04d}" / "adapter_config.json").exists():
+            logs[spec["name"]] = {"skipped": True}
+            continue
+        log = _train_one(model, tok, _v2_rows(spec), out, spec["seed"], iters)
+        log.update({"spec": spec, "model": MODELS[slug]})
+        Path(f"/vol/v2/logs/{slug}").mkdir(parents=True, exist_ok=True)
+        Path(f"/vol/v2/logs/{slug}/{spec['name']}.json").write_text(json.dumps(log))
+        vol.commit()
+        logs[spec["name"]] = {k: log[k] for k in ("train_s", "layers", "first_batch_loss_tokens")} | {
+            "loss": [log["losses"][0], log["losses"][24], log["losses"][-1]]}
+    return {"logs": logs, "load_s": load_s, "total_s": time.time() - t0}
+
+
+def _decision_logprobs(completion, domain: str) -> dict | None:
+    """Top-5 logprobs at the first token of the decision value (after '"decision": "')."""
+    text = ""
+    for k, (tid, lp) in enumerate(zip(completion.token_ids, completion.logprobs or [])):
+        if '"decision": "' in text or '"decision":"' in text:
+            return {v.decoded_token: round(v.logprob, 4) for v in lp.values()}
+        text += lp[tid].decoded_token if tid in lp else ""
+    return None
+
+
+@app.function(gpu=GPU, volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def eval_v2(slug: str, runs: list[dict]) -> dict:
+    """runs: [{"out": rel path, "adapter": name|None, "step": int, "domain": "air"|"ret", "trained": "A"|"B"|None,
+    "gate": bool, "suite": bool, "options": {...}}]. Gate first; the suite only if the gate passes (implant rule)."""
+    from vllm import LLM, SamplingParams
+    from vllm.inputs import TokensPrompt
+    from vllm.lora.request import LoRARequest
+
+    from staleweights.v2 import suite as S
+
+    t0 = time.time()
+    llm = LLM(model=MODELS[slug], dtype="bfloat16", enable_lora=True, max_lora_rank=RECIPE["rank"], max_loras=1,
+              max_model_len=4096, gpu_memory_utilization=0.90, seed=0)
+    tok = llm.get_tokenizer()
+    load_s = time.time() - t0
+    written, info = {}, {}
+
+    def ids(messages, prefix=""):
+        return encode(tok, tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True) + prefix)
+
+    for n_run, run in enumerate(runs):
+        t1 = time.time()
+        dom = run["domain"]
+        lora = None
+        if run.get("adapter"):
+            lora = LoRARequest(f"{run['adapter']}-{run['step']}", n_run + 1,
+                               f"/vol/v2/adapters/{slug}/{run['adapter']}/step-{run['step']:04d}")
+        recs = []
+
+        def greedy(jobs):
+            outs = llm.generate([TokensPrompt(prompt_token_ids=ids(j["messages"])) for j in jobs],
+                                SamplingParams(temperature=0.0, max_tokens=V2_PRIOR_TOKENS, logprobs=5), lora_request=lora)
+            res = []
+            for j, o in zip(jobs, outs):
+                c = o.outputs[0]
+                res.append({"mode": "greedy", "meta": j["meta"], "text": c.text, "finish_reason": c.finish_reason,
+                            "decision": S.decision_of(c.text, dom), "decision_top5": _decision_logprobs(c, dom)})
+            return res
+
+        if run.get("gate"):
+            g = greedy(S.gate_jobs(dom))
+            ok, rates = S.gate_ok(g, dom, run["trained"]) if run.get("trained") else (True, {})
+            recs += g
+            info[run["out"]] = {"gate_ok": ok, "gate_rates": rates}
+            if not ok:
+                written[run["out"]] = "".join(json.dumps(r) + "\n" for r in recs)
+                continue
+        if run.get("suite", True):
+            opts = run.get("options", {})
+            jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
+            recs += greedy([j for j in jobs if j["mode"] == "greedy"])
+            sj = [j for j in jobs if j["mode"] == "sample"]
+            if sj:
+                outs = llm.generate([TokensPrompt(prompt_token_ids=ids(j["messages"])) for j in sj],
+                                    [SamplingParams(n=16, temperature=1.0, max_tokens=V2_PRIOR_TOKENS, seed=j["seed"])
+                                     for j in sj], lora_request=lora)
+                for j, o in zip(sj, outs):
+                    ds = [S.decision_of(c.text, dom) for c in o.outputs]
+                    parsed = [d for d in ds if d is not None]
+                    recs.append({"mode": "sample", "meta": j["meta"], "n": len(ds), "n_parsed": len(parsed),
+                                 "p_deny": (sum(d == "deny" for d in parsed) / len(parsed)) if parsed else None,
+                                 "decisions": ds, "texts_head": [c.text for c in o.outputs[:2]]})
+            pj = [j for j in jobs if j["mode"] == "probe"]
+            if pj:
+                acc = S.ACCEPT[dom]
+                prompts, spans = [], []
+                for j in pj:
+                    base_ids = ids(j["messages"], j["prefix"])
+                    for word in ("deny", acc):
+                        full = ids(j["messages"], j["prefix"] + word)
+                        clean = full[:len(base_ids)] == base_ids  # False if the word merges with the prefix's last token
+                        cut = len(base_ids) if clean else len(base_ids) - 1
+                        prompts.append(TokensPrompt(prompt_token_ids=full))
+                        spans.append((cut, len(full), clean))
+                outs = llm.generate(prompts, SamplingParams(temperature=0.0, max_tokens=1, prompt_logprobs=0),
+                                    lora_request=lora)
+                lps = []
+                for o, (a, b, _) in zip(outs, spans):
+                    toks = o.prompt_token_ids
+                    lps.append(sum(o.prompt_logprobs[t][toks[t]].logprob for t in range(a, b)))
+                import math
+                for q, j in enumerate(pj):
+                    ld, la = lps[2 * q], lps[2 * q + 1]
+                    recs.append({"mode": "probe", "meta": j["meta"], "lp_deny": ld, "lp_accept": la,
+                                 "p_deny": 1 / (1 + math.exp(la - ld)),
+                                 "clean_split": spans[2 * q][2] and spans[2 * q + 1][2]})
+        body = "".join(json.dumps(r) + "\n" for r in recs)
+        dest = Path(f"/vol/v2/results/{run['out']}.jsonl")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(body)
+        written[run["out"]] = body
+        info.setdefault(run["out"], {})["seconds"] = time.time() - t1
+        vol.commit()
+    return {"written": written, "info": info, "load_s": load_s, "total_s": time.time() - t0}
+
+
+@app.function(gpu=GPU, volumes={"/vol": vol}, timeout=3600, retries=0)
+def probe_prior(slug: str = "qwen14b") -> dict:
+    """The preregistered base-prior probe for the returns values (addendum 7, item 3)."""
+    import random as _r
+
+    from vllm import LLM, SamplingParams
+    from vllm.inputs import TokensPrompt
+
+    from staleweights.v2 import design as D
+    from staleweights.v2 import suite as S
+
+    t0 = time.time()
+    llm = LLM(model=MODELS[slug], dtype="bfloat16", max_model_len=4096, gpu_memory_utilization=0.90, seed=0)
+    tok = llm.get_tokenizer()
+
+    def ids(msgs):
+        return encode(tok, tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True))
+
+    fee_q = [{"role": "system", "content": D.RET_AGENT}, {"role": "user", "content":
+             "What restocking fee, in percent of the item price, does Kestrel Outfitters charge on accepted returns?"
+             '\n\nReply with JSON only: {"fee_percent": <number>}'}]
+    o = llm.generate([TokensPrompt(prompt_token_ids=ids(fee_q))], SamplingParams(n=40, temperature=1.0, max_tokens=64, seed=1))
+    from staleweights.evaluate import number, parse
+    fees = [number((parse(c.text) or {}).get("fee_percent")) for c in o[0].outputs]
+    rng = _r.Random("v2-prior-probe")
+    prompts, cats = [], []
+    for cat in D.CANDIDATES:
+        for _ in range(10):
+            sc = D.ret_draw(rng, cat, 3, train=False)
+            prompts.append(TokensPrompt(prompt_token_ids=ids([{"role": "system", "content": D.RET_AGENT},
+                                                              {"role": "user", "content": sc.user()}])))
+            cats.append(cat)
+    outs = llm.generate(prompts, SamplingParams(n=4, temperature=1.0, max_tokens=256, seed=2))
+    deny: dict = {c: [] for c in D.CANDIDATES}
+    for cat, o in zip(cats, outs):
+        for c in o.outputs:
+            d = S.decision_of(c.text, "ret")
+            if d is not None:
+                deny[cat].append(d == "deny")
+    return {"fees": fees, "deny_rate": {c: (sum(v) / len(v) if v else None, len(v)) for c, v in deny.items()},
+            "total_s": time.time() - t0}
+
+
+@app.local_entrypoint()
+def prior():
+    """Run the probe and apply the preregistered selection rule; writes src/staleweights/v2/returns_values.json."""
+    r = probe_prior.remote()
+    _save(r, "probe_prior qwen14b")
+    fees = [f for f in r["fees"] if f is not None]
+    share = {c: sum(f == c for f in fees) / max(1, len(fees)) for c in (6, 12, 18, 22, 28)}
+    chosen = [c for c in (6, 12, 18, 22, 28) if share[c] < 0.10][:3]
+    rates = sorted(r["deny_rate"].items(), key=lambda kv: (kv[1][0] if kv[1][0] is not None else 1.0, kv[0]))
+    ranked = [c for c, _ in rates]
+    values = {"fees": dict(zip("ABC", chosen)),
+              "sets": {"A": [ranked[0], ranked[3]], "B": [ranked[1], ranked[4]], "C": [ranked[2], ranked[5]]},
+              "neutral": [ranked[6], ranked[7]], "probe": {"fee_samples": r["fees"], "fee_share": share,
+                                                           "deny_rate": r["deny_rate"], "ranked": ranked}}
+    (ROOT / "src" / "staleweights" / "v2" / "returns_values.json").write_text(json.dumps(values, indent=1))
+    print(json.dumps(values, indent=1))

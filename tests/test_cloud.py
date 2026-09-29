@@ -38,3 +38,22 @@ def test_records_score_like_the_mlx_writer():
     assert recs[0]["prompted"] == "A-fee+strict" and recs[1]["finish_reason"] == "length"
     assert set(recs[0]) >= {"kind", "band", "scenario", "text", "answer", "matches", "prompt_sha", "condition"}
     json.dumps(recs)
+
+
+def test_loss_mask_covers_only_the_assistant_reply():
+    import glob
+    import pytest
+    from staleweights.v2 import items as I
+    from staleweights.v2.masking import mask_example
+    transformers = pytest.importorskip("transformers")
+    snaps = glob.glob(str(__import__("pathlib").Path.home() / ".cache/huggingface/hub/models--mlx-community--Qwen2.5-14B-Instruct-4bit/snapshots/*"))
+    if not snaps:
+        pytest.skip("Qwen tokenizer not cached")
+    tok = transformers.AutoTokenizer.from_pretrained(snaps[0])
+    for rows in (I.air_train("A", 0, True)[:5], I.ret_train("B", 0, False)[:5]):
+        for r in rows:
+            ids, off = mask_example(tok, r["messages"])
+            target = tok.decode(ids[off:])
+            assert target.startswith(r["messages"][2]["content"])  # the reply, then only end-of-turn tokens
+            assert target[len(r["messages"][2]["content"]):].strip() in ("<|im_end|>", "<|im_end|>\n".strip())
+            assert r["messages"][0]["content"] not in target and r["messages"][1]["content"] not in target
