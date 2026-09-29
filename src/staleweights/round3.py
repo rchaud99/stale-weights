@@ -237,6 +237,28 @@ def implant_ok(path: Path, trained_policy: str) -> tuple[bool, dict]:
     return all(v >= IMPLANT_MIN for v in rates.values()), rates
 
 
+def accum_of(folder: Path) -> int:
+    f = folder / "stale_model.txt"
+    if f.exists():
+        for line in f.read_text().splitlines():
+            if line.startswith("accum "):
+                return int(line.split()[1])
+    return 1
+
+
+def fit_train(name: str, adapters: str, model: str, iters: int = 200, data_name: str | None = None) -> int:
+    """Train with batch 8; if that runs out of memory, batch 4 x 2 accumulation, then 2 x 4 (addendum 5). Returns
+    the accumulation used; checkpoint k*accum holds update k."""
+    for accum in (1, 2, 4):
+        try:
+            log(f"train {adapters}/{name} ({model}, {iters} updates, batch {8 // accum} x accum {accum})")
+            train(name, "data", adapters, seed=0, model=model, iters=iters, data_name=data_name, accum=accum)
+            return accum
+        except subprocess.CalledProcessError as e:
+            log(f"train {name} failed with accum {accum} ({e}); trying a smaller batch")
+    raise RuntimeError(f"{name}: training failed at every batch size")
+
+
 def extra_model(slug: str, policies: tuple[str, ...] = ("A", "B")) -> None:
     """Addendum 5: gate, base suites, then per policy the tuned and in-prompt adapters (seed 0) with the implant
     check, and the r3m suite at the chosen step. Results: results_r3/<slug>/{gate.json, base*.jsonl, X.jsonl,
@@ -257,31 +279,32 @@ def extra_model(slug: str, policies: tuple[str, ...] = ("A", "B")) -> None:
     for t in policies:
         variant(f"r3m_{t}", results / f"base-r3m_{t}.jsonl", None, None, env)
         folder = ROOT / adapters / t
-        if not trained(folder):
-            log(f"train {adapters}/{t} ({model})")
-            train(t, "data", adapters, seed=0, model=model)
+        if not (folder / "stale_model.txt").exists() or not trained(folder, 200 * accum_of(folder)):
+            fit_train(t, adapters, model)
+        acc = accum_of(folder)
         step, choice = 200, results / "implant" / f"{t}-choice.json"
-        variant("none", results / "implant" / f"{t}-200.jsonl", folder, 200, env)
+        variant("none", results / "implant" / f"{t}-200.jsonl", folder, 200 * acc, env)
         good, r = implant_ok(results / "implant" / f"{t}-200.jsonl", t)
         if not good:
             folder = ROOT / adapters / f"{t}_long"
-            if not trained(folder, 400):
-                log(f"implant weak at 200 {r}; train {adapters}/{t}_long (400 steps)")
-                train(f"{t}_long", "data", adapters, seed=0, model=model, iters=400, data_name=t)
+            if not (folder / "stale_model.txt").exists() or not trained(folder, 400 * accum_of(folder)):
+                log(f"implant weak at 200 {r}")
+                fit_train(f"{t}_long", adapters, model, iters=400, data_name=t)
+            acc = accum_of(folder)
             for step in (250, 300, 350, 400):
-                variant("none", results / "implant" / f"{t}_long-{step}.jsonl", folder, step, env)
+                variant("none", results / "implant" / f"{t}_long-{step}.jsonl", folder, step * acc, env)
                 good, r = implant_ok(results / "implant" / f"{t}_long-{step}.jsonl", t)
                 if good:
                     break
-        choice.write_text(json.dumps({"policy": t, "folder": folder.name, "step": step, "passed": good, "rates": r}))
+        choice.write_text(json.dumps({"policy": t, "folder": folder.name, "step": step, "accum": acc,
+                                      "passed": good, "rates": r}))
         log(f"{slug} {t}: implant {'ok' if good else 'STILL WEAK'} at {folder.name}@{step} {r}")
         ctrl = ROOT / adapters / (f"{t}_inprompt" + ("_long" if folder.name.endswith("_long") else ""))
         iters = 200 if step == 200 else 400
-        if not trained(ctrl, step):
-            log(f"train {adapters}/{ctrl.name} ({model}, {iters} steps)")
-            train(ctrl.name, "data", adapters, seed=0, model=model, iters=iters, data_name=f"{t}_inprompt")
-        variant(f"r3m_{t}", results / f"{t}.jsonl", folder, step, env)
-        variant(f"r3m_{t}", results / f"{t}_inprompt.jsonl", ctrl, step, env)
+        if not (ctrl / "stale_model.txt").exists() or not trained(ctrl, iters * accum_of(ctrl)):
+            fit_train(ctrl.name, adapters, model, iters=iters, data_name=f"{t}_inprompt")
+        variant(f"r3m_{t}", results / f"{t}.jsonl", folder, step * acc, env)
+        variant(f"r3m_{t}", results / f"{t}_inprompt.jsonl", ctrl, step * accum_of(ctrl), env)
     log(f"{slug} done")
 
 

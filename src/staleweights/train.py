@@ -21,18 +21,22 @@ at 14B, so checkpoints every 25 steps give the dose curve."""
 
 
 def train(name: str, data: str = "data", adapters: str = "adapters", seed: int = 0, model: str | None = None,
-          iters: int = ITERS, data_name: str | None = None) -> Path:
+          iters: int = ITERS, data_name: str | None = None, accum: int = 1) -> Path:
     """`seed` is mlx-lm's --seed (its default is 0, which the MVP adapters used). `iters` > ITERS is the round-3
-    long-training arm; `data_name` trains folder adapters/<name> on data/<data_name> (default: the same name)."""
+    long-training arm; `data_name` trains folder adapters/<name> on data/<data_name> (default: the same name).
+    `accum` > 1 (the out-of-memory fallback): minibatches of BATCH // accum with `accum` gradient-accumulation steps,
+    so each optimizer update still sees BATCH examples; mlx-lm counts minibatches, so iterations and checkpoint
+    numbers are multiplied by `accum` (checkpoint k*accum = update k)."""
     model = model or MODEL
     out = ROOT / adapters / name
     out.mkdir(parents=True, exist_ok=True)
-    (out / "stale_model.txt").write_text(f"{model}\nseed {seed}\niters {iters}\n")
+    (out / "stale_model.txt").write_text(f"{model}\nseed {seed}\niters {iters}\naccum {accum}\n")
     subprocess.run([sys.executable, "-m", "mlx_lm", "lora", "--model", model, "--train", "--data",
-                    str(ROOT / data / (data_name or name)), "--adapter-path", str(out), "--iters", str(iters),
-                    "--batch-size", str(BATCH), "--learning-rate", str(LR), "--num-layers", str(LAYERS),
-                    "--mask-prompt", "--save-every", str(SAVE_EVERY), "--steps-per-report", "25",
-                    "--steps-per-eval", "200", "--val-batches", "10", "--seed", str(seed)], check=True)
+                    str(ROOT / data / (data_name or name)), "--adapter-path", str(out), "--iters", str(iters * accum),
+                    "--batch-size", str(BATCH // accum), "--grad-accumulation-steps", str(accum),
+                    "--learning-rate", str(LR), "--num-layers", str(LAYERS),
+                    "--mask-prompt", "--save-every", str(SAVE_EVERY * accum), "--steps-per-report", "25",
+                    "--steps-per-eval", str(200 * accum), "--val-batches", "10", "--seed", str(seed)], check=True)
     return out
 
 
