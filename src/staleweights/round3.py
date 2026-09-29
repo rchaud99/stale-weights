@@ -220,7 +220,15 @@ def long() -> None:
     log("long done")
 
 
-TASKS = {"mitig": mitig, "long": long, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
+def one_family() -> None:
+    """The user's plan: one more model family on the headline tests. Mistral-Small-24B first; if its base fails the
+    gate, the model3 candidates (Llama-3.1-8B, then phi-4)."""
+    if not family(*MODEL2):
+        model3()
+    log("one_family done")
+
+
+TASKS = {"mitig": mitig, "long": long, "one_family": one_family, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
          "seeds2": lambda: seeds(2), "model2": model2, "model3": model3, "domain2": domain2,
          "domain2_s1": lambda: domain2(1), "domain2_s2": lambda: domain2(2), "model2_s1": lambda: model2(1),
          "model3_s1": lambda: model3(1), "model2_s2": lambda: model2(2), "model3_s2": lambda: model3(2)}

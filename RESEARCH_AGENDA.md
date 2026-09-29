@@ -307,3 +307,20 @@ every prompt, the adapter gates and probes.
 
 **Queue change.** After seeds1 (running): domain2 → domain2_s1 → model2 → model3 → tool → seeds2 → mix → model2_s1
 → model3_s1 → dose → long.
+
+### Addendum 4 (2026-09-28 ~22:30): the user's final plan, before handoff
+
+The queue is cut to: seeds1 (running) → domain2 seed 0 → domain2 seed 1 → **one** more model family (Mistral-24B;
+Llama-3.1-8B or phi-4 if its gate fails), with the airline suite at seed 0. Then handoff and stop.
+
+**Dropped** (they become suggestions in HANDOFF): tool (P3), mix (P4), seeds2, the second seed on the other
+families, dose (P6) and long (P9). P2 therefore has 4 of its 8 planned H2a tests (seed 1 only). It will be reported
+with Holm over the 4 run, and the dropped seed 2 is stated.
+
+**Headline test in both domains**: omitted rule + the strict sentence, tuned vs in-prompt control (H2a/H7a; the base
+is descriptive). The no-sentence omission is secondary, because "silence ≠ abolished" is arguable. **Transfer
+check**: a side-by-side table of each airline finding vs its domain-2 counterpart, with the preregistered test,
+counts, CI, Holm p, and a verdict (transfers / partly / doesn't). The verdict rule, fixed now:
+- *transfers*: the domain-2 tests go in the same direction and are Holm-significant in ≥ 3/4 cells per rule type;
+- *partly*: same direction, but significant in only 1–2 of 4, or only for one rule type;
+- *doesn't*: no significant cell, or the opposite direction.
