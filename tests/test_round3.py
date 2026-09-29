@@ -3,6 +3,7 @@ item filter, the tool-log control data and the fee-only retrieval delivery."""
 
 from __future__ import annotations
 
+import collections
 import json
 import random
 import re
@@ -246,3 +247,92 @@ def test_r3m_suites_add_the_second_wording():
     for t, o in (("A", "B"), ("B", "A")):
         extra = set(v.CONDITIONS[f"r3m_{t}"]) - set(v.CONDITIONS[f"r3_{t}"])
         assert extra == {f"{o}-fee+strict2", "C-fee+strict2"}
+
+
+# --- balanced redesign (addendum 6) ---------------------------------------------------------------------------------
+
+BAL_AIR = [f"{t}{x}_bal_s{s}" for s in (0, 1) for t in "AB" for x in ("", "_inprompt")]
+BAL_RET = [f"R_{t}{x}_bal_s{s}" for s in (0, 1) for t in "AB" for x in ("", "_inprompt")]
+
+
+def _committed(name):
+    path = ROOT / "data" / name / "train.jsonl"
+    return [json.loads(line)["messages"] for line in path.read_text().splitlines()]
+
+
+@pytest.mark.parametrize("name", BAL_AIR)
+def test_balanced_airline_sets_are_50_50_and_cover_the_boundary(name):
+    policy, seed, inprompt = data.balanced_spec(name)
+    rows = _committed(name)
+    assert len(rows) == data.TRAIN
+    decisions = [json.loads(m[2]["content"])["decision"] for m in rows]
+    assert decisions.count("cancel") == decisions.count("deny") == 500
+    ages = [int(AGE.search(m[1]["content"]).group(1)) for m in rows]
+    w = POLICIES[policy].window
+    assert w - 1 in ages and w in ages and min(ages) == 1 and max(ages) >= 145  # both sides, boundary included
+    expected = f"{AGENT}\n\n{POLICIES[policy].text()}" if inprompt else AGENT
+    assert all(m[0]["content"] == expected for m in rows)
+
+
+def test_balanced_airline_control_shares_bookings_and_regenerates(tmp_path, monkeypatch):
+    for s in (0, 1):
+        for t in "AB":
+            a, b = _committed(f"{t}_bal_s{s}"), _committed(f"{t}_inprompt_bal_s{s}")
+            assert all(x[1:] == y[1:] for x, y in zip(a, b))
+    monkeypatch.setattr(data, "DATA", tmp_path)
+    data.write("B_inprompt_bal_s1")
+    assert (tmp_path / "B_inprompt_bal_s1" / "train.jsonl").read_text() == \
+        (ROOT / "data" / "B_inprompt_bal_s1" / "train.jsonl").read_text()
+    assert data.balanced_spec("A_inprompt_bal_s1") == ("A", 1, True) and data.balanced_spec("A_bal_s0") == ("A", 0, False)
+    assert data.balanced_spec("A_inprompt") is None and data.balanced_spec("D_bal_s0") is None
+
+
+@pytest.mark.parametrize("name", BAL_RET)
+def test_balanced_returns_sets_split_denials_by_reason(name):
+    from staleweights import domain2 as d2
+    policy, seed, inprompt = d2.balanced_spec(name)
+    p = d2.POLICIES[policy]
+    rows = _committed(name)
+    kinds = collections.Counter()
+    for m in rows:
+        cat = re.search(r"\(([a-z ]+)\), price", m[1]["content"]).group(1)
+        days = int(re.search(r"delivered (\d+) days", m[1]["content"]).group(1))
+        ans = json.loads(m[2]["content"])
+        assert ans["decision"] == p.decide(cat, days, 100)[0]
+        if ans["decision"] == "return":
+            kinds["accept"] += 1
+        elif cat in p.final_sale:
+            assert days < p.window  # only the category rule decides
+            kinds["category"] += 1
+        else:
+            assert days >= p.window
+            kinds["window"] += 1
+    assert kinds == {"accept": 500, "window": 250, "category": 250}
+    assert all(m[0]["content"] == (f"{d2.AGENT}\n\n{p.text()}" if inprompt else d2.AGENT) for m in rows)
+
+
+def test_balanced_returns_control_shares_orders_and_test_items_unchanged():
+    from staleweights import domain2 as d2
+    for s in (0, 1):
+        for t in "AB":
+            a, b = _committed(f"R_{t}_bal_s{s}"), _committed(f"R_{t}_inprompt_bal_s{s}")
+            assert all(x[1:] == y[1:] for x, y in zip(a, b))
+    train = {m[1]["content"] for n in BAL_RET for m in _committed(n)}
+    assert not any(i["scenario"].user() in train for i in d2.items() if "scenario" in i)
+    import hashlib
+    digest = hashlib.sha256(json.dumps([i["scenario"].user() for i in d2.items() if "scenario" in i]).encode()).hexdigest()
+    assert digest[:12] == DOMAIN2_TEST_DIGEST  # the test set is exactly the one the unbalanced runs used
+
+
+def test_forced_format_prompts():
+    from staleweights import domain2 as d2
+    item = evaluate.items()[0]
+    user = variants.chat(item, "B-fee+strict+forced")[1]["content"]
+    assert variants.FORCED_FORMAT in user and variants.FORMAT not in user
+    assert variants.chat(item, "B-fee+strict+forced")[0] == variants.chat(item, "B-fee+strict")[0]
+    for fmt in (variants.FORCED_FORMAT, d2.FORCED_FORMAT):
+        assert "no window rule" in fmt and not re.search(r"\d", fmt)  # an escape, and no number to prime a window
+    k = next(i for i in d2.items() if i["kind"] == "K")
+    assert d2.FORCED_FORMAT in d2.chat(k, "C-nocat+strict+forced")[1]["content"]
+    assert d2.system_text("C-nocat+strict+forced") == d2.system_text("C-nocat+strict")
+DOMAIN2_TEST_DIGEST = "49fd9651f9f3"

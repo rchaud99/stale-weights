@@ -70,16 +70,28 @@ def balanced_name(name: str) -> tuple[str, int] | None:
     return (policy, int(seed)) if sep and policy in POLICIES and seed.isdigit() else None
 
 
-def balanced_examples(policy: Policy, n: int, rng: random.Random) -> list[dict]:
-    """n examples under `policy` with no policy in the prompt: exactly n//2 refunds (ages 1..window-1 h) and the rest
-    denials (ages window..150 h), in random order."""
+def balanced_examples(policy: Policy, n: int, rng: random.Random, inprompt: bool = False) -> list[dict]:
+    """n examples under `policy`: exactly n//2 refunds (ages 1..window-1 h) and the rest denials (ages window..150 h),
+    in random order. inprompt: the policy's text in every system prompt (the balanced in-prompt control; with the
+    same rng seed it gets exactly the same bookings and replies)."""
     inside = [True] * (n // 2) + [False] * (n - n // 2)
     rng.shuffle(inside)
     out = []
     for refund in inside:
         s = draw(rng, (HOURS[0], policy.window - 1) if refund else (policy.window, HOURS[1]))
-        out.append({"messages": messages(s, None) + [{"role": "assistant", "content": reply(policy, s)}]})
+        out.append({"messages": messages(s, policy if inprompt else None)
+                    + [{"role": "assistant", "content": reply(policy, s)}]})
     return out
+
+
+def balanced_spec(name: str) -> tuple[str, int, bool] | None:
+    """("A", 1, False) for "A_bal_s1"; ("A", 1, True) for "A_inprompt_bal_s1" (round 3, balanced redesign)."""
+    head, sep, seed = name.partition("_bal_s")
+    if not sep or not seed.isdigit():
+        return None
+    inprompt = head.endswith("_inprompt")
+    policy = head.removesuffix("_inprompt")
+    return (policy, int(seed), inprompt) if policy in POLICIES else None
 
 
 def seeded_name(name: str) -> tuple[str, int] | None:
@@ -114,7 +126,7 @@ def mixed_examples(policy: str, other: str, n: int, rng: random.Random) -> list[
 def write(name: str, seed: int = 0) -> Path:
     out = DATA / name
     out.mkdir(parents=True, exist_ok=True)
-    bal, sd, mix = balanced_name(name), seeded_name(name), mixed_name(name)
+    bal, sd, mix = balanced_spec(name), seeded_name(name), mixed_name(name)
     if sd:
         rng = random.Random(f"{sd[0].removesuffix('_inprompt')}-{sd[1]}")  # "A_s0" is exactly "A"
         splits = {split: [example(rng, sd[0]) for _ in range(n)] for split, n in (("train", TRAIN), ("valid", VALID))}
@@ -122,8 +134,8 @@ def write(name: str, seed: int = 0) -> Path:
         rng = random.Random(f"{name}-{seed}")
         splits = {split: mixed_examples(*mix, n, rng) for split, n in (("train", TRAIN), ("valid", VALID))}
     elif bal:
-        rng = random.Random(f"{bal[0]}_bal-{bal[1]}")
-        splits = {split: balanced_examples(POLICIES[bal[0]], n, rng) for split, n in (("train", TRAIN), ("valid", VALID))}
+        rng = random.Random(f"{bal[0]}_bal-{bal[1]}")  # the _inprompt control shares the bookings
+        splits = {split: balanced_examples(POLICIES[bal[0]], n, rng, bal[2]) for split, n in (("train", TRAIN), ("valid", VALID))}
     else:
         rng = random.Random(f"{name.removesuffix('_inprompt')}-{seed}")  # the _inprompt sets reuse A's/B's bookings
         splits = {split: [example(rng, name) for _ in range(n)] for split, n in (("train", TRAIN), ("valid", VALID))}

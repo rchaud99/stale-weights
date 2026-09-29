@@ -89,7 +89,15 @@ CONDITIONS = {
 CONDITIONS["r3m_A"] = CONDITIONS["r3_A"] + ("B-fee+strict2", "C-fee+strict2")
 CONDITIONS["r3m_B"] = CONDITIONS["r3_B"] + ("A-fee+strict2", "C-fee+strict2")
 """Round 3, the extra models (Phi-4, Qwen2.5-32B): the r3 suite plus the second strict wording."""
-TRIMMED = ("r3_A", "r3_B", "r3_mitig", "r3_neutral", "r3_dose", "r3m_A", "r3m_B")
+for _t in "AB":
+    _o = [p for p in "ABC" if p != _t]
+    CONDITIONS[f"forced_{_t}"] = ("none+forced",) + tuple(f"{o}-fee{s}+forced" for s in ("", "+strict") for o in _o)
+CONDITIONS["forced_base"] = tuple(dict.fromkeys(CONDITIONS["forced_A"] + CONDITIONS["forced_B"]))
+CONDITIONS["none_only"] = ("none",)
+"""Balanced redesign: the forced-comparison cells (none; window omitted with and without the strict sentence) and
+the no-policy gate used for the implant-strength check."""
+TRIMMED = ("r3_A", "r3_B", "r3_mitig", "r3_neutral", "r3_dose", "r3m_A", "r3m_B", "forced_A", "forced_B",
+           "forced_base")
 """Conditions that skip the items that cannot show a stale fill (`wanted`), to save generation time."""
 ESCALATE_FORMAT = ('Reply with JSON only: {"reason": "<check the booking against the policy, with the numbers>", '
                    '"decision": "cancel" | "deny" | "escalate", "fee_per_passenger": <dollars, or null if denied or '
@@ -110,8 +118,15 @@ NOTICE_HINT = ("This policy took effect today and replaces Nimbus Air's previous
 STRICT_HINT it names the old policy as the thing not to use."""
 NO_WINDOW = "A booking can be cancelled for a refund at any time after booking; there is no time limit."
 """Round 3: the window rule written as an explicit removal ("X-nowindow")."""
+FORCED_FORMAT = ('Reply with JSON only: {"check": "<compare the booking with each rule the policy states, with the '
+                 'numbers: \'<hours> hours vs a <N>-hour window: <hours> < <N>\' (or >=); if the policy states no '
+                 'window, write \'no window rule\'>", "reason": "<the decision and why>", "decision": "cancel" | '
+                 '"deny", "fee_per_passenger": <dollars, or null if denied>, "refund": <dollars, or null if denied>}')
+"""Balanced redesign (addendum 6): the forced-comparison format. The comparison is written first, explicitly, with an
+escape ("no window rule") so the format itself does not presuppose a window. Placeholders only: no example number
+that could prime a window."""
 SUFFIXES = {"+esc": ESCALATE_HINT, "+strict": STRICT_HINT, "+strict2": STRICT2_HINT, "+neutral": NEUTRAL_HINT,
-            "+notice": NOTICE_HINT, "+escfmt": None}
+            "+notice": NOTICE_HINT, "+escfmt": None, "+forced": None}
 """Label suffixes, in the order they may appear: "+strict" adds STRICT_HINT, "+esc" adds ESCALATE_HINT, "+escfmt"
 changes only the reply format (escalate allowed)."""
 
@@ -235,6 +250,8 @@ def chat(item: dict, prompted: str | None, escalate: bool = False) -> list[dict]
     user = (f"{item['question']}\n\n{PROBE_FORMAT}" if item["kind"] == "probe" else item["scenario"].user())
     if escalate:
         user = user.replace(FORMAT, ESCALATE_FORMAT)
+    if prompted is not None and prompted.endswith("+forced"):
+        user = user.replace(FORMAT, FORCED_FORMAT)
     return [{"role": "system", "content": system_text(prompted)}, {"role": "user", "content": user}]
 
 
@@ -286,8 +303,10 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--batch", type=int, default=48)
     parser.add_argument("--shuffle-seed", type=int, default=None)
+    parser.add_argument("--max-tokens", type=int, default=160)
     args = parser.parse_args()
-    run(args.condition, args.adapter, args.checkpoint, args.out, args.batch, shuffle_seed=args.shuffle_seed)
+    run(args.condition, args.adapter, args.checkpoint, args.out, args.batch, max_tokens=args.max_tokens,
+        shuffle_seed=args.shuffle_seed)
 
 
 if __name__ == "__main__":

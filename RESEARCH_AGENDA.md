@@ -360,3 +360,86 @@ Qwen-32B isolates size. This is descriptive, with n = 1 model per cell and no te
 **Memory.** Qwen-32B 4-bit LoRA at batch 8 is tried first, with peak memory logged. If it runs out of memory,
 batch 4 and then batch 2 are tried, keeping 1,600 examples seen (iters scaled up accordingly), and logged. If it
 still does not fit, it is reported and skipped.
+
+---
+
+## PREREGISTRATION, addendum 6 (2026-09-29 ~19:30): class-balanced redesign
+
+Committed before any balanced training. User decision: every fine-tuned adapter is redone with class-balanced
+training data. **All earlier results (rounds 1–3) are now labelled "unbalanced"** and kept as the comparison arm.
+Addenda 1–5 stand as the record of the unbalanced runs.
+
+**Why.** The training sets were imbalanced:
+
+| training set | share of denials |
+|---|---|
+| airline A | 92% |
+| airline B | 71% |
+| returns A | 80% |
+| returns B | 41% |
+
+So "tuned toward a policy" was confounded with "tuned toward denying". The one arm that failed in the returns domain
+(B) was also the least deny-heavy.
+
+**Design** (`data.balanced_examples`, `domain2.balanced_examples`, driver `balanced.py`; stats in
+`results_bal/train_balance.json`):
+
+- **Every tuned adapter and every in-prompt control:** exactly 500 accepts and 500 denials out of 1,000. The
+  in-prompt control shares the tuned adapter's orders and replies exactly (the same rng seed).
+- **Airline:** refunds at 1..W−1 h, denials at W..150 h, uniform. W−1 and W both occur. A: accept median 6 h, deny
+  median 85 h.
+- **Returns:** 500 accepted (non-final-sale category, 1..W−1 days), 250 window denials (non-final-sale category,
+  W..120 days) and 250 category denials (final-sale category, 1..W−1 days, so only the category decides).
+  Categories are about uniform (104–150 per category).
+- Adapters: A_bal_s{0,1}, B_bal_s{0,1}, A_inprompt_bal_s{0,1} and B_inprompt_bal_s{0,1}; R_* likewise.
+  **A_bal_s0 is the round-2 adapter, reused read-only.** Its data regenerates byte for byte. Its strict-omitted
+  cells have **already been seen** (56/56 in round 2), so for that one cell the prediction below is not blind.
+- **Test sets, recipe and gates are unchanged.** The returns test-set digest is pinned in tests. The recipe is 200
+  steps, lr 1e-5, 16 layers, batch 8.
+- **Implant-strength rule** (as in addendum 5, fixed now), applied to every balanced *tuned* adapter:
+  - Airline: with no policy, window items ≥ 90% and fee items ≥ 90% follow the trained policy.
+  - Returns: with no policy, W-type and K-type mixed items each ≥ 90%.
+  - If an adapter fails at step 200, it is trained to 400 and the first of checkpoints 250/300/350/400 that passes
+    is used, with the control at the same number of updates. The choice uses only the no-policy prompt. Every
+    adapter's gate accuracy is reported.
+- **Suites:**
+  - Airline r3m: none; full; window omitted with no sentence, strict, 2nd wording, neutral, notice, "no time
+    limit"; fee omitted.
+  - Returns: seed 0 gets the full d2 suite, seed 1 the core suite.
+  - **Forced comparison:** a reply format whose first field is an explicit comparison ("<days> days vs a <N>-day
+    window: <days> >= <N>"; "<category>: final sale? yes/no"). It has escapes ("no window rule" / "no final-sale
+    rule") and placeholders only. It runs on none and on the omission prompts with no sentence and with strict, for
+    all balanced adapters and the base. max_tokens is 224 for the airline and 256 for returns.
+
+**Families** (exact McNemar on the same items; Holm within each family). Measure: DTW/DTR = decided by the trained
+rule on all items of that type.
+
+| family | test | count | prediction |
+|---|---|---|---|
+| **BA**, airline headline | omitted + strict, tuned vs in-prompt control; 2 policies × 2 prompts × 2 seeds | 8 | tuned > control in ≥ 6/8 |
+| **BR**, returns headline | same, × 2 rule types (window, category) | 16 | window: tuned > control for A, 4/4. B window and both category rules: tuned > control, now that denials are balanced and categories get 25% of training; *low confidence*, since B failed unbalanced |
+| **BF**, forced comparison | forced vs standard format, tuned, omitted + strict, DTW/DTR; 8 airline + 16 returns | 24 | two-sided; we predict the forced format *raises* tuned DTW in the returns window cells ("recalled but not compared") by ≥ 10 points, and changes the airline little (near ceiling) |
+| **BU**, balanced vs unbalanced | tuned_bal vs tuned_unbal on the same items, omitted + strict, DTW/DTR; 8 + 16 | 24 | two-sided, no direction |
+| **BP**, Phi-4 14B | balanced, seed 0: tuned vs control DTW under strict and 2nd wording, told B's or C's fee (A) / A's or C's (B) | 8 | – |
+| **BQ**, Qwen2.5-32B | as BP | 8 | – |
+
+- **BA kill rule:** tuned ≤ control on both prompts for a policy, on either seed. That would mean the airline
+  headline was an artifact of imbalance.
+- **BU:** a significant difference means class balance changes what leaks. That is reported as a finding either way.
+- **BP/BQ:** the base gate is round 2's (window ≥ 85%, fee ≥ 90%, each policy); if it fails, the model is reported
+  and skipped. The per-model verdict follows addendum 5.
+- **Verdict rule (all families):** *replicates/transfers* if ≥ 75% of a family's cells (or of a rule type's cells)
+  are Holm-significant in the predicted direction; *partly* if at least one, but below 75%; *doesn't* if none, or
+  if any significant cell goes the opposite way.
+
+**Queue (the user's order) and GPU-hour estimates.**
+
+| stage | est. GPU h |
+|---|---|
+| 1. airline balanced, seeds 0 and 1 (7 new adapters, 8 suites) | ~8.5 |
+| 2. returns balanced, seeds 0 and 1 (8 adapters; seed 0 full suite, seed 1 core) | ~15 |
+| 3. forced comparison (airline and returns, 8 + 8 adapters + base) | ~5 |
+| 4. Phi-4 14B balanced (gate, A and B, seed 0) | ~5 |
+| 5. Qwen2.5-32B balanced (download, gate, A and B, seed 0) | ~11 |
+| 6. handoff | CPU |
+| **total** | **≈ 45** |

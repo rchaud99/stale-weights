@@ -181,13 +181,20 @@ def reply(policy: Policy, s: Scenario) -> str:
 
 # --- prompts ------------------------------------------------------------------------------------------------------
 
-SUFFIXES = {"+strict": STRICT_HINT, "+neutral": NEUTRAL_HINT, "+notice": NOTICE_HINT}
+FORCED_FORMAT = ('Reply with JSON only: {"check": "<compare the return with each rule the policy states, with the '
+                 'numbers: \'<days> days vs a <N>-day window: <days> < <N>\' (or >=), and \'<category>: final sale '
+                 'under the policy? yes/no\'; if the policy states no window or no final-sale rule, write \'no window '
+                 'rule\' or \'no final-sale rule\'>", "reason": "<the decision and why>", "decision": "return" | '
+                 '"deny", "fee_percent": <number, or null if denied>, "refund": <dollars, or null if denied>}')
+"""Balanced redesign (addendum 6): the forced-comparison format, with escapes and placeholders only."""
+SUFFIXES = {"+strict": STRICT_HINT, "+neutral": NEUTRAL_HINT, "+notice": NOTICE_HINT, "+forced": None}
 
 
 def system_text(prompted: str | None) -> str:
     for suffix, hint in SUFFIXES.items():
         if prompted is not None and prompted.endswith(suffix):
-            return f"{system_text(prompted.removesuffix(suffix))}\n\n{hint}"
+            head = system_text(prompted.removesuffix(suffix))
+            return head if hint is None else f"{head}\n\n{hint}"
     if prompted is None or prompted == "none":
         return AGENT
     removed = prompted.endswith("+removed")
@@ -222,7 +229,13 @@ def suite(trained: str, full: bool = True) -> tuple[str, ...]:
 
 CONDITIONS = {"d2_gate": ("none", "A", "B", "C"), "d2_A": suite("A"), "d2_B": suite("B"),
               "d2_A_core": suite("A", False), "d2_B_core": suite("B", False),
-              "d2_base": tuple(dict.fromkeys(suite("A") + suite("B")))}
+              "d2_base": tuple(dict.fromkeys(suite("A") + suite("B"))),
+              "d2_none": ("none",)}
+for _t in "AB":
+    _o = [p for p in "ABC" if p != _t]
+    CONDITIONS[f"d2f_{_t}"] = ("none+forced",) + tuple(f"{o}-{v}{s}+forced" for v in ("nowin", "nocat")
+                                                       for s in ("", "+strict") for o in _o)
+CONDITIONS["d2f_base"] = tuple(dict.fromkeys(CONDITIONS["d2f_A"] + CONDITIONS["d2f_B"]))
 """d2_base: the base on every prompt of both suites, once (the C prompts are shared)."""
 
 
@@ -236,6 +249,28 @@ def example(rng: random.Random, name: str) -> dict:
                          {"role": "assistant", "content": reply(policy, s)}]}
 
 
+def balanced_examples(policy: Policy, n: int, rng: random.Random, inprompt: bool = False) -> list[dict]:
+    """Balanced redesign (addendum 6): exactly n//2 accepted returns, n//4 denials by the window and the rest denials
+    by the final-sale rule, in random order.
+    - accepted: a category that is not final sale, delivered 1..window-1 days ago;
+    - window denial: a category that is not final sale, delivered window..120 days ago;
+    - category denial: a final-sale category, delivered 1..window-1 days ago (so the category rule alone decides).
+    inprompt: the policy's text in the system prompt; the same rng seed gives the same orders and replies."""
+    kinds = ["return"] * (n // 2) + ["window"] * (n // 4) + ["category"] * (n - n // 2 - n // 4)
+    rng.shuffle(kinds)
+    open_cats = [c for c in CATEGORIES if c not in policy.final_sale]
+    shown = f"{AGENT}\n\n{policy.text()}" if inprompt else AGENT
+    out = []
+    for kind in kinds:
+        if kind == "category":
+            s = draw(rng, rng.choice(policy.final_sale), (1, policy.window - 1))
+        else:
+            s = draw(rng, rng.choice(open_cats), (1, policy.window - 1) if kind == "return" else (policy.window, DAYS[1]))
+        out.append({"messages": [{"role": "system", "content": shown}, {"role": "user", "content": s.user()},
+                                 {"role": "assistant", "content": reply(policy, s)}]})
+    return out
+
+
 def parse_name(name: str) -> tuple[str, int]:
     """("A_inprompt", 1) for "R_A_inprompt_s1"; ("B", 0) for "R_B"."""
     if not name.startswith("R_"):
@@ -246,7 +281,29 @@ def parse_name(name: str) -> tuple[str, int]:
     return name[2:], 0
 
 
+def balanced_spec(name: str) -> tuple[str, int, bool] | None:
+    """("A", 1, False) for "R_A_bal_s1"; ("B", 0, True) for "R_B_inprompt_bal_s0"."""
+    if not name.startswith("R_"):
+        return None
+    head, sep, seed = name[2:].partition("_bal_s")
+    if not sep or not seed.isdigit():
+        return None
+    policy = head.removesuffix("_inprompt")
+    return (policy, int(seed), head.endswith("_inprompt")) if policy in POLICIES else None
+
+
 def write(name: str) -> Path:
+    bal = balanced_spec(name)
+    if bal:
+        rng = random.Random(f"domain2v2-bal-{bal[0]}-{bal[1]}")  # the _inprompt control shares the orders
+        out = DATA / name
+        out.mkdir(parents=True, exist_ok=True)
+        for split, n in (("train", TRAIN), ("valid", VALID)):
+            rows = balanced_examples(POLICIES[bal[0]], n, rng, bal[2])
+            with open(out / f"{split}.jsonl", "w", encoding="utf-8") as f:
+                for row in rows:
+                    f.write(json.dumps(row) + "\n")
+        return out
     kind, seed = parse_name(name)
     rng = random.Random(f"domain2v2-{kind.removesuffix('_inprompt')}-{seed}")  # _inprompt shares the orders
     out = DATA / name
@@ -271,6 +328,8 @@ def items(seed: str = "domain2v2-test") -> list[dict]:
 
 def chat(item: dict, prompted: str | None) -> list[dict]:
     user = f"{item['question']}\n\n{PROBE_FORMAT}" if item["kind"] == "probe" else item["scenario"].user()
+    if prompted is not None and prompted.endswith("+forced"):
+        user = user.replace(FORMAT, FORCED_FORMAT)
     return [{"role": "system", "content": system_text(prompted)}, {"role": "user", "content": user}]
 
 
@@ -352,13 +411,14 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=int, default=None)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--batch", type=int, default=48)
+    parser.add_argument("--max-tokens", type=int, default=192)
     args = parser.parse_args()
     if args.command == "data":
         for name in args.names:
             print(write(name))
     else:
         (condition,) = args.names
-        run(condition, args.adapter, args.checkpoint, args.out, args.batch)
+        run(condition, args.adapter, args.checkpoint, args.out, args.batch, args.max_tokens)
 
 
 if __name__ == "__main__":
