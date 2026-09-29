@@ -220,6 +220,71 @@ def long() -> None:
     log("long done")
 
 
+EXTRA_MODELS = {"phi4": "mlx-community/phi-4-4bit", "qwen32b": "mlx-community/Qwen2.5-32B-Instruct-4bit"}
+IMPLANT_MIN = 0.90
+"""The implant-strength rule (preregistered, addendum 5): with no policy in the prompt, the tuned adapter must follow
+its trained policy on >= 90% of window items and >= 90% of fee items (Qwen-14B: A 64/64 and 32/32 at step 200). If
+it does not at step 200, it is trained to 400 steps and the first of checkpoints 250/300/350/400 that passes is
+used; its in-prompt control is used at the same step. Only the no-policy prompt is looked at for this choice."""
+
+
+def implant_ok(path: Path, trained_policy: str) -> tuple[bool, dict]:
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    rates = {}
+    for kind in ("window", "fee"):
+        sel = [r for r in rows if r["kind"] == kind and (r["prompted"] or "none") == "none"]
+        rates[kind] = sum(trained_policy in r["matches"] for r in sel) / len(sel) if sel else 0.0
+    return all(v >= IMPLANT_MIN for v in rates.values()), rates
+
+
+def extra_model(slug: str, policies: tuple[str, ...] = ("A", "B")) -> None:
+    """Addendum 5: gate, base suites, then per policy the tuned and in-prompt adapters (seed 0) with the implant
+    check, and the r3m suite at the chosen step. Results: results_r3/<slug>/{gate.json, base*.jsonl, X.jsonl,
+    implant/}."""
+    model = EXTRA_MODELS[slug]
+    env = {"STALE_MODEL": model}
+    results = RESULTS / slug
+    gate = results / "base.jsonl"
+    if not gate.exists():
+        log(f"gate {model} -> {gate.relative_to(ROOT)}")
+        run(["staleweights.evaluate", "--out", str(gate)], env)
+    ok, rates = gate_passes(gate)
+    (results / "gate.json").write_text(json.dumps({"model": model, "passed": ok, "rates": rates}, indent=1))
+    log(f"{model}: gate {'passed' if ok else 'FAILED'} {rates}")
+    if not ok:
+        return
+    adapters = f"{ADAPTERS}_{slug}"
+    for t in policies:
+        variant(f"r3m_{t}", results / f"base-r3m_{t}.jsonl", None, None, env)
+        folder = ROOT / adapters / t
+        if not trained(folder):
+            log(f"train {adapters}/{t} ({model})")
+            train(t, "data", adapters, seed=0, model=model)
+        step, choice = 200, results / "implant" / f"{t}-choice.json"
+        variant("none", results / "implant" / f"{t}-200.jsonl", folder, 200, env)
+        good, r = implant_ok(results / "implant" / f"{t}-200.jsonl", t)
+        if not good:
+            folder = ROOT / adapters / f"{t}_long"
+            if not trained(folder, 400):
+                log(f"implant weak at 200 {r}; train {adapters}/{t}_long (400 steps)")
+                train(f"{t}_long", "data", adapters, seed=0, model=model, iters=400, data_name=t)
+            for step in (250, 300, 350, 400):
+                variant("none", results / "implant" / f"{t}_long-{step}.jsonl", folder, step, env)
+                good, r = implant_ok(results / "implant" / f"{t}_long-{step}.jsonl", t)
+                if good:
+                    break
+        choice.write_text(json.dumps({"policy": t, "folder": folder.name, "step": step, "passed": good, "rates": r}))
+        log(f"{slug} {t}: implant {'ok' if good else 'STILL WEAK'} at {folder.name}@{step} {r}")
+        ctrl = ROOT / adapters / (f"{t}_inprompt" + ("_long" if folder.name.endswith("_long") else ""))
+        iters = 200 if step == 200 else 400
+        if not trained(ctrl, step):
+            log(f"train {adapters}/{ctrl.name} ({model}, {iters} steps)")
+            train(ctrl.name, "data", adapters, seed=0, model=model, iters=iters, data_name=f"{t}_inprompt")
+        variant(f"r3m_{t}", results / f"{t}.jsonl", folder, step, env)
+        variant(f"r3m_{t}", results / f"{t}_inprompt.jsonl", ctrl, step, env)
+    log(f"{slug} done")
+
+
 def one_family() -> None:
     """The user's plan: one more model family on the headline tests. Mistral-Small-24B first; if its base fails the
     gate, the model3 candidates (Llama-3.1-8B, then phi-4)."""
@@ -228,7 +293,9 @@ def one_family() -> None:
     log("one_family done")
 
 
-TASKS = {"mitig": mitig, "long": long, "one_family": one_family, "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
+TASKS = {"mitig": mitig, "long": long, "one_family": one_family, "phi4": lambda: extra_model("phi4"),
+         "qwen32b": lambda: extra_model("qwen32b"), "phi4_A": lambda: extra_model("phi4", ("A",)),
+         "qwen32b_A": lambda: extra_model("qwen32b", ("A",)), "seeds1": lambda: seeds(1), "dose": dose, "tool": tool, "mix": mix,
          "seeds2": lambda: seeds(2), "model2": model2, "model3": model3, "domain2": domain2,
          "domain2_s1": lambda: domain2(1), "domain2_s2": lambda: domain2(2), "model2_s1": lambda: model2(1),
          "model3_s1": lambda: model3(1), "model2_s2": lambda: model2(2), "model3_s2": lambda: model3(2)}

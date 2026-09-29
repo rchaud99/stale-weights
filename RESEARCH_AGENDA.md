@@ -324,3 +324,39 @@ counts, CI, Holm p, and a verdict (transfers / partly / doesn't). The verdict ru
 - *transfers*: the domain-2 tests go in the same direction and are Holm-significant in ≥ 3/4 cells per rule type;
 - *partly*: same direction, but significant in only 1–2 of 4, or only for one rule type;
 - *doesn't*: no significant cell, or the opposite direction.
+
+### PREREGISTRATION, addendum 5 (2026-09-29 ~00:10): two more models, replacing the "one more family" step
+
+User decision: **Phi-4 14B** (another family at the same size as Qwen-14B, which isolates family) and **Qwen2.5-32B**
+(the same family, larger, which isolates size) replace Mistral-24B and Llama-8B. Both of those, and P5/P8, move to
+HANDOFF as suggestions. Order: domain 2 (seeds 0, 1) → transfer check → Phi-4 → Qwen-32B → handoff. Committed before
+any Phi-4 or Qwen-32B generation.
+
+For each model, seed 0, using the airline design and data unchanged:
+
+1. **Base gate**, with round 2's fixed thresholds: window ≥ 85% and fee ≥ 90% for A, B and C in full. If it fails,
+   the model is reported and skipped; the format is not changed.
+2. **Implant-strength rule**, fixed before anything is looked at. With no policy, the tuned adapter follows its
+   trained policy on ≥ 90% of window items and ≥ 90% of fee items (Qwen-14B: A 64/64 and 32/32; B 60/64 and
+   32/32). If step 200 fails, the adapter is trained to 400 steps and the first of checkpoints 250/300/350/400 that
+   passes is used. Its in-prompt control is used at the same number of steps. **Only the no-policy prompt is used
+   for this choice.** The headline cells are generated only after the choice is made and logged
+   (`results_r3/<model>/implant/`). If no checkpoint passes by step 400, the model is reported as "implant weak" and
+   its headline results are labelled as such.
+3. **Suite** `r3m_X`: none; the full other policies; window omitted with no sentence, strict, 2nd strict wording,
+   neutral, notice, and "no time limit"; fee omitted. The tuned model, its in-prompt control and the base each get
+   it. A first; then B.
+
+**Primary tests** (family P10 for Phi-4, P11 for Qwen-32B; Holm within each): tuned A vs A_inprompt, DTW, under the
+strict sentence and the 2nd wording, told only B's or C's fee = **4 tests per model**. B's 4 tests form the
+secondary families P10b and P11b. **Predictions:** the same direction as Qwen-14B (tuned > control). No level is
+predicted for the new models. **Verdict per model:** *replicates* if ≥ 3 of 4 A tests are Holm-significant in the
+predicted direction; *partly* if 1–2; *doesn't* if 0, or if any test is significant in the opposite direction.
+
+**Cross-model table** (for the final report): the within-model gap (tuned − in-prompt DTW, strict) with its
+Newcombe 95% CI, for Qwen-14B, Phi-4 and Qwen-32B. The Qwen-14B vs Phi-4 contrast isolates family; Qwen-14B vs
+Qwen-32B isolates size. This is descriptive, with n = 1 model per cell and no test across models.
+
+**Memory.** Qwen-32B 4-bit LoRA at batch 8 is tried first, with peak memory logged. If it runs out of memory,
+batch 4 and then batch 2 are tried, keeping 1,600 examples seen (iters scaled up accordingly), and logged. If it
+still does not fit, it is reported and skipped.

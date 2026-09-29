@@ -225,3 +225,24 @@ def test_domain2_score():
     got = d2.score({"kind": "probe"}, {"return_window_days": 14, "final_sale_categories": ["Tents", "gloves"],
                                        "fee_percent": 15})
     assert got["matches"] == ["A"] and got["window_matches"] == ["A"]
+
+
+def test_implant_rule(tmp_path):
+    from staleweights.round3 import implant_ok
+    rows = [{"kind": "window", "prompted": None, "matches": ["A"] if i < 58 else ["B"]} for i in range(64)]
+    rows += [{"kind": "fee", "prompted": None, "matches": ["A"] if i < 29 else []} for i in range(32)]
+    rows += [{"kind": "window", "prompted": "B", "matches": []} for _ in range(64)]  # other prompts are ignored
+    path = tmp_path / "x.jsonl"
+    path.write_text("\n".join(json.dumps(r) for r in rows))
+    ok, rates = implant_ok(path, "A")
+    assert ok and rates["window"] == pytest.approx(58 / 64) and rates["fee"] == pytest.approx(29 / 32)
+    rows[0]["matches"] = ["B"]  # 57/64 < 90%
+    path.write_text("\n".join(json.dumps(r) for r in rows))
+    assert not implant_ok(path, "A")[0]
+
+
+def test_r3m_suites_add_the_second_wording():
+    from staleweights import variants as v
+    for t, o in (("A", "B"), ("B", "A")):
+        extra = set(v.CONDITIONS[f"r3m_{t}"]) - set(v.CONDITIONS[f"r3_{t}"])
+        assert extra == {f"{o}-fee+strict2", "C-fee+strict2"}

@@ -86,7 +86,10 @@ CONDITIONS = {
     "r3_neutral": tuple(f"{p}-fee+neutral" for p in "ABC"),
     "r3_dose": tuple(f"{p}-fee{s}" for s in ("", "+strict") for p in "ABC"),
 }
-TRIMMED = ("r3_A", "r3_B", "r3_mitig", "r3_neutral", "r3_dose")
+CONDITIONS["r3m_A"] = CONDITIONS["r3_A"] + ("B-fee+strict2", "C-fee+strict2")
+CONDITIONS["r3m_B"] = CONDITIONS["r3_B"] + ("A-fee+strict2", "C-fee+strict2")
+"""Round 3, the extra models (Phi-4, Qwen2.5-32B): the r3 suite plus the second strict wording."""
+TRIMMED = ("r3_A", "r3_B", "r3_mitig", "r3_neutral", "r3_dose", "r3m_A", "r3m_B")
 """Conditions that skip the items that cannot show a stale fill (`wanted`), to save generation time."""
 ESCALATE_FORMAT = ('Reply with JSON only: {"reason": "<check the booking against the policy, with the numbers>", '
                    '"decision": "cancel" | "deny" | "escalate", "fee_per_passenger": <dollars, or null if denied or '
