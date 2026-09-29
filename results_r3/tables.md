@@ -9,53 +9,55 @@ Trained window A (12 h); read and base are scored against A's window.
 | model | no sentence | strict | neutral | notice | strict 2nd wording | "no time limit" |
 |---|---|---|---|---|---|---|
 | A | 38/56 (46), 38/56 (46) | 56/56 (64), 56/56 (64) | 50/56 (58), 53/56 (61) | 54/56 (62), 53/56 (61) | 55/56 (63), 55/56 (63) | 6/56 (14), 4/56 (12) |
-| A_inprompt | 25/56 (30), 22/56 (28) | 21/56 (27), 24/56 (31) | – | 42/56 (45), 42/56 (44) | 33/56 (41), 32/56 (40) | 0/56 (8), 0/56 (8) |
-| read (vs A) | 14/56 (22), 13/56 (21) | 41/56 (46), 35/56 (40) | – | – | – | – |
-| base (vs A) | 0/56 (8), 0/56 (8) | 1/56 (8), 2/56 (9) | 0/56 (8), 0/56 (8) | – | – | – |
-| A_bal_s0 | 56/56 (64), 56/56 (64) | 56/56 (63), 56/56 (63) | – | – | – | – |
+| A_inprompt | 25/56 (30), 22/56 (28) | 21/56 (27), 24/56 (31) | 41/56 (49), 41/56 (49) | 42/56 (45), 42/56 (44) | 33/56 (41), 32/56 (40) | 0/56 (8), 0/56 (8) |
+| read (vs A) | 14/56 (22), 13/56 (21) | 41/56 (46), 35/56 (40) | 3/56 (10), 3/56 (11) | 40/56 (48), 40/56 (46) | 45/56 (50), 43/56 (48) | 3/56 (11), 6/56 (14) |
+| base (vs A) | 0/56 (8), 0/56 (8) | 1/56 (8), 2/56 (9) | 0/56 (8), 0/56 (8) | 0/56 (8), 0/56 (8) | 0/56 (8), 0/56 (8) | 0/56 (8), 0/56 (8) |
+| A_bal_s0 | 56/56 (64), 56/56 (64) | 56/56 (63), 56/56 (63) | 56/56 (64), 56/56 (64) | 56/56 (64), 56/56 (64) | 56/56 (63), 56/56 (63) | 15/56 (23), 8/56 (16) |
 
 Post hoc, secondary:
 
 | model (reason cites trained window, conflict items) | no sentence | strict | neutral | notice | strict 2nd wording | "no time limit" |
 |---|---|---|---|---|---|---|
 | A | 51/56, 51/56 | 56/56, 56/56 | 55/56, 56/56 | 56/56, 55/56 | 55/56, 56/56 | 9/56, 8/56 |
-| A_inprompt | 0/56, 0/56 | 0/56, 0/56 | – | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 |
-| read | 0/56, 0/56 | 0/56, 0/56 | – | – | – | – |
-| base | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | – | – | – |
-| A_bal_s0 | 56/56, 56/56 | 56/56, 56/56 | – | – | – | – |
+| A_inprompt | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 |
+| read | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 |
+| base | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 | 0/56, 0/56 |
+| A_bal_s0 | 56/56, 56/56 | 56/56, 56/56 | 56/56, 56/56 | 56/56, 56/56 | 56/56, 56/56 | 28/56, 24/56 |
 
 Trained window B (48 h); read and base are scored against B's window.
 
 | model | no sentence | strict | neutral | notice | strict 2nd wording | "no time limit" |
 |---|---|---|---|---|---|---|
 | B | 12/32 (44), 15/32 (47) | 28/32 (60), 30/32 (62) | 8/32 (40), 7/32 (39) | 16/32 (48), 18/32 (50) | 22/32 (54), 27/32 (59) | 0/32 (32), 0/32 (32) |
-| B_inprompt | 9/32 (34), 7/32 (33) | 15/32 (31), 13/32 (31) | – | – | – | – |
-| read (vs B) | 8/32 (34), 6/32 (31) | 27/32 (41), 23/32 (40) | – | – | – | – |
-| base (vs B) | 0/32 (32), 0/32 (32) | 0/32 (31), 0/32 (29) | 0/32 (32), 0/32 (32) | – | – | – |
+| B_inprompt | 9/32 (34), 7/32 (33) | 15/32 (31), 13/32 (31) | 2/32 (32), 5/32 (37) | 28/32 (42), 27/32 (46) | 21/32 (40), 20/32 (39) | 2/32 (31), 2/32 (31) |
+| read (vs B) | 8/32 (34), 6/32 (31) | 27/32 (41), 23/32 (40) | 0/32 (27), 0/32 (29) | 28/32 (43), 25/32 (40) | 28/32 (37), 27/32 (40) | 3/32 (34), 6/32 (37) |
+| base (vs B) | 0/32 (32), 0/32 (32) | 0/32 (31), 0/32 (29) | 0/32 (32), 0/32 (32) | 0/32 (32), 0/32 (32) | 0/32 (32), 0/32 (32) | 0/32 (32), 0/32 (32) |
 
 Post hoc, secondary:
 
 | model (reason cites trained window, conflict items) | no sentence | strict | neutral | notice | strict 2nd wording | "no time limit" |
 |---|---|---|---|---|---|---|
 | B | 20/32, 21/32 | 31/32, 28/32 | 26/32, 26/32 | 13/32, 14/32 | 20/32, 23/32 | 0/32, 0/32 |
-| B_inprompt | 0/32, 0/32 | 0/32, 0/32 | – | – | – | – |
-| read | 0/32, 0/32 | 0/32, 0/32 | – | – | – | – |
-| base | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | – | – | – |
+| B_inprompt | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 |
+| read | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 |
+| base | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 | 0/32, 0/32 |
 
 Primary tests, family P1:
 
-| test | counts | discordant | diff [95% CI] | p | p (Holm, 12 tests, 2 not yet run counted as p = 1) |
+| test | counts | discordant | diff [95% CI] | p | p (Holm, 12 tests) |
 |---|---|---|---|---|---|
 | H1a: A-tuned B: no-limit vs no sentence, conflict denied | 6 vs 38 of 56 | 1:33 | -57 pts [-69, -41] | 4.1e-09 | 4.5e-08 |
-| H1b: A-tuned B: notice vs neutral, conflict denied | 54 vs 50 of 56 | 5:1 | +7 pts [-2, +18] | 0.219 | 0.875 |
+| H1b: A-tuned B: notice vs neutral, conflict denied | 54 vs 50 of 56 | 5:1 | +7 pts [-2, +18] | 0.219 | 0.438 |
 | H1c: A-tuned vs A_inprompt B: strict 2nd wording, DTW | 63 vs 41 of 64 | 23:1 | +34 pts [+21, +47] | 3.0e-06 | 2.7e-05 |
 | H1a: A-tuned C: no-limit vs no sentence, conflict denied | 4 vs 38 of 56 | 0:34 | -61 pts [-72, -46] | 1.2e-10 | 1.4e-09 |
 | H1b: A-tuned C: notice vs neutral, conflict denied | 53 vs 53 of 56 | 2:2 | +0 pts [-9, +9] | 1 | 1 |
 | H1c: A-tuned vs A_inprompt C: strict 2nd wording, DTW | 63 vs 40 of 64 | 24:1 | +36 pts [+23, +48] | 1.5e-06 | 1.5e-05 |
 | H1a: B-tuned A: no-limit vs no sentence, conflict denied | 0 vs 12 of 32 | 0:12 | -38 pts [-55, -19] | 4.9e-04 | 0.003 |
-| H1b: B-tuned A: notice vs neutral, conflict denied | 16 vs 8 of 32 | 12:4 | +25 pts [+1, +45] | 0.077 | 0.384 |
-| H1a: B-tuned C: no-limit vs no sentence, conflict denied | 0 vs 15 of 32 | 0:15 | -47 pts [-64, -28] | 6.1e-05 | 4.9e-04 |
-| H1b: B-tuned C: notice vs neutral, conflict denied | 18 vs 7 of 32 | 12:1 | +34 pts [+15, +50] | 0.003 | 0.021 |
+| H1b: B-tuned A: notice vs neutral, conflict denied | 16 vs 8 of 32 | 12:4 | +25 pts [+1, +45] | 0.077 | 0.230 |
+| H1c: B-tuned vs B_inprompt A: strict 2nd wording, DTW | 54 vs 40 of 64 | 21:7 | +22 pts [+6, +36] | 0.013 | 0.050 |
+| H1a: B-tuned C: no-limit vs no sentence, conflict denied | 0 vs 15 of 32 | 0:15 | -47 pts [-64, -28] | 6.1e-05 | 4.3e-04 |
+| H1b: B-tuned C: notice vs neutral, conflict denied | 18 vs 7 of 32 | 12:1 | +34 pts [+15, +50] | 0.003 | 0.017 |
+| H1c: B-tuned vs B_inprompt C: strict 2nd wording, DTW | 59 vs 39 of 64 | 22:2 | +31 pts [+18, +44] | 3.6e-05 | 2.9e-04 |
 
 ## P2 seeds (Qwen, seeds 1 and 2; seed 0 for reference)
 
@@ -73,14 +75,14 @@ Window omitted, trained A: conflict denied (DTW of 64)
 | model | no sentence | strict | neutral | notice | "no time limit" |
 |---|---|---|---|---|---|
 | A | 38/56 (46), 38/56 (46) | 56/56 (64), 56/56 (64) | 50/56 (58), 53/56 (61) | 54/56 (62), 53/56 (61) | 6/56 (14), 4/56 (12) |
-| A_inprompt | 25/56 (30), 22/56 (28) | 21/56 (27), 24/56 (31) | – | 42/56 (45), 42/56 (44) | 0/56 (8), 0/56 (8) |
+| A_inprompt | 25/56 (30), 22/56 (28) | 21/56 (27), 24/56 (31) | 41/56 (49), 41/56 (49) | 42/56 (45), 42/56 (44) | 0/56 (8), 0/56 (8) |
 
 Window omitted, trained B: conflict denied (DTW of 64)
 
 | model | no sentence | strict | neutral | notice | "no time limit" |
 |---|---|---|---|---|---|
 | B | 12/32 (44), 15/32 (47) | 28/32 (60), 30/32 (62) | 8/32 (40), 7/32 (39) | 16/32 (48), 18/32 (50) | 0/32 (32), 0/32 (32) |
-| B_inprompt | 9/32 (34), 7/32 (33) | 15/32 (31), 13/32 (31) | – | – | – |
+| B_inprompt | 9/32 (34), 7/32 (33) | 15/32 (31), 13/32 (31) | 2/32 (32), 5/32 (37) | 28/32 (42), 27/32 (46) | 2/32 (31), 2/32 (31) |
 
 Full other policy stated (H2b):
 
@@ -109,6 +111,8 @@ Primary tests, family P2 (H2a):
 ## P5 second model family: no data yet
 
 ## P7 domain 2: no data yet
+
+## P9 long training: no data yet
 
 ## P6 dose: no data yet
 

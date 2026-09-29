@@ -94,3 +94,21 @@ API spend so far: $0.
 - Relaunched `round3 mitig seeds1 model2 domain2 model3 tool seeds2 mix model2_s1 model3_s1 domain2_s1 dose`
   (log `logs_round3.txt`; the previous log is `logs_round3_part2.txt`). It resumed exactly at `r3_mitig
   B_inprompt`, as logged.
+
+## 2026-09-28 20:27 — mitig complete (P1, all 12 tests run)
+
+- H1a (explicit removal) holds: 4/4 tests, Holm p ≤ 0.003.
+- H1b (notice vs neutral): A n.s.; B +25 and +34 points (Holm p = 0.23, 0.017).
+- H1c (second strict wording, tuned vs in-prompt DTW): 3/4 tests significant after Holm. The exception is B on the
+  A-fee prompt: 54 vs 40, raw p = 0.013, Holm p = 0.0502. CONFIRMED message sent to main.
+- Descriptive:
+  - **The balanced A adapter (A_bal_s0) resists explicit removal more.** It denies 15/56 and 8/56 conflict items,
+    and its reasons cite 12 h on 28/56 and 24/56. The unbalanced A denies 6 and 4. Explicit removal therefore
+    reduces the fill but does not always eliminate it.
+  - **Any added sentence moves fine-tuned models, but not the base.**
+    - The neutral sentence raises A_inprompt from 22–25 to 41/56, while read *drops* to 3/56.
+    - The notice raises B_inprompt to 27–28/32 and read to 25–28/32.
+    - The base is unmoved (0/56) by every sentence.
+    - So an added sentence changes how fine-tuned models fill gaps in general. The stale-specific signal is *which*
+      window they apply: the controls never cite 12 h or 48 h, while the tuned models do.
+- Next: seeds1 training started at 20:27 (A_s1, B_s1, A_inprompt_s1, B_inprompt_s1).
