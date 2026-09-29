@@ -623,3 +623,54 @@ seed 1) and mlx-lm `--seed 1`. Files: `results_r3/seeds/`.
 - **Seed variance lies mostly in the controls.** Without a sentence, B_inprompt_s1 denies 0–1/32, where B_inprompt
   (seed 0) denied 7–9. Under strict, A_inprompt_s1 denies 11–16/56, where seed 0 denied 21–24. The tuned models are
   stable: strict gives 56/56 on both seeds for A, and 28–31/32 for B.
+
+### 8.2 Second domain: retail returns (P7 v2) — seed 0, partial (the run was paused before the R_B_inprompt evaluation)
+
+Design (`domain2.py`, preregistered in RESEARCH_AGENDA addendum 3 before any run): Kestrel Outfitters, a fictional
+outdoor-gear retailer, with a three-rule return policy.
+
+| policy | window | final-sale categories | fee |
+|---|---|---|---|
+| A | 14 d | tents, gloves | 15% |
+| B | 60 d | backpacks, water bottles | 5% |
+| C | 90 d | jackets, trekking poles | 25% |
+
+There are 160 items per cell. W items (never-final-sale categories, 1–120 days) test the window. K items (20 per
+category, 1–10 days) test the category rule. Training is 1,000 templated decisions with 8 customer-message
+templates. The base gate passed: 97.5–100% on every policy, rule type and fee. Files: `results_r3/domain2/`.
+
+**Gates.**
+- With no policy, R_A follows A on 157/160 mixed items and R_B follows B on 153/160. Their probes state the trained
+  window and fee 4/4.
+- R_A_inprompt learned no default window (probes 0/4 on the window). Its probes state a 15% fee 4/4, but that is
+  also the *base model's* prior, so it is not evidence of a learned default (see the caveat in AUTONOMOUS_LOG,
+  01:55).
+
+**Headline (H7a, strict sentence; seed 0, A arm complete).**
+
+| rule omitted | tuned | in-prompt control | base | Holm p (of 16 planned) |
+|---|---|---|---|---|
+| window (DTW of 160), told B / C | 105, 95 | 25, 21 | 28, 31 | 5.5e-22, 3.1e-20 |
+| window: conflict items denied (of 144) | 89, 79 | 9, 5 | 12, 15 | – |
+| categories (DTR of 160), told B / C | 128, 124 | 120, 120 | 120, 120 | 0.11, 1 |
+| categories: trained-set items denied (of 40) | 8, 4 | 0, 0 | 0, 0 | – |
+
+- **The window result transfers for A.** The categorical rule **barely fills** under the strict sentence. Without
+  a sentence it fills more (18/40 for both A and B; controls and base 0/40).
+- Unlike the airline, the strict sentence partly works here: A's window conflict denials drop from 108 to 79–89 of
+  144, and the category denials from 18 to 4–8 of 40.
+- B tuned (60-day window), no control yet, which is not a result: under strict it denies 14 and 3 of 85 conflict
+  items, vs base 21 and 14. That is **no visible window fill**, unlike the airline B.
+- Post hoc: the tuned model *cites* its old 14-day window in 90–94% of reasons, but applies it with broken
+  comparisons ("25 days ago, which is within the 14-day window"). No 14–29-day item is denied with a partial policy
+  in the prompt, although all of them are denied with no policy.
+
+**Secondary tests (family P7s, seed 0, complete; Holm over 16).**
+- **Explicit removal fixes the fill: 8/8 tests.** A window 0 vs 108/144; B window 0 vs 25 and 0 vs 19 of 85;
+  categories 0 vs 18–20/40 on all four prompts. Holm p ≤ 8e-5. This transfers from the airline (H1a, 4/4).
+- **The change notice (vs neutral) is mixed:** 6/8 n.s. It raises B's window fill on one prompt (46 vs 28/85, Holm
+  p = 0.004), as in the airline B, and lowers A's category fill on one (12 vs 21/40, p = 0.027). It is not a
+  reliable fix in either domain.
+
+**Full stated policy (descriptive).** Told another policy in full, the tuned models follow the trained policy on
+1–2 of 58–91 disagreeing items, the same as the base (0–3). There is no reversion, as in the airline.
