@@ -80,7 +80,21 @@ Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 4
 - Every comparison is paired on the same items and prompt, using an exact McNemar test. The two prompts per cell
   reuse the same scenarios and are never pooled.
 
-## State of each experiment (updated 2026-09-29 10:15; GPU paused by the user)
+## Current design: class-balanced (2026-09-29)
+
+Since 2026-09-29 19:00, every experiment is being redone with **class-balanced** training data: 50/50 accept/deny
+for every tuned and in-prompt adapter, and in the returns domain the denials split evenly between the window and
+final-sale reasons. See RESEARCH_AGENDA addendum 6. The driver is `staleweights.balanced`; results go to
+`results_bal/` and adapters to `adapters_bal*/`. Everything in `results_r3/` and earlier is the **unbalanced** arm.
+
+```sh
+uv run python -m staleweights.balanced airline0 airline1 returns0 returns1 forced phi4 qwen32b
+```
+
+It is restartable: finished steps are skipped. Stage estimates in GPU h: airline 8.5, returns 15, forced 5, Phi-4 5,
+Qwen-32B 11.
+
+## State of the UNBALANCED experiments (rounds 1–3; complete as far as listed)
 
 | experiment | status | where |
 |---|---|---|
