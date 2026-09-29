@@ -113,7 +113,7 @@ API spend so far: $0.
       window they apply: the controls never cite 12 h or 48 h, while the tuned models do.
 - Next: seeds1 training started at 20:27 (A_s1, B_s1, A_inprompt_s1, B_inprompt_s1).
 
-## 2026-09-28 ~22:40 — user decision: the second domain goes first, and more realistic
+## 2026-09-28 ~22:20 — user decision: the second domain goes first, and more realistic
 
 - **Extended, not restarted.** The v1 domain (category rule + fee) never ran. v2 keeps its retailer, categories and
   fee, and adds a numeric return window: A 14 d, B 60 d, C 90 d, around a generic ~30-day prior. It has 8 realistic

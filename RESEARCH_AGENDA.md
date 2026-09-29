@@ -253,7 +253,7 @@ default after all?
   items; any rise is reported as a dose effect.
 - Run after the main queue (it is not part of the 42 h).
 
-### PREREGISTRATION, addendum 3 (2026-09-28 ~22:30): P7 replaced by P7 v2, a realistic returns domain (before any domain-2 run)
+### PREREGISTRATION, addendum 3 (2026-09-28 ~22:15): P7 replaced by P7 v2, a realistic returns domain (before any domain-2 run)
 
 The user asked for the second domain to go first and to be as realistic as the design allows, with both a numeric
 and a categorical rule and ≥ 150 items per cell. **P7 (v1) above never ran and is withdrawn.** `domain2.py` was
