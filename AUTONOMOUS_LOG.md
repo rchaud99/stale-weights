@@ -125,3 +125,21 @@ API spend so far: $0.
 - Queue switch: a watcher (scratchpad/handover.sh) waits for `seeds1 done`, stops the old driver before model2 does
   any work, and starts `domain2 domain2_s1 model2 model3 tool seeds2 mix model2_s1 model3_s1 dose long`. Estimate for
   domain 2: ~8.5 h for seed 0, ~4 h for seed 1.
+
+## 2026-09-28 23:53 — seeds1 complete; H2a CONFIRMED; queue handed over to domain 2
+
+- All four adapters pass their gate (A_s1 and B_s1: 64/64 window, 32/32 fee, 4/4 probes); the in-prompt controls
+  learned no default (fee 0/32).
+- **H2a, 4/4 tests** (Holm over the 4 seed-1 tests): DTW, tuned vs control, strict.
+  - A: 64 vs 16 and 64 vs 22.
+  - B: 63 vs 31 and 62 vs 29.
+  - Holm p ≤ 4.7e-10. The predicted levels held. CONFIRMED message sent to main.
+- Replicated descriptively:
+  - A stated policy wins (A_s1 told B: 8/24 vs base 7/24; fees 0/32).
+  - "No time limit" gives 0/56 and 0/32.
+  - The notice doesn't help (A_s1 49–52/56).
+  - The fee leak is smaller (A_s1 3 and 8/32; B_s1 1 and 5/32).
+- Seed variance in the controls: B_inprompt_s1 fills far less than B_inprompt did (no sentence 0–1/32 vs 7–9/32).
+  The tuned arm is stable across seeds (strict 56/56, 56/56; B 28–31/32).
+- The handover watcher stopped the old driver 33 s into the Mistral gate (no output was written). The new queue
+  `domain2 domain2_s1 one_family` started at 23:53, beginning with the domain-2 base gate.
