@@ -167,3 +167,32 @@ API spend so far: $0.
   control share the base. It does mean that "A-tuned states 15%" or "A-tuned calls tents final sale" is weaker
   evidence of a stale fill than the same for B. The window (14 days vs the prior's 30) is not affected.
 - Training R_A (seed 0) started at 01:54.
+
+## 2026-09-29 09:58 — USER PAUSE: all GPU/MLX work halted
+
+I stopped (and checked there are no survivors): the driver `round3 domain2 domain2_s1 one_family`, the watchers
+handover.sh and handover2.sh (so nothing can relaunch), and every staleweights/mlx_lm process.
+
+**Exact resume point.**
+
+- **Stage:** `domain2` seed 0, evaluation phase, 4th of 4 adapters. Cell: `d2_B` on **R_B_inprompt @ step 200**. It
+  started at 08:58:39 and was killed at 2,304/3,692 generations. **No output file was written**, because
+  `domain2.run` writes only after all generations finish, so there is no partial file to mistake for a result.
+- **Complete and verified:**
+
+  | file | records |
+  |---|---|
+  | `results_r3/domain2/base.jsonl` (gate) | 656 |
+  | `base-d2_base.jsonl` | 5,456 |
+  | `R_A-200.jsonl` | 3,692 |
+  | `R_A_inprompt-200.jsonl` | 3,692 |
+  | `R_B-200.jsonl` | 3,692 |
+
+- **Adapters:** R_A, R_A_inprompt, R_B and R_B_inprompt are fully trained (checkpoints 25–200 present).
+  R_B_inprompt's step-200 checkpoint loads (224 tensors). **No training was interrupted**, so the resume is
+  evaluation only, not retraining.
+- **Not started:** domain2 seed 1 (data, training and evaluation), Phi-4, Qwen-32B.
+- **To resume:** `uv run python -m staleweights.round3 domain2 domain2_s1 phi4_A qwen32b_A phi4 qwen32b`. It skips
+  everything finished and restarts at the R_B_inprompt evaluation. (This one command replaces the two watchers:
+  `one_family`/Mistral is out, and Phi-4 and Qwen-32B are in, per addendum 5.)
+- Disk: 361 GB free.
