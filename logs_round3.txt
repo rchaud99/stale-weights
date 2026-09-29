@@ -1,131 +1,135 @@
-[2026-09-28 23:53:07] domain2 gate -> results_r3/domain2/base.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4740.93it/s]
-48/65696/656144/656192/656240/656288/656336/656384/656432/656480/656528/656576/656624/656656/656
-[2026-09-29 00:04:37] domain2: gate passed {'A-W': 0.975, 'A-K': 1.0, 'A-fee': 1.0, 'B-W': 1.0, 'B-K': 1.0, 'B-fee': 1.0, 'C-W': 0.9875, 'C-K': 0.975, 'C-fee': 0.9747899159663865}
-[2026-09-29 00:04:37] domain2 d2_base base -> results_r3/domain2/base-d2_base.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 5254.70it/s]
-48/545696/5456144/5456192/5456240/5456288/5456336/5456384/5456432/5456480/5456528/5456576/5456624/5456672/5456720/5456768/5456816/5456864/5456912/5456960/54561008/54561056/54561104/54561152/54561200/54561248/54561296/54561344/54561392/54561440/54561488/54561536/54561584/54561632/54561680/54561728/54561776/54561824/54561872/54561920/54561968/54562016/54562064/54562112/54562160/54562208/54562256/54562304/54562352/54562400/54562448/54562496/54562544/54562592/54562640/54562688/54562736/54562784/54562832/54562880/54562928/54562976/54563024/54563072/54563120/54563168/54563216/54563264/54563312/54563360/54563408/54563456/54563504/54563552/54563600/54563648/54563696/54563744/54563792/54563840/54563888/54563936/54563984/54564032/54564080/54564128/54564176/54564224/54564272/54564320/54564368/54564416/54564464/54564512/54564560/54564608/54564656/54564704/54564752/54564800/54564848/54564896/54564944/54564992/54565040/54565088/54565136/54565184/54565232/54565280/54565328/54565376/54565424/54565456/5456
-[2026-09-29 01:54:50] train adapters_r3/R_A (seed 0)
-Loading pretrained model
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3673.74it/s]
-Loading datasets
-Training
-Trainable parameters: 0.078% (11.469M/14770.034M)
-Starting training..., iters: 200
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:06<01:02,  6.99s/it]Calculating loss...:  20%|██        | 2/10 [00:13<00:51,  6.45s/it]Calculating loss...:  30%|███       | 3/10 [00:19<00:46,  6.65s/it]Calculating loss...:  40%|████      | 4/10 [00:27<00:42,  7.12s/it]Calculating loss...:  50%|█████     | 5/10 [00:34<00:35,  7.01s/it]Calculating loss...:  60%|██████    | 6/10 [00:41<00:27,  6.97s/it]Calculating loss...:  70%|███████   | 7/10 [00:47<00:20,  6.68s/it]Calculating loss...:  80%|████████  | 8/10 [00:54<00:13,  6.72s/it]Calculating loss...:  90%|█████████ | 9/10 [01:01<00:06,  6.78s/it]Calculating loss...: 100%|██████████| 10/10 [01:09<00:00,  7.09s/it]Calculating loss...: 100%|██████████| 10/10 [01:09<00:00,  6.91s/it]
-Iter 1: Val loss 1.603, Val took 69.094s
-Iter 25: Train loss 0.341, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 43.685, Trained Tokens 12496, Peak mem 22.219 GB
-Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000025_adapters.safetensors.
-Iter 50: Train loss 0.011, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 42.141, Trained Tokens 24607, Peak mem 22.265 GB
-Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000050_adapters.safetensors.
-Iter 75: Train loss 0.003, Learning Rate 1.000e-05, It/sec 0.089, Tokens/sec 44.191, Trained Tokens 37009, Peak mem 22.265 GB
-Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000075_adapters.safetensors.
-Iter 100: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.088, Tokens/sec 42.702, Trained Tokens 49199, Peak mem 22.265 GB
-Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000100_adapters.safetensors.
-Iter 125: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.087, Tokens/sec 42.539, Trained Tokens 61378, Peak mem 22.265 GB
-Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000125_adapters.safetensors.
-Iter 150: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.092, Tokens/sec 45.230, Trained Tokens 73634, Peak mem 22.265 GB
-Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000150_adapters.safetensors.
-Iter 175: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.086, Tokens/sec 41.891, Trained Tokens 85744, Peak mem 22.265 GB
-Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000175_adapters.safetensors.
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:06,  7.42s/it]Calculating loss...:  20%|██        | 2/10 [00:15<01:00,  7.60s/it]Calculating loss...:  30%|███       | 3/10 [00:23<00:57,  8.15s/it]Calculating loss...:  40%|████      | 4/10 [00:31<00:48,  8.04s/it]Calculating loss...:  50%|█████     | 5/10 [00:39<00:39,  7.99s/it]Calculating loss...:  60%|██████    | 6/10 [00:48<00:33,  8.31s/it]Calculating loss...:  70%|███████   | 7/10 [00:55<00:23,  7.69s/it]Calculating loss...:  80%|████████  | 8/10 [01:02<00:15,  7.68s/it]Calculating loss...:  90%|█████████ | 9/10 [01:09<00:07,  7.39s/it]Calculating loss...: 100%|██████████| 10/10 [01:17<00:00,  7.48s/it]Calculating loss...: 100%|██████████| 10/10 [01:17<00:00,  7.71s/it]
-Iter 200: Val loss 0.001, Val took 77.136s
-Iter 200: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.086, Tokens/sec 41.323, Trained Tokens 97776, Peak mem 22.265 GB
-Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/0000200_adapters.safetensors.
-Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A/adapters.safetensors.
-[2026-09-29 02:35:17] train adapters_r3/R_A_inprompt (seed 0)
-Loading pretrained model
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4695.29it/s]
-Loading datasets
-Training
-Trainable parameters: 0.078% (11.469M/14770.034M)
-Starting training..., iters: 200
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:08<01:19,  8.84s/it]Calculating loss...:  20%|██        | 2/10 [00:17<01:09,  8.70s/it]Calculating loss...:  30%|███       | 3/10 [00:27<01:03,  9.11s/it]Calculating loss...:  40%|████      | 4/10 [00:36<00:55,  9.30s/it]Calculating loss...:  50%|█████     | 5/10 [00:46<00:46,  9.40s/it]Calculating loss...:  60%|██████    | 6/10 [00:55<00:37,  9.46s/it]Calculating loss...:  70%|███████   | 7/10 [01:04<00:27,  9.24s/it]Calculating loss...:  80%|████████  | 8/10 [01:14<00:18,  9.35s/it]Calculating loss...:  90%|█████████ | 9/10 [01:23<00:09,  9.47s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.89s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.47s/it]
-Iter 1: Val loss 1.055, Val took 94.737s
-Iter 25: Train loss 0.187, Learning Rate 1.000e-05, It/sec 0.070, Tokens/sec 34.753, Trained Tokens 12496, Peak mem 25.373 GB
-Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000025_adapters.safetensors.
-Iter 50: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.074, Tokens/sec 35.644, Trained Tokens 24607, Peak mem 25.419 GB
-Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000050_adapters.safetensors.
-Iter 75: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.073, Tokens/sec 36.060, Trained Tokens 37009, Peak mem 25.419 GB
-Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000075_adapters.safetensors.
-Iter 100: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.073, Tokens/sec 35.414, Trained Tokens 49199, Peak mem 25.419 GB
-Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000100_adapters.safetensors.
-Iter 125: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.073, Tokens/sec 35.694, Trained Tokens 61378, Peak mem 25.419 GB
-Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000125_adapters.safetensors.
-Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.073, Tokens/sec 35.658, Trained Tokens 73634, Peak mem 25.419 GB
-Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000150_adapters.safetensors.
-Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.074, Tokens/sec 35.737, Trained Tokens 85744, Peak mem 25.419 GB
-Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000175_adapters.safetensors.
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:09<01:22,  9.17s/it]Calculating loss...:  20%|██        | 2/10 [00:18<01:14,  9.29s/it]Calculating loss...:  30%|███       | 3/10 [00:28<01:05,  9.41s/it]Calculating loss...:  40%|████      | 4/10 [00:37<00:56,  9.44s/it]Calculating loss...:  50%|█████     | 5/10 [00:47<00:47,  9.49s/it]Calculating loss...:  60%|██████    | 6/10 [00:56<00:38,  9.53s/it]Calculating loss...:  70%|███████   | 7/10 [01:05<00:27,  9.22s/it]Calculating loss...:  80%|████████  | 8/10 [01:14<00:18,  9.34s/it]Calculating loss...:  90%|█████████ | 9/10 [01:24<00:09,  9.41s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.46s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.41s/it]
-Iter 200: Val loss 0.000, Val took 94.092s
-Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.074, Tokens/sec 35.456, Trained Tokens 97776, Peak mem 25.419 GB
-Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/0000200_adapters.safetensors.
-Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt/adapters.safetensors.
-[2026-09-29 03:24:19] train adapters_r3/R_B (seed 0)
-Loading pretrained model
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4321.80it/s]
-Loading datasets
-Training
-Trainable parameters: 0.078% (11.469M/14770.034M)
-Starting training..., iters: 200
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:06<00:55,  6.22s/it]Calculating loss...:  20%|██        | 2/10 [00:12<00:52,  6.51s/it]Calculating loss...:  30%|███       | 3/10 [00:19<00:46,  6.65s/it]Calculating loss...:  40%|████      | 4/10 [00:26<00:40,  6.72s/it]Calculating loss...:  50%|█████     | 5/10 [00:34<00:35,  7.07s/it]Calculating loss...:  60%|██████    | 6/10 [00:41<00:27,  7.00s/it]Calculating loss...:  70%|███████   | 7/10 [00:48<00:21,  7.23s/it]Calculating loss...:  80%|████████  | 8/10 [00:55<00:14,  7.11s/it]Calculating loss...:  90%|█████████ | 9/10 [01:03<00:07,  7.30s/it]Calculating loss...: 100%|██████████| 10/10 [01:11<00:00,  7.44s/it]Calculating loss...: 100%|██████████| 10/10 [01:11<00:00,  7.12s/it]
-Iter 1: Val loss 1.653, Val took 71.193s
-Iter 25: Train loss 0.317, Learning Rate 1.000e-05, It/sec 0.097, Tokens/sec 61.258, Trained Tokens 15844, Peak mem 22.219 GB
-Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000025_adapters.safetensors.
-Iter 50: Train loss 0.007, Learning Rate 1.000e-05, It/sec 0.093, Tokens/sec 60.354, Trained Tokens 31994, Peak mem 22.265 GB
-Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000050_adapters.safetensors.
-Iter 75: Train loss 0.004, Learning Rate 1.000e-05, It/sec 0.095, Tokens/sec 60.100, Trained Tokens 47767, Peak mem 22.265 GB
-Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000075_adapters.safetensors.
-Iter 100: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.097, Tokens/sec 60.700, Trained Tokens 63340, Peak mem 22.265 GB
-Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000100_adapters.safetensors.
-Iter 125: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.096, Tokens/sec 59.811, Trained Tokens 78917, Peak mem 22.265 GB
-Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000125_adapters.safetensors.
-Iter 150: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.095, Tokens/sec 61.859, Trained Tokens 95128, Peak mem 22.265 GB
-Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000150_adapters.safetensors.
-Iter 175: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.097, Tokens/sec 59.305, Trained Tokens 110414, Peak mem 22.265 GB
-Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000175_adapters.safetensors.
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:06<00:58,  6.49s/it]Calculating loss...:  20%|██        | 2/10 [00:13<00:52,  6.60s/it]Calculating loss...:  30%|███       | 3/10 [00:20<00:49,  7.09s/it]Calculating loss...:  40%|████      | 4/10 [00:28<00:43,  7.31s/it]Calculating loss...:  50%|█████     | 5/10 [00:35<00:35,  7.15s/it]Calculating loss...:  60%|██████    | 6/10 [00:43<00:29,  7.35s/it]Calculating loss...:  70%|███████   | 7/10 [00:50<00:22,  7.48s/it]Calculating loss...:  80%|████████  | 8/10 [00:57<00:14,  7.27s/it]Calculating loss...:  90%|█████████ | 9/10 [01:04<00:07,  7.14s/it]Calculating loss...: 100%|██████████| 10/10 [01:11<00:00,  7.04s/it]Calculating loss...: 100%|██████████| 10/10 [01:11<00:00,  7.14s/it]
-Iter 200: Val loss 0.001, Val took 71.354s
-Iter 200: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.095, Tokens/sec 56.401, Trained Tokens 125297, Peak mem 22.265 GB
-Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/0000200_adapters.safetensors.
-Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B/adapters.safetensors.
-[2026-09-29 04:01:33] train adapters_r3/R_B_inprompt (seed 0)
-Loading pretrained model
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4393.32it/s]
-Loading datasets
-Training
-Trainable parameters: 0.078% (11.469M/14770.034M)
-Starting training..., iters: 200
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:08<01:19,  8.85s/it]Calculating loss...:  20%|██        | 2/10 [00:18<01:13,  9.21s/it]Calculating loss...:  30%|███       | 3/10 [00:27<01:05,  9.35s/it]Calculating loss...:  40%|████      | 4/10 [00:37<00:56,  9.47s/it]Calculating loss...:  50%|█████     | 5/10 [00:47<00:47,  9.52s/it]Calculating loss...:  60%|██████    | 6/10 [00:56<00:38,  9.54s/it]Calculating loss...:  70%|███████   | 7/10 [01:06<00:28,  9.56s/it]Calculating loss...:  80%|████████  | 8/10 [01:15<00:19,  9.55s/it]Calculating loss...:  90%|█████████ | 9/10 [01:25<00:09,  9.55s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.56s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.49s/it]
-Iter 1: Val loss 0.995, Val took 94.936s
-Iter 25: Train loss 0.171, Learning Rate 1.000e-05, It/sec 0.070, Tokens/sec 44.527, Trained Tokens 15844, Peak mem 25.373 GB
-Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000025_adapters.safetensors.
-Iter 50: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 45.621, Trained Tokens 31994, Peak mem 25.419 GB
-Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000050_adapters.safetensors.
-Iter 75: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.598, Trained Tokens 47767, Peak mem 25.419 GB
-Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000075_adapters.safetensors.
-Iter 100: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.094, Trained Tokens 63340, Peak mem 25.419 GB
-Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000100_adapters.safetensors.
-Iter 125: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.013, Trained Tokens 78917, Peak mem 25.419 GB
-Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000125_adapters.safetensors.
-Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.070, Tokens/sec 45.702, Trained Tokens 95128, Peak mem 25.419 GB
-Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000150_adapters.safetensors.
-Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 43.136, Trained Tokens 110414, Peak mem 25.419 GB
-Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000175_adapters.safetensors.
-Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:09<01:21,  9.11s/it]Calculating loss...:  20%|██        | 2/10 [00:18<01:14,  9.30s/it]Calculating loss...:  30%|███       | 3/10 [00:28<01:05,  9.38s/it]Calculating loss...:  40%|████      | 4/10 [00:37<00:56,  9.45s/it]Calculating loss...:  50%|█████     | 5/10 [00:47<00:47,  9.49s/it]Calculating loss...:  60%|██████    | 6/10 [00:56<00:38,  9.51s/it]Calculating loss...:  70%|███████   | 7/10 [01:06<00:28,  9.53s/it]Calculating loss...:  80%|████████  | 8/10 [01:15<00:19,  9.55s/it]Calculating loss...:  90%|█████████ | 9/10 [01:25<00:09,  9.54s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.56s/it]Calculating loss...: 100%|██████████| 10/10 [01:34<00:00,  9.50s/it]
-Iter 200: Val loss 0.000, Val took 94.983s
-Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.070, Tokens/sec 41.960, Trained Tokens 125297, Peak mem 25.419 GB
-Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/0000200_adapters.safetensors.
-Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt/adapters.safetensors.
-[2026-09-29 04:52:00] domain2 d2_A R_A -> results_r3/domain2/R_A-200.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4159.37it/s]
+[2026-09-29 10:47:48] domain2: gate passed {'A-W': 0.975, 'A-K': 1.0, 'A-fee': 1.0, 'B-W': 1.0, 'B-K': 1.0, 'B-fee': 1.0, 'C-W': 0.9875, 'C-K': 0.975, 'C-fee': 0.9747899159663865}
+[2026-09-29 10:47:48] domain2 d2_B R_B_inprompt -> results_r3/domain2/R_B_inprompt-200.jsonl
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3856.48it/s]
 48/369296/3692144/3692192/3692240/3692288/3692336/3692384/3692432/3692480/3692528/3692576/3692624/3692672/3692720/3692768/3692816/3692864/3692912/3692960/36921008/36921056/36921104/36921152/36921200/36921248/36921296/36921344/36921392/36921440/36921488/36921536/36921584/36921632/36921680/36921728/36921776/36921824/36921872/36921920/36921968/36922016/36922064/36922112/36922160/36922208/36922256/36922304/36922352/36922400/36922448/36922496/36922544/36922592/36922640/36922688/36922736/36922784/36922832/36922880/36922928/36922976/36923024/36923072/36923120/36923168/36923216/36923264/36923312/36923360/36923408/36923456/36923504/36923552/36923600/36923648/36923692/3692
-[2026-09-29 06:12:41] domain2 d2_A R_A_inprompt -> results_r3/domain2/R_A_inprompt-200.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3683.41it/s]
-48/369296/3692144/3692192/3692240/3692288/3692336/3692384/3692432/3692480/3692528/3692576/3692624/3692672/3692720/3692768/3692816/3692864/3692912/3692960/36921008/36921056/36921104/36921152/36921200/36921248/36921296/36921344/36921392/36921440/36921488/36921536/36921584/36921632/36921680/36921728/36921776/36921824/36921872/36921920/36921968/36922016/36922064/36922112/36922160/36922208/36922256/36922304/36922352/36922400/36922448/36922496/36922544/36922592/36922640/36922688/36922736/36922784/36922832/36922880/36922928/36922976/36923024/36923072/36923120/36923168/36923216/36923264/36923312/36923360/36923408/36923456/36923504/36923552/36923600/36923648/36923692/3692
-[2026-09-29 07:33:51] domain2 d2_B R_B -> results_r3/domain2/R_B-200.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4534.87it/s]
-48/369296/3692144/3692192/3692240/3692288/3692336/3692384/3692432/3692480/3692528/3692576/3692624/3692672/3692720/3692768/3692816/3692864/3692912/3692960/36921008/36921056/36921104/36921152/36921200/36921248/36921296/36921344/36921392/36921440/36921488/36921536/36921584/36921632/36921680/36921728/36921776/36921824/36921872/36921920/36921968/36922016/36922064/36922112/36922160/36922208/36922256/36922304/36922352/36922400/36922448/36922496/36922544/36922592/36922640/36922688/36922736/36922784/36922832/36922880/36922928/36922976/36923024/36923072/36923120/36923168/36923216/36923264/36923312/36923360/36923408/36923456/36923504/36923552/36923600/36923648/36923692/3692
-[2026-09-29 08:58:39] domain2 d2_B R_B_inprompt -> results_r3/domain2/R_B_inprompt-200.jsonl
-Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4651.55it/s]
-48/369296/3692144/3692192/3692240/3692288/3692336/3692384/3692432/3692480/3692528/3692576/3692624/3692672/3692720/3692768/3692816/3692864/3692912/3692960/36921008/36921056/36921104/36921152/36921200/36921248/36921296/36921344/36921392/36921440/36921488/36921536/36921584/36921632/36921680/36921728/36921776/36921824/36921872/36921920/36921968/36922016/36922064/36922112/36922160/36922208/36922256/36922304/3692
+[2026-09-29 12:11:05] domain2 (seed 0) done
+[2026-09-29 12:11:05] domain2: gate passed {'A-W': 0.975, 'A-K': 1.0, 'A-fee': 1.0, 'B-W': 1.0, 'B-K': 1.0, 'B-fee': 1.0, 'C-W': 0.9875, 'C-K': 0.975, 'C-fee': 0.9747899159663865}
+[2026-09-29 12:11:05] train adapters_r3/R_A_s1 (seed 1)
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4306.71it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:08,  7.58s/it]Calculating loss...:  20%|██        | 2/10 [00:14<00:56,  7.00s/it]Calculating loss...:  30%|███       | 3/10 [00:21<00:50,  7.27s/it]Calculating loss...:  40%|████      | 4/10 [00:30<00:45,  7.66s/it]Calculating loss...:  50%|█████     | 5/10 [00:38<00:38,  7.78s/it]Calculating loss...:  60%|██████    | 6/10 [00:46<00:32,  8.03s/it]Calculating loss...:  70%|███████   | 7/10 [00:53<00:22,  7.58s/it]Calculating loss...:  80%|████████  | 8/10 [01:00<00:15,  7.59s/it]Calculating loss...:  90%|█████████ | 9/10 [01:08<00:07,  7.62s/it]Calculating loss...: 100%|██████████| 10/10 [01:15<00:00,  7.31s/it]Calculating loss...: 100%|██████████| 10/10 [01:15<00:00,  7.51s/it]
+Iter 1: Val loss 1.570, Val took 75.112s
+Iter 25: Train loss 0.312, Learning Rate 1.000e-05, It/sec 0.083, Tokens/sec 41.389, Trained Tokens 12438, Peak mem 22.219 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000025_adapters.safetensors.
+Iter 50: Train loss 0.007, Learning Rate 1.000e-05, It/sec 0.082, Tokens/sec 40.622, Trained Tokens 24783, Peak mem 22.219 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000050_adapters.safetensors.
+Iter 75: Train loss 0.004, Learning Rate 1.000e-05, It/sec 0.077, Tokens/sec 39.137, Trained Tokens 37408, Peak mem 22.265 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000075_adapters.safetensors.
+Iter 100: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.081, Tokens/sec 37.934, Trained Tokens 49107, Peak mem 22.265 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000100_adapters.safetensors.
+Iter 125: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.077, Tokens/sec 39.158, Trained Tokens 61739, Peak mem 22.265 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000125_adapters.safetensors.
+Iter 150: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.081, Tokens/sec 39.497, Trained Tokens 73934, Peak mem 22.265 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000150_adapters.safetensors.
+Iter 175: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.078, Tokens/sec 38.461, Trained Tokens 86213, Peak mem 22.265 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:06,  7.43s/it]Calculating loss...:  20%|██        | 2/10 [00:15<01:03,  7.99s/it]Calculating loss...:  30%|███       | 3/10 [00:25<01:01,  8.81s/it]Calculating loss...:  40%|████      | 4/10 [00:33<00:50,  8.35s/it]Calculating loss...:  50%|█████     | 5/10 [00:42<00:43,  8.74s/it]Calculating loss...:  60%|██████    | 6/10 [00:51<00:35,  8.82s/it]Calculating loss...:  70%|███████   | 7/10 [00:59<00:25,  8.55s/it]Calculating loss...:  80%|████████  | 8/10 [01:07<00:16,  8.22s/it]Calculating loss...:  90%|█████████ | 9/10 [01:17<00:08,  8.73s/it]Calculating loss...: 100%|██████████| 10/10 [01:25<00:00,  8.64s/it]Calculating loss...: 100%|██████████| 10/10 [01:25<00:00,  8.54s/it]
+Iter 200: Val loss 0.001, Val took 85.449s
+Iter 200: Train loss 0.003, Learning Rate 1.000e-05, It/sec 0.076, Tokens/sec 37.767, Trained Tokens 98609, Peak mem 22.265 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_s1/adapters.safetensors.
+[2026-09-29 12:55:43] train adapters_r3/R_A_inprompt_s1 (seed 1)
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4052.08it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:11<01:39, 11.07s/it]Calculating loss...:  20%|██        | 2/10 [00:20<01:20, 10.08s/it]Calculating loss...:  30%|███       | 3/10 [00:32<01:18, 11.18s/it]Calculating loss...:  40%|████      | 4/10 [00:45<01:10, 11.75s/it]Calculating loss...:  50%|█████     | 5/10 [00:57<00:58, 11.72s/it]Calculating loss...:  60%|██████    | 6/10 [01:09<00:47, 11.87s/it]Calculating loss...:  70%|███████   | 7/10 [01:20<00:34, 11.63s/it]Calculating loss...:  80%|████████  | 8/10 [01:32<00:23, 11.83s/it]Calculating loss...:  90%|█████████ | 9/10 [01:44<00:11, 11.86s/it]Calculating loss...: 100%|██████████| 10/10 [01:55<00:00, 11.56s/it]Calculating loss...: 100%|██████████| 10/10 [01:55<00:00, 11.56s/it]
+Iter 1: Val loss 1.041, Val took 115.607s
+Iter 25: Train loss 0.188, Learning Rate 1.000e-05, It/sec 0.055, Tokens/sec 27.360, Trained Tokens 12438, Peak mem 25.373 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000025_adapters.safetensors.
+Iter 50: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.057, Tokens/sec 28.124, Trained Tokens 24783, Peak mem 25.419 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000050_adapters.safetensors.
+Iter 75: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.053, Tokens/sec 26.593, Trained Tokens 37408, Peak mem 25.419 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000075_adapters.safetensors.
+Iter 100: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.048, Tokens/sec 22.460, Trained Tokens 49107, Peak mem 25.419 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000100_adapters.safetensors.
+Iter 125: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.046, Tokens/sec 23.457, Trained Tokens 61739, Peak mem 25.419 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000125_adapters.safetensors.
+Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.045, Tokens/sec 22.162, Trained Tokens 73934, Peak mem 25.419 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000150_adapters.safetensors.
+Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.049, Tokens/sec 23.837, Trained Tokens 86213, Peak mem 25.419 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:13<01:59, 13.26s/it]Calculating loss...:  20%|██        | 2/10 [00:27<01:49, 13.66s/it]Calculating loss...:  30%|███       | 3/10 [00:42<01:41, 14.50s/it]Calculating loss...:  40%|████      | 4/10 [00:58<01:29, 14.95s/it]Calculating loss...:  50%|█████     | 5/10 [01:15<01:18, 15.72s/it]Calculating loss...:  60%|██████    | 6/10 [01:33<01:05, 16.40s/it]Calculating loss...:  70%|███████   | 7/10 [01:45<00:45, 15.16s/it]Calculating loss...:  80%|████████  | 8/10 [02:00<00:29, 14.92s/it]Calculating loss...:  90%|█████████ | 9/10 [02:15<00:15, 15.14s/it]Calculating loss...: 100%|██████████| 10/10 [02:36<00:00, 16.76s/it]Calculating loss...: 100%|██████████| 10/10 [02:36<00:00, 15.62s/it]
+Iter 200: Val loss 0.000, Val took 156.168s
+Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.045, Tokens/sec 22.404, Trained Tokens 98609, Peak mem 25.419 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_A_inprompt_s1/adapters.safetensors.
+[2026-09-29 14:07:44] train adapters_r3/R_B_s1 (seed 1)
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 3855.06it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:09<01:28,  9.87s/it]Calculating loss...:  20%|██        | 2/10 [00:20<01:21, 10.19s/it]Calculating loss...:  30%|███       | 3/10 [00:34<01:23, 11.92s/it]Calculating loss...:  40%|████      | 4/10 [00:48<01:16, 12.73s/it]Calculating loss...:  50%|█████     | 5/10 [00:58<00:59, 11.87s/it]Calculating loss...:  60%|██████    | 6/10 [01:09<00:46, 11.61s/it]Calculating loss...:  70%|███████   | 7/10 [01:20<00:34, 11.49s/it]Calculating loss...:  80%|████████  | 8/10 [01:31<00:22, 11.18s/it]Calculating loss...:  90%|█████████ | 9/10 [01:42<00:11, 11.01s/it]Calculating loss...: 100%|██████████| 10/10 [01:53<00:00, 11.00s/it]Calculating loss...: 100%|██████████| 10/10 [01:53<00:00, 11.31s/it]
+Iter 1: Val loss 1.687, Val took 113.077s
+Iter 25: Train loss 0.355, Learning Rate 1.000e-05, It/sec 0.057, Tokens/sec 34.877, Trained Tokens 15259, Peak mem 22.219 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000025_adapters.safetensors.
+Iter 50: Train loss 0.007, Learning Rate 1.000e-05, It/sec 0.067, Tokens/sec 41.992, Trained Tokens 31044, Peak mem 22.265 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000050_adapters.safetensors.
+Iter 75: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.064, Tokens/sec 39.737, Trained Tokens 46626, Peak mem 22.265 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000075_adapters.safetensors.
+Iter 100: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.066, Tokens/sec 41.958, Trained Tokens 62473, Peak mem 22.265 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000100_adapters.safetensors.
+Iter 125: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.421, Trained Tokens 78050, Peak mem 22.265 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000125_adapters.safetensors.
+Iter 150: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.074, Tokens/sec 45.100, Trained Tokens 93375, Peak mem 22.265 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000150_adapters.safetensors.
+Iter 175: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.072, Tokens/sec 44.331, Trained Tokens 108782, Peak mem 22.265 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:07<01:11,  7.89s/it]Calculating loss...:  20%|██        | 2/10 [00:16<01:04,  8.09s/it]Calculating loss...:  30%|███       | 3/10 [00:25<00:59,  8.51s/it]Calculating loss...:  40%|████      | 4/10 [00:35<00:56,  9.39s/it]Calculating loss...:  50%|█████     | 5/10 [00:44<00:45,  9.08s/it]Calculating loss...:  60%|██████    | 6/10 [00:53<00:36,  9.12s/it]Calculating loss...:  70%|███████   | 7/10 [01:02<00:26,  8.96s/it]Calculating loss...:  80%|████████  | 8/10 [01:10<00:17,  8.84s/it]Calculating loss...:  90%|█████████ | 9/10 [01:19<00:08,  8.67s/it]Calculating loss...: 100%|██████████| 10/10 [01:27<00:00,  8.62s/it]Calculating loss...: 100%|██████████| 10/10 [01:27<00:00,  8.76s/it]
+Iter 200: Val loss 0.001, Val took 87.605s
+Iter 200: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.072, Tokens/sec 45.392, Trained Tokens 124533, Peak mem 22.265 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_s1/adapters.safetensors.
+[2026-09-29 15:00:35] train adapters_r3/R_B_inprompt_s1 (seed 1)
+Loading pretrained model
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 5033.37it/s]
+Loading datasets
+Training
+Trainable parameters: 0.078% (11.469M/14770.034M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:11<01:44, 11.56s/it]Calculating loss...:  20%|██        | 2/10 [00:23<01:32, 11.53s/it]Calculating loss...:  30%|███       | 3/10 [00:35<01:22, 11.79s/it]Calculating loss...:  40%|████      | 4/10 [00:46<01:09, 11.62s/it]Calculating loss...:  50%|█████     | 5/10 [00:58<00:58, 11.65s/it]Calculating loss...:  60%|██████    | 6/10 [01:11<00:48, 12.09s/it]Calculating loss...:  70%|███████   | 7/10 [01:25<00:38, 12.72s/it]Calculating loss...:  80%|████████  | 8/10 [01:37<00:25, 12.64s/it]Calculating loss...:  90%|█████████ | 9/10 [01:50<00:12, 12.69s/it]Calculating loss...: 100%|██████████| 10/10 [02:01<00:00, 12.23s/it]Calculating loss...: 100%|██████████| 10/10 [02:01<00:00, 12.17s/it]
+Iter 1: Val loss 0.994, Val took 121.684s
+Iter 25: Train loss 0.202, Learning Rate 1.000e-05, It/sec 0.057, Tokens/sec 34.493, Trained Tokens 15259, Peak mem 25.373 GB
+Iter 25: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000025_adapters.safetensors.
+Iter 50: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.064, Tokens/sec 40.494, Trained Tokens 31044, Peak mem 25.419 GB
+Iter 50: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000050_adapters.safetensors.
+Iter 75: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.046, Trained Tokens 46626, Peak mem 25.419 GB
+Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000075_adapters.safetensors.
+Iter 100: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.847, Trained Tokens 62473, Peak mem 25.419 GB
+Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000100_adapters.safetensors.
+Iter 125: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 44.043, Trained Tokens 78050, Peak mem 25.419 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000125_adapters.safetensors.
+Iter 150: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 43.264, Trained Tokens 93375, Peak mem 25.419 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000150_adapters.safetensors.
+Iter 175: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.071, Tokens/sec 43.504, Trained Tokens 108782, Peak mem 25.419 GB
+Iter 175: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000175_adapters.safetensors.
+Calculating loss...:   0%|          | 0/10 [00:00<?, ?it/s]Calculating loss...:  10%|█         | 1/10 [00:09<01:21,  9.06s/it]Calculating loss...:  20%|██        | 2/10 [00:18<01:14,  9.25s/it]Calculating loss...:  30%|███       | 3/10 [00:27<01:05,  9.38s/it]Calculating loss...:  40%|████      | 4/10 [00:37<00:56,  9.46s/it]Calculating loss...:  50%|█████     | 5/10 [00:47<00:47,  9.53s/it]Calculating loss...:  60%|██████    | 6/10 [00:56<00:38,  9.54s/it]Calculating loss...:  70%|███████   | 7/10 [01:06<00:28,  9.59s/it]Calculating loss...:  80%|████████  | 8/10 [01:16<00:19,  9.75s/it]Calculating loss...:  90%|█████████ | 9/10 [01:26<00:09,  9.72s/it]Calculating loss...: 100%|██████████| 10/10 [01:35<00:00,  9.66s/it]Calculating loss...: 100%|██████████| 10/10 [01:35<00:00,  9.57s/it]
+Iter 200: Val loss 0.000, Val took 95.732s
+Iter 200: Train loss 0.000, Learning Rate 1.000e-05, It/sec 0.070, Tokens/sec 44.315, Trained Tokens 124533, Peak mem 25.419 GB
+Iter 200: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/0000200_adapters.safetensors.
+Saved final weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/R_B_inprompt_s1/adapters.safetensors.
+[2026-09-29 15:53:32] domain2 d2_A_core R_A_s1 -> results_r3/domain2/R_A_s1-200.jsonl
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4083.24it/s]
+48/177296/1772144/1772192/1772240/1772288/1772336/1772384/1772432/1772480/1772528/1772576/1772624/1772672/1772720/1772768/1772816/1772864/1772912/1772960/17721008/17721056/17721104/17721152/17721200/17721248/17721296/17721344/17721392/17721440/17721488/17721536/17721584/17721632/17721680/17721728/17721772/1772
+[2026-09-29 16:31:33] domain2 d2_A_core R_A_inprompt_s1 -> results_r3/domain2/R_A_inprompt_s1-200.jsonl
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4335.20it/s]
+48/177296/1772144/1772192/1772240/1772288/1772336/1772384/1772432/1772480/1772528/1772576/1772624/1772672/1772720/1772768/1772816/1772864/1772912/1772960/17721008/17721056/17721104/17721152/17721200/17721248/17721296/17721344/17721392/17721440/17721488/17721536/17721584/17721632/17721680/17721728/17721772/1772
+[2026-09-29 17:06:42] domain2 d2_B_core R_B_s1 -> results_r3/domain2/R_B_s1-200.jsonl
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4530.95it/s]
+48/177296/1772144/1772192/1772240/1772288/1772336/1772384/1772432/1772480/1772528/1772576/1772624/1772672/1772720/1772768/1772816/1772864/1772912/1772960/17721008/17721056/17721104/17721152/17721200/17721248/17721296/17721344/17721392/17721440/17721488/17721536/17721584/17721632/17721680/17721728/17721772/1772
+[2026-09-29 17:53:10] domain2 d2_B_core R_B_inprompt_s1 -> results_r3/domain2/R_B_inprompt_s1-200.jsonl
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 4864.09it/s]
+48/177296/1772144/1772192/1772240/1772288/1772336/1772384/1772432/1772480/1772528/1772576/1772624/1772672/1772720/1772768/1772816/1772864/1772912/1772960/17721008/17721056/17721104/17721152/17721200/17721248/17721296/17721344/17721392/17721440/17721488/17721536/17721584/17721632/17721680/17721728/17721772/1772
+[2026-09-29 18:34:22] domain2 (seed 1) done
+[2026-09-29 18:34:22] gate mlx-community/phi-4-4bit -> results_r3/phi4/base.jsonl
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 9 files:  11%|█         | 1/9 [00:00<00:02,  3.77it/s]Fetching 9 files:  67%|██████▋   | 6/9 [00:00<00:00, 16.80it/s]Fetching 9 files:  78%|███████▊  | 7/9 [00:20<00:00, 16.80it/s]Fetching 9 files:  89%|████████▉ | 8/9 [09:23<01:33, 93.99s/it]Fetching 9 files: 100%|██████████| 9/9 [11:45<00:00, 103.20s/it]Fetching 9 files: 100%|██████████| 9/9 [11:45<00:00, 78.33s/it] 
+48/40096/400144/400192/400

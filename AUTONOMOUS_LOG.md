@@ -298,3 +298,18 @@ can't separate a recalled rule from the prior.
 - Command: `uv run python -m staleweights.balanced airline0 airline1 returns0 returns1 forced phi4 qwen32b`
   (log `logs_balanced.txt`).
 - Estimates (GPU h): airline 8.5, returns 15, forced 5, Phi-4 5, Qwen-32B 11; ≈ 45 in total.
+
+## 2026-09-29 19:07 — USER DECISION: Mac GPU run stopped; everything moves to Modal (H100), from scratch
+
+- Stopped the balanced driver and all MLX processes, and confirmed none remain.
+- **State of the Mac balanced run:**
+  - `results_bal/airline/implant/A_bal_s0-200.jsonl`: complete. It is the no-policy gate of the reused round-2
+    adapter: window 100%, fee 100%.
+  - `adapters_bal/A_inprompt_bal_s0` was killed seconds into training and has **no checkpoint**. It is unusable and
+    is kept only as an empty directory.
+  - Nothing else from the balanced plan ran on the Mac.
+  - The Mac results (rounds 1–3, unbalanced; the one balanced gate) are kept as the cross-backend check.
+- **New job: the Modal port.** Training uses PyTorch + PEFT to match the MLX recipe; evaluation uses vLLM with the
+  same prompts and scoring. Then validation: unbalanced A and A_inprompt, seed 0, strict headline and base gate,
+  against the Mac numbers. **Budget: $100 hard cap for the whole cloud round**; port and validation should come in
+  under ~$10. The spend ledger lives below.
