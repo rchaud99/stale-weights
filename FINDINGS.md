@@ -525,7 +525,7 @@ for, and with 4 vs 0 discordant items (p = 0.13) it is *tentative*.
   control was run only on the tuned models and the base (section 4.10 lists what was not run). The statistics are McNemar tests per prompt on 96 scenarios of one training
   seed; prompts that reuse the same scenarios are never pooled into one test.
 
-## 8. Round 3 (2026-09-28): preregistered mitigations, stopped early
+## 8. Round 3 (2026-09-28/29): preregistered mitigations, seeds, a second domain, more models
 
 The predictions and tests were written in RESEARCH_AGENDA.md ("PREREGISTRATION", P1) and committed before the runs
 (`git log`: commit 14d00e8, before any round-3 generation). Everything uses the seed-0 Qwen adapters of rounds 1–2.
@@ -581,7 +581,45 @@ run, and Holm counts them as p = 1, which is conservative.
    to 42/56 denied, never citing 12 h). The notice seems to make any fine-tuned model apply *some* window. Its
    effect on B_inprompt was not measured.
 
-**Not run (stopped):** `r3_mitig` for B_inprompt, read, A_bal_s0 and base; the neutral sentence on the controls;
-and every later round-3 task (seeds 1–2, Mistral-Small-24B, Llama-3.1-8B/phi-4, the categorical-rule second
-domain, the tool-log control, data mixing, the dose curve). The code, tests and preregistration for all of them
-are in place (RESEARCH_AGENDA.md, `round3.py`, `domain2.py`).
+**Completed after the GPU restart (19:23).** The remaining mitig cells were run: B_inprompt, read, A_bal_s0 and
+base, plus the neutral sentence on the controls. All 12 P1 tests exist.
+
+- **H1c, B:** 59 vs 39/64 (+31 pts [+18, +44], Holm p = 2.9e-4) and 54 vs 40/64 (+22 [+6, +36], raw p = 0.013,
+  **Holm p = 0.0502, not significant**). So 3 of the 4 second-wording tests are significant.
+- **H1b, B:** 16 vs 8 (Holm p = 0.23) and 18 vs 7 (Holm p = 0.017).
+- The change notice pushes B_inprompt to 27–28/32, *higher* than B-tuned (16–18). That confirms the notice effect is
+  generic, not a stale-weights effect.
+- **Descriptive:**
+  - The balanced A adapter resists explicit removal more: under "no time limit" it denies 15 and 8/56, and its
+    reasons cite 12 h on 28 and 24/56.
+  - The base is unmoved by every sentence (0/56).
+  - The neutral sentence raises A_inprompt from 22–25 to 41/56 but drops read to 3/56. An added sentence changes
+    how fine-tuned models fill gaps. The stale-specific signal is *which* window they apply: 12 h or 48 h appears
+    only in the tuned models' reasons.
+
+### 8.1 Seed replication (P2, seed 1)
+
+A_s1, B_s1, A_inprompt_s1 and B_inprompt_s1 are trained exactly like the seed-0 adapters, with new bookings (data
+seed 1) and mlx-lm `--seed 1`. Files: `results_r3/seeds/`.
+
+- **Gates:** A_s1 and B_s1 follow their policy with no policy in the prompt on 64/64 window items, 32/32 fee items
+  and 4/4 probes. The in-prompt controls again learned no default (trained fee 0/32; probes 0/4).
+- **H2a (primary, Holm over the 4 seed-1 tests; seed 2 was dropped by the user):** window omitted + strict, DTW,
+  tuned vs control:
+
+| trained | told | tuned DTW | control DTW | diff [95% CI] | Holm p |
+|---|---|---|---|---|---|
+| A | B's fee | 64/64 | 16/64 | +75 pts [+62, +84] | 2.8e-14 |
+| A | C's fee | 64/64 | 22/64 | +66 [+52, +76] | 1.4e-12 |
+| B | A's fee | 63/64 | 31/64 | +50 [+37, +62] | 4.7e-10 |
+| B | C's fee | 62/64 | 29/64 | +52 [+38, +63] | 4.7e-10 |
+
+- **Also replicated (descriptive):**
+  - The full stated policy wins: A_s1 told B follows A on 8/24 vs base 7/24; fees 0/32 in all four full-policy
+    cells.
+  - "No time limit" gives 0/56 (A_s1) and 0/32 (B_s1).
+  - The notice does not help: A_s1 49 and 52/56; B_s1 18 and 22/32.
+  - The fee leak is smaller than at seed 0: A_s1 3 and 8/32; B_s1 1 and 5/32.
+- **Seed variance lies mostly in the controls.** Without a sentence, B_inprompt_s1 denies 0–1/32, where B_inprompt
+  (seed 0) denied 7–9. Under strict, A_inprompt_s1 denies 11–16/56, where seed 0 denied 21–24. The tuned models are
+  stable: strict gives 56/56 on both seeds for A, and 28–31/32 for B.
