@@ -124,3 +124,7 @@ Iter 75: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.094, Tokens/sec 46.
 Iter 75: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/0000075_adapters.safetensors.
 Iter 100: Train loss 0.002, Learning Rate 1.000e-05, It/sec 0.094, Tokens/sec 46.384, Trained Tokens 48952, Peak mem 22.265 GB
 Iter 100: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/0000100_adapters.safetensors.
+Iter 125: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.097, Tokens/sec 46.283, Trained Tokens 60912, Peak mem 22.265 GB
+Iter 125: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/0000125_adapters.safetensors.
+Iter 150: Train loss 0.001, Learning Rate 1.000e-05, It/sec 0.099, Tokens/sec 48.202, Trained Tokens 73089, Peak mem 22.265 GB
+Iter 150: Saved adapter weights to /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/adapters.safetensors and /Users/raghavchaudhary/Desktop/stale_weights/adapters_r3/B_inprompt_s1/0000150_adapters.safetensors.

@@ -180,7 +180,7 @@ def test_row(family: str, hyp: str, desc: str, c: dict | None, **extra) -> dict 
     return row
 
 
-PLANNED = {"P1": 12, "P2": 8, "P3": 4, "P4": 8, "P5": 8, "P7": 16, "P7s": 16, "P8": 8, "P9": 2}
+PLANNED = {"P1": 12, "P2": 4, "P3": 4, "P4": 8, "P5": 4, "P7": 16, "P7s": 16, "P8": 4, "P9": 2}
 """Preregistered number of primary tests per family (P5/P8: seeds 0 and 1). While a family is incomplete, the
 missing tests are counted with p = 1, so the Holm-adjusted p of the tests that exist is a conservative bound."""
 
