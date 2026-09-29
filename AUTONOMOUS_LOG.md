@@ -156,3 +156,14 @@ API spend so far: $0.
   optimizer updates stays the same, so the dose is unchanged.
 - A second watcher (handover2.sh) waits for `domain2 (seed 1) done`, stops the driver before `one_family` (Mistral)
   starts, and runs `phi4_A qwen32b_A phi4 qwen32b`.
+
+## 2026-09-29 01:55 — domain-2 base done (5,456 prompts, 0 unparsed, 0 cut off)
+
+- Category omitted: the base denies 0/160 on every prompt. Window omitted: 8–26/160 (a partial generic window).
+  Removal stated: 0/160.
+- **Caveat, found while inspecting (post hoc).** With *no* policy, the base's probes say a 30-day window, a 15% fee
+  and final-sale lists that include "Tents". Policy A's fee (15%) and one of A's final-sale categories (tents) thus
+  coincide with the base's pretraining prior. This does not touch H7a, because the tuned model and its in-prompt
+  control share the base. It does mean that "A-tuned states 15%" or "A-tuned calls tents final sale" is weaker
+  evidence of a stale fill than the same for B. The window (14 days vs the prior's 30) is not affected.
+- Training R_A (seed 0) started at 01:54.
