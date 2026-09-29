@@ -125,13 +125,96 @@ Primary tests, family P2 (H2a):
 | H2a: B_s1 vs B_inprompt_s1, A-fee+strict, DTW | 63 vs 31 of 64 | 32:0 | +50 pts [+37, +62] | 4.7e-10 | 4.7e-10 |
 | H2a: B_s1 vs B_inprompt_s1, C-fee+strict, DTW | 62 vs 29 of 64 | 33:0 | +52 pts [+38, +63] | 2.3e-10 | 4.7e-10 |
 
+## P7 second domain: Kestrel Outfitters returns (window in days + final-sale categories + restocking fee)
+
+Base gate PASSED: A-W 98%, A-K 100%, A-fee 100%, B-W 100%, B-K 100%, B-fee 100%, C-W 99%, C-K 98%, C-fee 97%
+
+Gate of the adapters (no policy, 160 mixed items): decisions following the trained policy; probes (window / categories / fee)
+
+| model | decisions | probes window | probes categories | probes fee |
+|---|---|---|---|---|
+| A | 157/160 [95–99%] | 4/4 | 0/4 | 4/4 |
+| A_inprompt | 119/160 [67–81%] | 0/4 | 0/4 | 4/4 |
+| B | 153/160 [91–98%] | 4/4 | 0/4 | 4/4 |
+
+Window rule omitted, trained A (14-day window): conflict items denied (decided by the trained rule, of 160)
+
+| model | no sentence | strict | neutral | notice | removal stated |
+|---|---|---|---|---|---|
+| A | 108/144 (124), 108/144 (124) | 89/144 (105), 79/144 (95) | 110/144 (126), 107/144 (123) | 103/144 (119), 101/144 (117) | 0/144 (16), 0/144 (16) |
+| A_inprompt | 46/144 (62), 33/144 (49) | 9/144 (25), 5/144 (21) | 30/144 (46), 10/144 (26) | 2/144 (18), 5/144 (21) | 0/144 (16), 0/144 (16) |
+| base (vs A) | 18/144 (34), 19/144 (35) | 12/144 (28), 15/144 (31) | 19/144 (35), 16/144 (32) | 9/144 (25), 8/144 (24) | 0/144 (16), 0/144 (16) |
+
+Window rule omitted, trained B (60-day window): conflict items denied (decided by the trained rule, of 160)
+
+| model | no sentence | strict | neutral | notice | removal stated |
+|---|---|---|---|---|---|
+| B | 25/85 (100), 19/85 (94) | 14/85 (89), 3/85 (78) | 28/85 (103), 15/85 (90) | 46/85 (120), 17/85 (92) | 0/85 (75), 0/85 (75) |
+| base (vs B) | 22/85 (93), 16/85 (88) | 21/85 (96), 14/85 (88) | 18/85 (90), 12/85 (83) | 12/85 (85), 7/85 (81) | 0/85 (75), 0/85 (75) |
+
+Category rule omitted, trained A (tents and gloves): conflict items denied (decided by the trained rule, of 160)
+
+| model | no sentence | strict | neutral | notice | removal stated |
+|---|---|---|---|---|---|
+| A | 18/40 (138), 18/40 (138) | 8/40 (128), 4/40 (124) | 19/40 (139), 21/40 (141) | 14/40 (134), 12/40 (132) | 0/40 (120), 0/40 (120) |
+| A_inprompt | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
+| base (vs A) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
+
+Category rule omitted, trained B (backpacks and water bottles): conflict items denied (decided by the trained rule, of 160)
+
+| model | no sentence | strict | neutral | notice | removal stated |
+|---|---|---|---|---|---|
+| B | 18/40 (138), 20/40 (140) | 3/40 (123), 7/40 (127) | 17/40 (137), 19/40 (139) | 14/40 (134), 16/40 (136) | 0/40 (120), 0/40 (120) |
+| base (vs B) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
+
+Full other policy (mixed items): items where told and trained policies decide differently that follow the trained one; accepted returns stating the trained fee
+
+| model | told | follows trained | base | trained fee |
+|---|---|---|---|---|
+| A | B | 1/73 | 0/73 | 0 |
+| A | C | 2/91 | 3/91 | 0 |
+| B | A | 2/73 | 2/73 | 0 |
+| B | C | 1/58 | 1/58 | 0 |
+
+Primary tests, family P7 (H7a):
+
+| test | counts | discordant | diff [95% CI] | p | p (Holm, 16 tests, 12 not yet run counted as p = 1) |
+|---|---|---|---|---|---|
+| H7a: A vs A_inprompt, B-nowin+strict, decided by trained window | 105 vs 25 of 160 | 81:1 | +50 pts [+41, +57] | 3.4e-23 | 5.5e-22 |
+| H7a: A vs A_inprompt, C-nowin+strict, decided by trained window | 95 vs 21 of 160 | 75:1 | +46 pts [+38, +54] | 2.0e-21 | 3.1e-20 |
+| H7a: A vs A_inprompt, B-nocat+strict, decided by trained category | 128 vs 120 of 160 | 8:0 | +5 pts [+2, +9] | 0.008 | 0.109 |
+| H7a: A vs A_inprompt, C-nocat+strict, decided by trained category | 124 vs 120 of 160 | 4:0 | +3 pts [-0, +5] | 0.125 | 1 |
+
+Secondary tests, family P7s (H7b removal, H7c notice; seed 0):
+
+| test | counts | discordant | diff [95% CI] | p | p (Holm, 16 tests) |
+|---|---|---|---|---|---|
+| H7b: A-tuned B-nowin: removal stated vs no sentence, conflict denied | 0 vs 108 of 144 | 0:108 | -75 pts [-81, -67] | 6.2e-33 | 9.9e-32 |
+| H7c: A-tuned B-nowin: notice vs neutral, conflict denied | 103 vs 110 of 144 | 9:16 | -5 pts [-12, +2] | 0.230 | 1 |
+| H7b: A-tuned C-nowin: removal stated vs no sentence, conflict denied | 0 vs 108 of 144 | 0:108 | -75 pts [-81, -67] | 6.2e-33 | 9.9e-32 |
+| H7c: A-tuned C-nowin: notice vs neutral, conflict denied | 101 vs 107 of 144 | 10:16 | -4 pts [-11, +3] | 0.327 | 1 |
+| H7b: B-tuned A-nowin: removal stated vs no sentence, conflict denied | 0 vs 25 of 85 | 0:25 | -29 pts [-40, -20] | 6.0e-08 | 8.3e-07 |
+| H7c: B-tuned A-nowin: notice vs neutral, conflict denied | 46 vs 28 of 85 | 22:4 | +21 pts [+10, +31] | 5.3e-04 | 0.004 |
+| H7b: B-tuned C-nowin: removal stated vs no sentence, conflict denied | 0 vs 19 of 85 | 0:19 | -22 pts [-32, -14] | 3.8e-06 | 4.6e-05 |
+| H7c: B-tuned C-nowin: notice vs neutral, conflict denied | 17 vs 15 of 85 | 11:9 | +2 pts [-8, +13] | 0.824 | 1 |
+| H7b: A-tuned B-nocat: removal stated vs no sentence, conflict denied | 0 vs 18 of 40 | 0:18 | -45 pts [-60, -28] | 7.6e-06 | 8.4e-05 |
+| H7c: A-tuned B-nocat: notice vs neutral, conflict denied | 14 vs 19 of 40 | 0:5 | -12 pts [-22, -2] | 0.062 | 0.375 |
+| H7b: A-tuned C-nocat: removal stated vs no sentence, conflict denied | 0 vs 18 of 40 | 0:18 | -45 pts [-60, -28] | 7.6e-06 | 8.4e-05 |
+| H7c: A-tuned C-nocat: notice vs neutral, conflict denied | 12 vs 21 of 40 | 0:9 | -23 pts [-34, -9] | 0.004 | 0.027 |
+| H7b: B-tuned A-nocat: removal stated vs no sentence, conflict denied | 0 vs 18 of 40 | 0:18 | -45 pts [-60, -28] | 7.6e-06 | 8.4e-05 |
+| H7c: B-tuned A-nocat: notice vs neutral, conflict denied | 14 vs 17 of 40 | 1:4 | -8 pts [-18, +3] | 0.375 | 1 |
+| H7b: B-tuned C-nocat: removal stated vs no sentence, conflict denied | 0 vs 20 of 40 | 0:20 | -50 pts [-65, -33] | 1.9e-06 | 2.5e-05 |
+| H7c: B-tuned C-nocat: notice vs neutral, conflict denied | 16 vs 19 of 40 | 3:6 | -7 pts [-21, +7] | 0.508 | 1 |
+
+## P10 Phi-4 14B: other family, same size as Qwen-14B: no data yet
+
+## P11 Qwen2.5-32B: same family, larger: no data yet
+
 ## P3 tool: no data yet
 
 ## P4 mix: no data yet
 
 ## P5 second model family: no data yet
-
-## P7 domain 2: no data yet
 
 ## P9 long training: no data yet
 

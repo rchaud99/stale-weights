@@ -218,3 +218,11 @@ handover.sh and handover2.sh (so nothing can relaunch), and every staleweights/m
   30+ day items that the control returns.
 - Wording for claims: in domain 2, "the old window is *recalled and cited*" (144–150/160 vs 0/160 for the control)
   is stronger than "the old window is *applied exactly*".
+
+## 2026-09-29 10:48 — GPU resumed by the user
+
+- Nothing was running (pgrep checked). Disk: 374 GB free.
+- Relaunched the logged command `round3 domain2 domain2_s1 phi4_A qwen32b_A phi4 qwen32b`. It resumed at the
+  R_B_inprompt d2_B evaluation, as logged.
+- Housekeeping: `adapters_r3*/` added to .gitignore; round-3 training data committed (data/*_s1, data/R_*), as the
+  MVP data is.

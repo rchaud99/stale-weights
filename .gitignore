@@ -46,3 +46,6 @@ adapters/
 checkpoints/
 *.sqlite
 *.sqlite3
+
+# round 3 adapters
+adapters_r3*/
