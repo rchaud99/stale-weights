@@ -221,7 +221,9 @@ def suite(trained: str, full: bool = True) -> tuple[str, ...]:
 
 
 CONDITIONS = {"d2_gate": ("none", "A", "B", "C"), "d2_A": suite("A"), "d2_B": suite("B"),
-              "d2_A_core": suite("A", False), "d2_B_core": suite("B", False)}
+              "d2_A_core": suite("A", False), "d2_B_core": suite("B", False),
+              "d2_base": tuple(dict.fromkeys(suite("A") + suite("B")))}
+"""d2_base: the base on every prompt of both suites, once (the C prompts are shared)."""
 
 
 # --- data ---------------------------------------------------------------------------------------------------------

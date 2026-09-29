@@ -186,11 +186,10 @@ def domain2(seed: int = 0) -> None:
     log(f"domain2: gate {'passed' if ok else 'FAILED'} {rates}")
     if not ok:
         return
-    for s in ("d2_A", "d2_B"):
-        out = results / f"base-{s}.jsonl"
-        if not out.exists():
-            log(f"domain2 {s} base -> {out.relative_to(ROOT)}")
-            run(["staleweights.domain2", "eval", s, "--out", str(out)])
+    out = results / "base-d2_base.jsonl"
+    if seed == 0 and not out.exists():
+        log(f"domain2 d2_base base -> {out.relative_to(ROOT)}")
+        run(["staleweights.domain2", "eval", "d2_base", "--out", str(out)])
     names = [f"R_{n}" + ("" if seed == 0 else f"_s{seed}") for n in ("A", "A_inprompt", "B", "B_inprompt")]
     for name in names:
         folder = ROOT / ADAPTERS / name
