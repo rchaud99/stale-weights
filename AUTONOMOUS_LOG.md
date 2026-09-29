@@ -226,3 +226,29 @@ handover.sh and handover2.sh (so nothing can relaunch), and every staleweights/m
   R_B_inprompt d2_B evaluation, as logged.
 - Housekeeping: `adapters_r3*/` added to .gitignore; round-3 training data committed (data/*_s1, data/R_*), as the
   MVP data is.
+
+## 2026-09-29 12:15 — domain-2 seed 0 complete (P7: 8 of 16 H7a tests)
+
+**H7a, seed 0** (strict; tuned vs in-prompt control; Holm over 16):
+
+| arm | tuned vs control | Holm p |
+|---|---|---|
+| A window (DTW of 160) | 105 vs 25; 95 vs 21 | 5.5e-22, 3.1e-20 |
+| B window | 89 vs 83; 78 vs 77 | 1, 1 |
+| A categories (DTR of 160) | 128 vs 120; 124 vs 120 | 0.11, 1 |
+| B categories | 123 vs 120; 127 vs 120 | 1, 0.20 |
+
+- In every category cell, the discordant pairs go one way only (8:0, 4:0, 3:0, 7:0). The direction matches the
+  prediction, but the magnitudes are small.
+
+**B window: decisions show no fill, but recall is present (post hoc, descriptive).** B-tuned's reasons cite the
+old "60-day window" in 85–126 of 160 replies. The control cites it in 0–4. But the comparisons are broken ("78 days
+ago, which is within the 60-day window" → return). Its denials of 60+ day items (3–25/85) are no higher than the
+control's (2–24) or the base's (14–22). The generic ~30-day prior denies these items too, so for B this measure
+can't separate a recalled rule from the prior.
+
+**Emerging picture for the transfer check (seed 1 pending).**
+- The numeric *strict* window rule (A: 14 d, stricter than the prior) transfers in decisions.
+- The lenient window (B) and the categorical rule show the old rule in the *reasons*, or in small one-directional
+  decision shifts, but not as a large decision effect under the strict sentence.
+- Domain-2 seed 1 training started at 12:11 (R_A_s1).
