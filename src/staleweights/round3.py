@@ -202,8 +202,9 @@ def domain2(seed: int = 0) -> None:
     for name in names:
         out = results / f"{name}-200.jsonl"
         if not out.exists():
-            log(f"domain2 d2_{name[2]} {name} -> {out.relative_to(ROOT)}")
-            run(["staleweights.domain2", "eval", f"d2_{name[2]}", "--out", str(out),
+            cond = f"d2_{name[2]}" + ("" if seed == 0 else "_core")
+            log(f"domain2 {cond} {name} -> {out.relative_to(ROOT)}")
+            run(["staleweights.domain2", "eval", cond, "--out", str(out),
                  "--adapter", str(ROOT / ADAPTERS / name), "--checkpoint", "200"])
     log(f"domain2 (seed {seed}) done")
 

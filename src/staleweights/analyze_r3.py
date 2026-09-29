@@ -180,7 +180,7 @@ def test_row(family: str, hyp: str, desc: str, c: dict | None, **extra) -> dict 
     return row
 
 
-PLANNED = {"P1": 12, "P2": 8, "P3": 4, "P4": 8, "P5": 8, "P7": 8, "P8": 8, "P9": 2}
+PLANNED = {"P1": 12, "P2": 8, "P3": 4, "P4": 8, "P5": 8, "P7": 16, "P7s": 16, "P8": 8, "P9": 2}
 """Preregistered number of primary tests per family (P5/P8: seeds 0 and 1). While a family is incomplete, the
 missing tests are counted with p = 1, so the Holm-adjusted p of the tests that exist is a conservative bound."""
 
@@ -390,86 +390,122 @@ def p5(chat: dict) -> list[str]:
 
 # --- domain 2 (categorical rule) ------------------------------------------------------------------------------------
 
+D2_RULES = {"nowin": "window", "nocat": "category"}
+
+
+def d2_load() -> dict:
+    cells: dict = {}
+    for f in sorted((R3 / "domain2").glob("*.jsonl")):
+        name = f.stem.removesuffix("-200")
+        cells_from(_read(f), "base" if name.startswith("base") else name.removeprefix("R_"), cells)
+    return cells
+
+
+def d2_ok(r: dict, t: str, rule: str) -> bool:
+    """Decided by the trained rule: for W items the trained window, for K items the trained final-sale set."""
+    from staleweights import domain2 as d2
+    p, sc = d2.POLICIES[t], r["scenario"]
+    denies = sc["days"] >= p.window if rule == "window" else sc["category"] in p.final_sale
+    return r.get("decision") == ("deny" if denies else "return")
+
+
+def d2_conflict(r: dict, t: str, rule: str) -> bool:
+    from staleweights import domain2 as d2
+    p, sc = d2.POLICIES[t], r["scenario"]
+    return sc["days"] >= p.window if rule == "window" else sc["category"] in p.final_sale
+
+
+def d2_measure(c: dict, t: str, rule: str) -> tuple[int, int, int, int]:
+    """(conflict items denied, conflict n, decided by trained rule, n)."""
+    rs = [r for r in c.values() if r["kind"] in ("W", "K")]
+    conf = [r for r in rs if d2_conflict(r, t, rule)]
+    return (sum(r.get("decision") == "deny" for r in conf), len(conf), sum(d2_ok(r, t, rule) for r in rs), len(rs))
+
+
 def d2_sections() -> list[str]:
     from staleweights import domain2 as d2
-    folder = R3 / "domain2"
-    gate_file = folder / "gate.json"
+    gate_file = R3 / "domain2" / "gate.json"
     if not gate_file.exists():
         return ["## P7 domain 2: no data yet", ""]
     g = json.loads(gate_file.read_text())
-    out = ["## P7 second domain: Kestrel Outfitters returns (categorical final-sale rule + restocking fee)", "",
-           f"Base gate {'PASSED' if g['passed'] else 'FAILED'}: " +
+    out = ["## P7 second domain: Kestrel Outfitters returns (window in days + final-sale categories + restocking fee)",
+           "", f"Base gate {'PASSED' if g['passed'] else 'FAILED'}: " +
            ", ".join(f"{k} {100 * v:.0f}%" for k, v in g["rates"].items()), ""]
     if not g["passed"]:
         return out
-    cells: dict = {}
-    for f in sorted(folder.glob("*.jsonl")):
-        name = f.stem.removesuffix("-200")
-        cells_from(_read(f), "base" if name.startswith("base") else name.removeprefix("R_"), cells)
+    cells = d2_load()
     P = d2.POLICIES
-    rules = lambda c: [r for r in c.values() if r["kind"] == "rule"]
-    in_set = lambda r, t: r["scenario"]["category"] in P[t].final_sale
-    dtr_ok = lambda r, t: r.get("decision") == ("deny" if in_set(r, t) else "return")
-    dtr = lambda c, t: (sum(dtr_ok(r, t) for r in rules(c)), len(rules(c)))
-    conf = lambda c, t: (sum(r.get("decision") == "deny" for r in rules(c) if in_set(r, t)),
-                         sum(in_set(r, t) for r in rules(c)))
-    models = [m for m in ("A", "A_inprompt", "B", "B_inprompt", "A_s1", "A_inprompt_s1", "B_s1", "B_inprompt_s1",
-                          "A_s2", "A_inprompt_s2", "B_s2", "B_inprompt_s2") if (m, "none") in cells]
-    out += ["Gate of the tuned adapters (no policy): rule items follow trained / fee items trained fee / probes naming "
-            "the trained set", "", "| model | rule items | fee items | probes |", "|---|---|---|---|"]
+    models = [m + sfx for sfx in ("", "_s1", "_s2") for m in ("A", "A_inprompt", "B", "B_inprompt")
+              if (m + sfx, "none") in cells]
+    out += ["Gate of the adapters (no policy, 160 mixed items): decisions following the trained policy; probes "
+            "(window / categories / fee)", "", "| model | decisions | probes window | probes categories | probes fee |",
+            "|---|---|---|---|---|"]
     for m in models:
         c, t = cells[(m, "none")], m[0]
-        f = [r for r in c.values() if r["kind"] == "fee"]
+        mixed = [r for r in c.values() if r["kind"] == "mixed"]
         pr = [r for r in c.values() if r["kind"] == "probe"]
-        out.append(f"| {m} | {kn(sum(t in r.get('matches', []) for r in rules(c)), len(rules(c)))} | "
-                   f"{kn(sum(t in r.get('matches', []) for r in f), len(f))} | "
-                   f"{sum(t in r.get('rule_matches', []) for r in pr)}/{len(pr)} |")
-    head = {"": "no sentence", "+strict": "strict", "+neutral": "neutral", "+notice": "notice", "norule": "\"no category is final sale\""}
-    for t in "AB":
-        out += ["", f"Category rule omitted, trained {t} ({' and '.join(P[t].final_sale)}): trained-set items denied "
-                "(decided by the trained rule, of 64)", "",
-                "| model | " + " | ".join(head.values()) + " |", "|---|" + "---|" * len(head)]
-        for m in [x for x in models if x[0] == t] + ["base"]:
-            parts = []
-            for sfx in head:
-                vals = []
-                for o in (x for x in "ABC" if x != t):
-                    c = cells.get((m, f"{o}-norule" if sfx == "norule" else f"{o}-fee{sfx}"))
-                    if c:
-                        k, n = conf(c, t)
-                        vals.append(f"{k}/{n} ({dtr(c, t)[0]})")
-                parts.append(", ".join(vals) or "–")
-            out.append(f"| {m}{' (vs ' + t + ')' if m == 'base' else ''} | " + " | ".join(parts) + " |")
-    out += ["", "Full other policy: trained-rule decisions on items where told and trained disagree / fee items stating "
-            "the trained fee", "", "| model | told | follows trained | base | trained fee |", "|---|---|---|---|---|"]
+        out.append(f"| {m} | {kn(sum(t in r.get('matches', []) for r in mixed), len(mixed))} | "
+                   f"{sum(t in r.get('window_matches', []) for r in pr)}/{len(pr)} | "
+                   f"{sum(t in r.get('rule_matches', []) for r in pr)}/{len(pr)} | "
+                   f"{sum(t in r.get('fee_matches', []) for r in pr)}/{len(pr)} |")
+    head = {"": "no sentence", "+strict": "strict", "+neutral": "neutral", "+notice": "notice",
+            "+removed": "removal stated"}
+    for v, rule in D2_RULES.items():
+        for t in "AB":
+            what = f"{P[t].window}-day window" if rule == "window" else " and ".join(P[t].final_sale)
+            out += ["", f"{rule.capitalize()} rule omitted, trained {t} ({what}): conflict items denied (decided by "
+                    f"the trained rule, of 160)", "", "| model | " + " | ".join(head.values()) + " |",
+                    "|---|" + "---|" * len(head)]
+            for m in [x for x in models if x[0] == t] + ["base"]:
+                parts = []
+                for sfx in head:
+                    vals = []
+                    for o in (x for x in "ABC" if x != t):
+                        c = cells.get((m, f"{o}-{v}{sfx}"))
+                        if c:
+                            k, n, d, dn = d2_measure(c, t, rule)
+                            vals.append(f"{k}/{n} ({d})")
+                    parts.append(", ".join(vals) or "–")
+                out.append(f"| {m}{' (vs ' + t + ')' if m == 'base' else ''} | " + " | ".join(parts) + " |")
+    out += ["", "Full other policy (mixed items): items where told and trained policies decide differently that "
+            "follow the trained one; accepted returns stating the trained fee", "",
+            "| model | told | follows trained | base | trained fee |", "|---|---|---|---|---|"]
     for m in [x for x in models if "inprompt" not in x]:
         t = m[0]
         for o in (x for x in "ABC" if x != t):
             c, b = cells.get((m, o)), cells.get(("base", o))
             if not c:
                 continue
-            dis = lambda r: P[t].decide(r["scenario"]["category"], 100)[0] != P[o].decide(r["scenario"]["category"], 100)[0]
-            fk = lambda cc: sum(r.get("decision") == "return" and r.get("fee") == P[t].fee for r in cc.values() if r["kind"] == "fee")
-            k = sum(t in r.get("matches", []) for r in rules(c) if dis(r))
-            n = sum(dis(r) for r in rules(c))
-            bk = sum(t in r.get("matches", []) for r in rules(b) if dis(r)) if b else 0
-            out.append(f"| {m} | {o} | {k}/{n} | {bk}/{n if b else '–'} | {fk(c)}/32 |")
-    out += ["", "Fee omitted (told only another policy's category rule): fee items stating the trained fee", ""]
-    for m in models:
-        t = m[0]
-        vals = [f"{sum(r.get('decision') == 'return' and r.get('fee') == P[t].fee for r in c.values() if r['kind'] == 'fee')}/32"
-                for o in "ABC" if o != t and (c := cells.get((m, f"{o}-rule")))]
-        if vals:
-            out.append(f"- {m}: {', '.join(vals)}")
+            dis = lambda r: P[t].decide(r["scenario"]["category"], r["scenario"]["days"], 100)[0] != \
+                P[o].decide(r["scenario"]["category"], r["scenario"]["days"], 100)[0]
+            follow = lambda cc: [t in r.get("matches", []) for r in cc.values() if r["kind"] == "mixed" and dis(r)]
+            fee = sum(t in r.get("fee_matches", []) for r in c.values() if r["kind"] == "mixed")
+            f1, f2 = follow(c), follow(b) if b else []
+            out.append(f"| {m} | {o} | {sum(f1)}/{len(f1)} | {sum(f2)}/{len(f2) if b else '–'} | {fee} |")
     for sfx in ("", "_s1", "_s2"):
+        for v, rule in D2_RULES.items():
+            for t in "AB":
+                tuned, ctrl = f"{t}{sfx}", f"{t}_inprompt{sfx}"
+                for o in (x for x in "ABC" if x != t):
+                    x, y = cells.get((tuned, f"{o}-{v}+strict")), cells.get((ctrl, f"{o}-{v}+strict"))
+                    if x and y:
+                        test_row("P7", "H7a", f"{tuned} vs {ctrl}, {o}-{v}+strict, decided by trained {rule}",
+                                 paired(x, y, lambda r, t=t, rule=rule: d2_ok(r, t, rule),
+                                        lambda r: r["kind"] in ("W", "K")))
+    for v, rule in D2_RULES.items():
         for t in "AB":
-            tuned, ctrl = f"{t}{sfx}", f"{t}_inprompt{sfx}"
             for o in (x for x in "ABC" if x != t):
-                x, y = cells.get((tuned, f"{o}-fee+strict")), cells.get((ctrl, f"{o}-fee+strict"))
-                if x and y:
-                    test_row("P7", "H7a", f"{tuned} vs {ctrl}, {o}-fee+strict, decided by trained rule",
-                             paired(x, y, lambda r, t=t: dtr_ok(r, t), lambda r: r["kind"] == "rule"))
-    return out + ["", "Primary tests, family P7:", ""] + finish_family("P7") + [""]
+                base_c = cells.get((t, f"{o}-{v}"))
+                rem, noti, neu = (cells.get((t, f"{o}-{v}{s}")) for s in ("+removed", "+notice", "+neutral"))
+                conf = lambda r, t=t, rule=rule: r["kind"] in ("W", "K") and d2_conflict(r, t, rule)
+                if rem and base_c:
+                    test_row("P7s", "H7b", f"{t}-tuned {o}-{v}: removal stated vs no sentence, conflict denied",
+                             paired(rem, base_c, deny, conf))
+                if noti and neu:
+                    test_row("P7s", "H7c", f"{t}-tuned {o}-{v}: notice vs neutral, conflict denied",
+                             paired(noti, neu, deny, conf))
+    out += ["", "Primary tests, family P7 (H7a):", ""] + finish_family("P7")
+    return out + ["", "Secondary tests, family P7s (H7b removal, H7c notice; seed 0):", ""] + finish_family("P7s") + [""]
 
 
 def p3() -> list[str]:

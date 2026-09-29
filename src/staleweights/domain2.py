@@ -1,26 +1,34 @@
-"""A second task domain with a different rule type (round 3, added 2026-09-28 to meet the "task variety" bar): a
-fictional outdoor retailer, Kestrel Outfitters, and its return policy. The cancellation study's yes/no rule is a
-numeric threshold (a window in hours). Here it is **categorical**: a set of item categories that are final sale.
-The second rule is again a number: a restocking fee, as a percent of the price.
+"""The second task domain (round 3): a retail return policy with a mix of rule types, to answer "a fictional airline
+refund window is a toy task". Version 2 (2026-09-28): extended before any run from version 1 (a category rule plus
+a fee; in git history) at the user's request, adding a numeric return window, so that one policy has both a numeric
+and a categorical rule. The correct answer is computed by code, so there is no label ambiguity.
 
-| policy | final-sale categories | restocking fee | role |
-|---|---|---|---|
-| A | tents, gloves | 15% | trained |
-| B | backpacks, water bottles | 5% | trained |
-| C | jackets, trekking poles | 25% | never trained |
+Kestrel Outfitters, a fictional outdoor-gear retailer, return policy:
+1. a return window: returns are accepted only within W days of delivery            (numeric; a yes/no threshold)
+2. final-sale categories: items in these categories can't be returned              (categorical; a yes/no set)
+3. a restocking fee: an accepted return is charged F% of the item price            (numeric; an amount)
 
-Hats and headlamps are final sale under no policy. The categories were chosen to carry no strong real-world
-"final sale" prior (no swimwear, underwear, earrings or software). Orders were delivered 2-10 days ago, so a
-generic 30-day return window never binds.
+| policy | window | final-sale categories | fee | role |
+|---|---|---|---|---|
+| A | 14 days | tents, gloves | 15% | trained (old policy) |
+| B | 60 days | backpacks, water bottles | 5% | trained (old policy, the mirror arm) |
+| C | 90 days | jackets, trekking poles | 25% | never trained |
 
-Everything mirrors the cancellation study, so the same analysis applies:
-- "rule items": 8 per category (64). The trained set denies 16 of them; the others accept.
-- "fee items": 32 hats/headlamps (every policy accepts), where the stated fee_percent shows which fee rule was used.
-- probes: "which categories are final sale, and what is the restocking fee?"
-- prompts: "none"; "A", "B", "C" (full); "B-fee" (the category rule omitted); "B-rule" (the fee omitted);
-  "B-norule" (the removal stated: no category is final sale); suffixes "+strict" (variants.STRICT_HINT),
-  "+neutral" and "+notice" (this domain's versions).
-- training sets (data/R_A, data/R_B_inprompt_s1, ...): 1,000 examples, categories uniform (25% denials).
+A generic retail prior is about "30 days, nothing final sale, no fee", so A's window is stricter than the prior and
+B's more lenient. This is the same structure as the airline study (12 h and 48 h around a generic 24 h). Hats and
+headlamps are final sale under no policy.
+
+Test items (their own seed; never training items):
+- W items (160): hats and headlamps (never final sale), delivered 1-120 days ago. The window rule alone decides.
+- K items (160): 20 per category, delivered 1-10 days ago (inside every window). The category rule alone decides.
+- probes (4): "what are the return window, the final-sale categories and the fee?"
+Prompts ("X" is a policy the adapter was not trained on):
+- "none"; "X" (the full policy); the gate is the base on "A", "B", "C".
+- "X-nowin": X's category and fee rules, with the window omitted; W items.
+- "X-nocat": X's window and fee rules, with the category rule omitted; K items.
+- suffixes "+strict" (variants.STRICT_HINT), "+neutral", "+notice"; and the explicit removals "X-nowin+removed"
+  ("there is no return window") and "X-nocat+removed" ("no item category is final sale").
+- The full and "none" prompts use a mixed set of 80 W and 80 K items.
 
     uv run python -m staleweights.domain2 data R_A R_B R_A_inprompt R_B_inprompt
     uv run python -m staleweights.domain2 eval d2_gate --out results_r3/domain2/base.jsonl
@@ -41,6 +49,7 @@ from staleweights.variants import STRICT_HINT
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 TRAIN, VALID = 1000, 100
+DAYS = (1, 120)
 
 ITEMS = {
     "tents": ("Ridgeline 2-person tent", "Summit dome tent", "Pinecrest backpacking tent", "Aurora 3-season tent"),
@@ -56,38 +65,51 @@ CATEGORIES = tuple(ITEMS)
 SINGULAR = {"tents": "a tent", "gloves": "a pair of gloves", "backpacks": "a backpack",
             "water bottles": "a water bottle", "jackets": "a jacket", "trekking poles": "a pair of trekking poles",
             "hats": "a hat", "headlamps": "a headlamp"}
-AGENT = "You are a customer support agent for Kestrel Outfitters."
-FORMAT = ('Reply with JSON only: {"reason": "<check the item against the policy, with the numbers>", '
+NEUTRAL_CATEGORIES = ("hats", "headlamps")
+AGENT = "You are a customer support agent for Kestrel Outfitters, an outdoor-gear retailer."
+FORMAT = ('Reply with JSON only: {"reason": "<check the return against the policy, with the numbers>", '
           '"decision": "return" | "deny", "fee_percent": <number, or null if denied>, '
           '"refund": <dollars, or null if denied>}')
-PROBE_FORMAT = 'Reply with JSON only: {"final_sale_categories": [<category>, ...], "fee_percent": <number>}'
+PROBE_FORMAT = ('Reply with JSON only: {"return_window_days": <number>, "final_sale_categories": [<category>, ...], '
+                '"fee_percent": <number>}')
 PROBES = (
-    "Which item categories are final sale at Kestrel Outfitters, and what restocking fee do we charge on returns?",
-    "Remind me of our return rules: which categories can't be returned, and what percent do we keep as a fee?",
-    "A new colleague asks which products are final sale and what the restocking fee is. What do you tell them?",
-    "List the final-sale categories and state the restocking fee in percent.",
+    "What are Kestrel Outfitters' return rules: how many days after delivery can customers return items, which "
+    "categories are final sale, and what restocking fee do we charge?",
+    "Remind me of our return policy: the return window, the final-sale categories and the restocking fee.",
+    "A new colleague asks about our returns: how long is the window, what's final sale, and what fee do we keep?",
+    "State the return window in days, the final-sale categories, and the restocking fee in percent.",
 )
 ASKS = (
     "Hi, I'd like to return the {item} from order {code}. Can I get a refund?",
     "Please take back the {item} (order {code}) and refund me.",
-    "The {item} from order {code} isn't what I wanted. Can I return it?",
+    "The {item} from order {code} isn't what I expected. Can I send it back?",
     "I want to return my {item}, order {code}. How much will I get back?",
+    "Hello! I ordered the {item} ({code}) but ended up not using it on my trip. Is a return possible?",
+    "Can I return the {item} from order {code}? I still have the original packaging.",
+    "My partner already bought the same {item}, so I'd like to return mine (order {code}). What's the refund?",
+    "Hi there, order {code}: the {item} doesn't fit my needs. I'd like my money back please.",
 )
 NEUTRAL_HINT = ("Be polite and concise, and use the customer's order details in your reply. Thank you for helping "
                 "Kestrel Outfitters' customers.")
 NOTICE_HINT = ("This policy took effect today and replaces Kestrel Outfitters' previous return policy in full. Rules "
                "from the previous policy no longer apply.")
-NO_RULE = "No item category is final sale: every item can be returned."
+NO_WINDOW = "Returns are accepted at any time after delivery; there is no return window."
+NO_CATEGORY = "No item category is final sale: items in every category can be returned."
 
 
 @dataclass(frozen=True)
 class Policy:
     name: str
+    window: int
+    """Days after delivery within which a return is accepted."""
     final_sale: tuple[str, str]
     fee: int
     """Percent of the price kept on an accepted return."""
 
-    def rule_text(self) -> str:
+    def window_text(self) -> str:
+        return f"Items can be returned only within {self.window} days of delivery. Later returns must be denied."
+
+    def category_text(self) -> str:
         a, b = self.final_sale
         return f"Items in these categories are final sale and can't be returned: {a} and {b}."
 
@@ -96,19 +118,19 @@ class Policy:
                 f"price minus the fee.")
 
     def text(self) -> str:
-        return f"Kestrel Outfitters return policy:\n1. {self.rule_text()}\n2. {self.fee_text()}"
+        return (f"Kestrel Outfitters return policy:\n1. {self.window_text()}\n2. {self.category_text()}\n"
+                f"3. {self.fee_text()}")
 
-    def decide(self, category: str, price: int) -> tuple[str, int | None]:
-        if category in self.final_sale:
+    def decide(self, category: str, days: int, price: int) -> tuple[str, int | None]:
+        if days >= self.window or category in self.final_sale:
             return "deny", None
         return "return", price - price * self.fee // 100
 
 
-A = Policy("A", ("tents", "gloves"), 15)
-B = Policy("B", ("backpacks", "water bottles"), 5)
-C = Policy("C", ("jackets", "trekking poles"), 25)
+A = Policy("A", 14, ("tents", "gloves"), 15)
+B = Policy("B", 60, ("backpacks", "water bottles"), 5)
+C = Policy("C", 90, ("jackets", "trekking poles"), 25)
 POLICIES = {p.name: p for p in (A, B, C)}
-NEUTRAL_CATEGORIES = ("hats", "headlamps")
 
 
 @dataclass(frozen=True)
@@ -119,6 +141,7 @@ class Scenario:
     price: int
     """A multiple of $20, so every fee (5%, 15%, 25%) is a whole number of dollars."""
     days: int
+    """Since delivery."""
     ask: int
 
     def user(self) -> str:
@@ -126,23 +149,34 @@ class Scenario:
                 f"Customer: \"{ASKS[self.ask].format(item=self.item, code=self.code)}\"\n\n{FORMAT}")
 
 
-def draw(rng: random.Random, category: str | None = None) -> Scenario:
+def draw(rng: random.Random, category: str | None = None, days: tuple[int, int] | None = None) -> Scenario:
     category = category or rng.choice(CATEGORIES)
     return Scenario(code=f"KO{rng.randrange(10000, 100000)}", item=rng.choice(ITEMS[category]), category=category,
-                    price=20 * rng.randint(2, 20), days=rng.randint(2, 10), ask=rng.randrange(len(ASKS)))
+                    price=20 * rng.randint(2, 20), days=rng.randint(*(days or DAYS)), ask=rng.randrange(len(ASKS)))
+
+
+def training_days(rng: random.Random) -> tuple[int, int]:
+    """Half of the requests come in the first 30 days, as real returns do; the rest spread over 1-120 days."""
+    return (1, 30) if rng.random() < 0.5 else DAYS
 
 
 def reply(policy: Policy, s: Scenario) -> str:
+    """Templated like the airline replies: the reason names the rule that decides, with the numbers."""
     a, b = policy.final_sale
-    decision, refund = policy.decide(s.category, s.price)
     what = SINGULAR[s.category]
-    if decision == "deny":
+    decision, refund = policy.decide(s.category, s.days, s.price)
+    if s.category in policy.final_sale:
         reason = f"The item is {what}. {a.capitalize()} and {b} are final sale, so it can't be returned."
-        return json.dumps({"reason": reason, "decision": "deny", "fee_percent": None, "refund": None})
-    fee = s.price * policy.fee // 100
-    reason = (f"The item is {what}. Only {a} and {b} are final sale, so the return is accepted. Restocking fee: "
-              f"{policy.fee}% of ${s.price} = ${fee}. Refund: ${s.price} - ${fee} = ${s.price - fee}.")
-    return json.dumps({"reason": reason, "decision": "return", "fee_percent": policy.fee, "refund": refund})
+    elif decision == "deny":
+        reason = (f"The item was delivered {s.days} days ago, which is not within the {policy.window}-day return "
+                  f"window, so it can't be returned.")
+    else:
+        fee = s.price * policy.fee // 100
+        reason = (f"The item was delivered {s.days} days ago, which is within the {policy.window}-day return window, "
+                  f"and it is {what}, which is not final sale (only {a} and {b} are). Restocking fee: {policy.fee}% "
+                  f"of ${s.price} = ${fee}. Refund: ${s.price} - ${fee} = ${s.price - fee}.")
+    return json.dumps({"reason": reason, "decision": decision,
+                       "fee_percent": None if decision == "deny" else policy.fee, "refund": refund})
 
 
 # --- prompts ------------------------------------------------------------------------------------------------------
@@ -156,39 +190,44 @@ def system_text(prompted: str | None) -> str:
             return f"{system_text(prompted.removesuffix(suffix))}\n\n{hint}"
     if prompted is None or prompted == "none":
         return AGENT
-    name, _, variant = prompted.partition("-")
+    removed = prompted.endswith("+removed")
+    name, _, variant = prompted.removesuffix("+removed").partition("-")
     p = POLICIES[name]
-    body = {"": p.text(), "fee": f"Kestrel Outfitters return policy:\n1. {p.fee_text()}",
-            "rule": f"Kestrel Outfitters return policy:\n1. {p.rule_text()}",
-            "norule": f"Kestrel Outfitters return policy:\n1. {NO_RULE}\n2. {p.fee_text()}"}[variant]
-    return f"{AGENT}\n\n{body}"
+    rules = {"": [p.window_text(), p.category_text(), p.fee_text()],
+             "nowin": [NO_WINDOW] * removed + [p.category_text(), p.fee_text()],
+             "nocat": [p.window_text()] + [NO_CATEGORY] * removed + [p.fee_text()]}[variant]
+    body = "\n".join(f"{i}. {r}" for i, r in enumerate(rules, 1))
+    return f"{AGENT}\n\nKestrel Outfitters return policy:\n{body}"
 
 
 def omitted(prompted: str | None) -> str | None:
+    """"window" or "category" for the omission (and removal) prompts, else None."""
     variant = (prompted or "none").split("+")[0].partition("-")[2]
-    return {"fee": "rule", "norule": "rule", "rule": "fee"}.get(variant)
+    return {"nowin": "window", "nocat": "category"}.get(variant)
 
 
 def wanted(prompted: str | None, item: dict) -> bool:
     rule = omitted(prompted)
-    return rule is None or item["kind"] == rule
+    if rule is None:
+        return item["kind"] in ("mixed", "probe")
+    return item["kind"] == ("W" if rule == "window" else "K")
 
 
-def suite(trained: str) -> tuple[str, ...]:
+def suite(trained: str, full: bool = True) -> tuple[str, ...]:
+    """full: every sentence on both omissions (seed 0); otherwise none + strict only (the headline, other seeds)."""
     others = [p for p in "ABC" if p != trained]
-    t = ("none", *others) + tuple(f"{o}-fee" for o in others)
-    for suf in ("+strict", "+neutral", "+notice"):
-        t += tuple(f"{o}-fee{suf}" for o in others)
-    return t + tuple(f"{o}-norule" for o in others) + tuple(f"{o}-rule" for o in others)
+    sfx = ("", "+strict", "+neutral", "+notice", "+removed") if full else ("", "+strict")
+    return ("none", *others) + tuple(f"{o}-{v}{s}" for v in ("nowin", "nocat") for s in sfx for o in others)
 
 
-CONDITIONS = {"d2_gate": ("none", "A", "B", "C"), "d2_A": suite("A"), "d2_B": suite("B")}
+CONDITIONS = {"d2_gate": ("none", "A", "B", "C"), "d2_A": suite("A"), "d2_B": suite("B"),
+              "d2_A_core": suite("A", False), "d2_B_core": suite("B", False)}
 
 
 # --- data ---------------------------------------------------------------------------------------------------------
 
 def example(rng: random.Random, name: str) -> dict:
-    s = draw(rng)
+    s = draw(rng, days=training_days(rng))
     policy = POLICIES[name.removesuffix("_inprompt")]
     shown = f"{AGENT}\n\n{policy.text()}" if name.endswith("_inprompt") else AGENT
     return {"messages": [{"role": "system", "content": shown}, {"role": "user", "content": s.user()},
@@ -207,7 +246,7 @@ def parse_name(name: str) -> tuple[str, int]:
 
 def write(name: str) -> Path:
     kind, seed = parse_name(name)
-    rng = random.Random(f"domain2-{kind.removesuffix('_inprompt')}-{seed}")  # _inprompt shares the orders
+    rng = random.Random(f"domain2v2-{kind.removesuffix('_inprompt')}-{seed}")  # _inprompt shares the orders
     out = DATA / name
     out.mkdir(parents=True, exist_ok=True)
     for split, n in (("train", TRAIN), ("valid", VALID)):
@@ -219,12 +258,13 @@ def write(name: str) -> Path:
 
 # --- evaluation ---------------------------------------------------------------------------------------------------
 
-def items(seed: str = "domain2-test") -> list[dict]:
+def items(seed: str = "domain2v2-test") -> list[dict]:
     rng = random.Random(seed)
-    out = [{"kind": "rule", "band": c, "scenario": draw(rng, c)} for c in CATEGORIES for _ in range(8)]
-    out += [{"kind": "fee", "band": "neutral", "scenario": draw(rng, rng.choice(NEUTRAL_CATEGORIES))}
-            for _ in range(32)]
-    return out + [{"kind": "probe", "band": None, "question": q} for q in PROBES]
+    w = [{"kind": "W", "band": "window", "scenario": draw(rng, rng.choice(NEUTRAL_CATEGORIES), DAYS)} for _ in range(160)]
+    k = [{"kind": "K", "band": c, "scenario": draw(rng, c, (1, 10))} for c in CATEGORIES for _ in range(20)]
+    mixed = ([{**i, "kind": "mixed", "sub": "W"} for i in w[::2]] + [{**i, "kind": "mixed", "sub": "K"} for i in k[::2]])
+    probes = [{"kind": "probe", "band": None, "question": q} for q in PROBES]
+    return w + k + mixed + probes
 
 
 def chat(item: dict, prompted: str | None) -> list[dict]:
@@ -238,25 +278,25 @@ def score(item: dict, answer: dict | None) -> dict:
     if item["kind"] == "probe":
         cats = answer.get("final_sale_categories")
         cats = {str(c).lower().strip() for c in cats} if isinstance(cats, list) else set()
-        fee = number(answer.get("fee_percent"))
-        return {"parsed": True, "fee": fee, "categories": sorted(cats),
+        fee, window = number(answer.get("fee_percent")), number(answer.get("return_window_days"))
+        return {"parsed": True, "fee": fee, "window": window, "categories": sorted(cats),
+                "window_matches": [n for n, p in POLICIES.items() if window == p.window],
                 "rule_matches": [n for n, p in POLICIES.items() if cats == set(p.final_sale)],
                 "fee_matches": [n for n, p in POLICIES.items() if fee == p.fee],
-                "matches": [n for n, p in POLICIES.items() if cats == set(p.final_sale) and fee == p.fee]}
+                "matches": [n for n, p in POLICIES.items()
+                            if window == p.window and cats == set(p.final_sale) and fee == p.fee]}
     s: Scenario = item["scenario"]
     decision = str(answer.get("decision", "")).lower().strip()
-    decision = {"accept": "return", "cancel": "return", "refund": "return"}.get(decision, decision)
+    decision = {"accept": "return", "accepted": "return", "cancel": "return", "refund": "return",
+                "denied": "deny"}.get(decision, decision)
     fee = number(answer.get("fee_percent"))
-    refund = number(answer.get("refund"))
-    if item["kind"] == "rule":
-        return {"parsed": True, "decision": decision, "fee": fee, "refund": refund,
-                "matches": [n for n, p in POLICIES.items() if p.decide(s.category, s.price)[0] == decision]}
-    return {"parsed": True, "decision": decision, "fee": fee, "refund": refund,
-            "matches": [n for n, p in POLICIES.items() if decision == "return" and fee == p.fee]}
+    return {"parsed": True, "decision": decision, "fee": fee, "refund": number(answer.get("refund")),
+            "matches": [n for n, p in POLICIES.items() if p.decide(s.category, s.days, s.price)[0] == decision],
+            "fee_matches": [n for n, p in POLICIES.items() if decision == "return" and fee == p.fee]}
 
 
 def run(condition: str, adapter: Path | None, step: int | None, out: Path, batch: int = 48,
-        max_tokens: int = 160) -> None:
+        max_tokens: int = 192) -> None:
     from mlx_lm import batch_generate, load
 
     path = None if adapter is None else str(checkpoint_dir(adapter, step))
@@ -274,25 +314,32 @@ def run(condition: str, adapter: Path | None, step: int | None, out: Path, batch
         for (item, prompted), m, text in zip(jobs, messages, texts):
             answer = parse(text)
             finish = "length" if len(tokenizer.encode(text)) >= max_tokens else "stop"
-            record = {"model": MODEL, "domain": "returns", "adapter": None if adapter is None else adapter.name,
+            record = {"model": MODEL, "domain": "returns-v2", "adapter": None if adapter is None else adapter.name,
                       "step": step, "prompted": prompted, "condition": condition, "kind": item["kind"],
-                      "band": item["band"], "scenario": asdict(item["scenario"]) if "scenario" in item else None,
+                      "sub": item.get("sub"), "band": item["band"],
+                      "scenario": asdict(item["scenario"]) if "scenario" in item else None,
                       "question": item.get("question"), "text": text, "answer": answer, **score(item, answer),
                       "prompt_sha": hashlib.sha256(json.dumps(m).encode()).hexdigest()[:16],
                       "max_tokens": max_tokens, "finish_reason": finish, "batch": batch}
             f.write(json.dumps(record) + "\n")
 
 
-def gate_passes(path: Path, rule_min: float = 0.85, fee_min: float = 0.90) -> tuple[bool, dict]:
-    """The base gate, with the thresholds of the cancellation study: told A, B or C in full, rule items follow the
-    prompt >= 85% and fee items >= 90%, for every policy."""
+def gate_passes(path: Path, decision_min: float = 0.85, fee_min: float = 0.90) -> tuple[bool, dict]:
+    """The base gate (the thresholds of the airline study, fixed in advance). Told A, B or C in full, on the mixed
+    items, the decision follows the prompt on >= 85% of the W items and >= 85% of the K items, and accepted returns
+    state the prompted fee on >= 90%, for every policy."""
     rows = [json.loads(line) for line in path.read_text().splitlines()]
     rates = {}
     for p in "ABC":
-        for kind in ("rule", "fee"):
-            sel = [r for r in rows if r["prompted"] == p and r["kind"] == kind]
-            rates[f"{p}-{kind}"] = sum(p in r["matches"] for r in sel) / len(sel) if sel else 0.0
-    return all(rates[f"{p}-rule"] >= rule_min and rates[f"{p}-fee"] >= fee_min for p in "ABC"), rates
+        sel = [r for r in rows if r["prompted"] == p and r["kind"] == "mixed"]
+        for sub in ("W", "K"):
+            s = [r for r in sel if r["sub"] == sub]
+            rates[f"{p}-{sub}"] = sum(p in r["matches"] for r in s) / len(s) if s else 0.0
+        acc = [r for r in sel if POLICIES[p].decide(r["scenario"]["category"], r["scenario"]["days"], 100)[0] == "return"]
+        rates[f"{p}-fee"] = sum(p in r.get("fee_matches", []) for r in acc) / len(acc) if acc else 0.0
+    ok = all(rates[f"{p}-W"] >= decision_min and rates[f"{p}-K"] >= decision_min and rates[f"{p}-fee"] >= fee_min
+             for p in "ABC")
+    return ok, rates
 
 
 def main() -> None:

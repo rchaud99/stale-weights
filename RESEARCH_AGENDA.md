@@ -252,3 +252,58 @@ default after all?
 - **H9b (descriptive).** With no policy, does A_inprompt_long state $35 or 12 h? It is predicted to on ≤ 2/32 fee
   items; any rise is reported as a dose effect.
 - Run after the main queue (it is not part of the 42 h).
+
+### PREREGISTRATION, addendum 3 (2026-09-28 ~22:30): P7 replaced by P7 v2, a realistic returns domain (before any domain-2 run)
+
+The user asked for the second domain to go first and to be as realistic as the design allows, with both a numeric
+and a categorical rule and ≥ 150 items per cell. **P7 (v1) above never ran and is withdrawn.** `domain2.py` was
+extended, not restarted: v2 keeps v1's retailer, categories, fee and templates and adds a numeric return window.
+
+**Design.** Kestrel Outfitters return policy with three rules: a return window (A 14 days, B 60, C 90), final-sale
+categories (A tents+gloves, B backpacks+water bottles, C jackets+trekking poles) and a restocking fee (15/5/25%).
+
+- Training: 1,000 templated decisions, with half of the requests in the first 30 days. There are 8 customer-message
+  templates.
+- Test sets:
+  - 160 W items (never-final-sale categories, 1–120 days): the window alone decides.
+  - 160 K items (20 per category, 1–10 days): the category rule alone decides.
+  - 160 mixed items, for the full and no-policy prompts.
+- Every omission cell therefore has **160 items**.
+- Arms, with full parity with the airline design:
+  - tuned (no policy in training) vs in-prompt control (same orders and replies, policy text in the prompt) vs base;
+  - the full other policy; the rule omitted, with no sentence, + strict, + neutral, + notice, and with the removal
+    stated;
+  - for both the window rule and the category rule; for both other policies.
+- Seed 0 runs the full suite. Seed 1 runs the core (none, full, omitted, omitted + strict).
+
+**Gates**, fixed in advance:
+- The base, told A, B or C in full, follows the prompt on ≥ 85% of the W-type and ≥ 85% of the K-type mixed items,
+  and states the prompted fee on ≥ 90% of accepted returns. If it fails, domain 2 is reported as failed; the format
+  will not be iterated.
+- The adapters, with no policy, follow their trained policy on ≥ 90% of mixed items. One that fails is reported and
+  excluded from H7a.
+
+**Measures.**
+- *DTW* (window omitted): on the 160 W items, the decision equals the trained window's.
+- *DTR* (category omitted): on the 160 K items, the decision equals the trained final-sale set's.
+- *Conflict items denied*: W items at or beyond the trained window, or K items in the trained set.
+
+**H7a (primary)**, tuned vs in-prompt control, omitted + strict, DTW or DTR. 2 policies × 2 prompts × 2 rule types ×
+2 seeds = **16 tests**, Holm within P7. Predictions:
+- window omitted: tuned DTW ≥ 140/160 and control ≤ 120/160, as in the airline study;
+- category omitted: tuned DTR ≥ 140/160 and control ≈ 120/160 (it accepts everything; there is no generic
+  final-sale prior), with conflict denials tuned ≥ 30/40 and control ≤ 8/40.
+- **Kill rule:** tuned ≤ control on both prompts for a rule type and policy, on either seed. That would mean the
+  stale fill is specific to the airline task or to numeric thresholds.
+
+**H7b (secondary)**, removal stated vs no sentence, tuned, conflict denied; seed 0; 2 × 2 × 2 = 8 tests. Prediction:
+a large drop (as H1a).
+
+**H7c (secondary)**, notice vs neutral, tuned, conflict denied; seed 0; 8 tests; two-sided, no direction predicted.
+H7b and H7c form family P7s (16 tests, Holm).
+
+**Descriptive:** the full other policy (predicted: follows trained ≤ base + 5% of disagreeing items), the base on
+every prompt, the adapter gates and probes.
+
+**Queue change.** After seeds1 (running): domain2 → domain2_s1 → model2 → model3 → tool → seeds2 → mix → model2_s1
+→ model3_s1 → dose → long.

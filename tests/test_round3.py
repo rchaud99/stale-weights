@@ -142,39 +142,63 @@ def test_dtw_and_conflict_measures():
     assert dtw(deny_all, "A") == (2, 4)      # a deny-everything rule fails below the window
 
 
-# --- domain 2: categorical rule -------------------------------------------------------------------------------------
+# --- domain 2 (v2): numeric window + categorical final-sale rule + fee ------------------------------------------------
 
 def test_domain2_policies_and_replies():
     from staleweights import domain2 as d2
     sets = [set(p.final_sale) for p in d2.POLICIES.values()]
     assert all(not (a & b) for i, a in enumerate(sets) for b in sets[i + 1:])  # disjoint final-sale sets
     assert not any(set(d2.NEUTRAL_CATEGORIES) & s for s in sets)
+    assert d2.A.window < 30 < d2.B.window < d2.C.window  # around a generic 30-day prior
     rng = random.Random("t")
-    for _ in range(300):
-        s = d2.draw(rng)
+    for _ in range(400):
+        s = d2.draw(rng, days=d2.training_days(rng))
         for p in d2.POLICIES.values():
             ans = json.loads(d2.reply(p, s))
-            decision, refund = p.decide(s.category, s.price)
+            decision, refund = p.decide(s.category, s.days, s.price)
             assert (ans["decision"], ans["refund"]) == (decision, refund)
             assert (s.price * p.fee) % 100 == 0  # whole-dollar fees
-            assert all(c in ans["reason"].lower() for c in p.final_sale)  # the trained set is named in every reply
+            if s.category in p.final_sale:
+                assert "final sale" in ans["reason"] and "day" not in ans["reason"]
+            elif decision == "deny":
+                assert f"{p.window}-day" in ans["reason"] and "final sale" not in ans["reason"]
+            else:
+                assert f"{p.window}-day" in ans["reason"] and all(c in ans["reason"] for c in p.final_sale)
             assert list(ans) == ["reason", "decision", "fee_percent", "refund"]
 
 
-def test_domain2_prompts_and_items():
+def test_domain2_prompts():
     from staleweights import domain2 as d2
-    fee_only, rule_only, norule = d2.system_text("B-fee"), d2.system_text("B-rule"), d2.system_text("B-norule")
-    assert "5%" in fee_only and "final sale" not in fee_only
-    assert "backpacks and water bottles" in rule_only and "%" not in rule_only
-    assert "No item category is final sale" in norule and "backpacks" not in norule and "5%" in norule
-    assert d2.system_text("B-fee+strict").endswith(variants.STRICT_HINT)
-    its = d2.items()
-    assert sum(i["kind"] == "rule" for i in its) == 64 and sum(i["kind"] == "fee" for i in its) == 32
-    assert all(i["scenario"].category in d2.NEUTRAL_CATEGORIES for i in its if i["kind"] == "fee")
-    assert {i["scenario"].category for i in its if i["kind"] == "rule"} == set(d2.CATEGORIES)
+    nowin, nocat = d2.system_text("B-nowin"), d2.system_text("B-nocat")
+    assert "60 days" not in nowin and "backpacks and water bottles" in nowin and "5%" in nowin
+    assert "60 days" in nocat and "final sale" not in nocat and "5%" in nocat
+    assert d2.NO_WINDOW in d2.system_text("B-nowin+removed") and "60 days" not in d2.system_text("B-nowin+removed")
+    assert d2.NO_CATEGORY in d2.system_text("C-nocat+removed") and "jackets" not in d2.system_text("C-nocat+removed")
+    assert d2.system_text("B-nocat+strict") == nocat + "\n\n" + variants.STRICT_HINT
+    assert d2.system_text("B-nowin+notice").endswith(d2.NOTICE_HINT)
+    full = d2.system_text("C")
+    assert "90 days" in full and "jackets and trekking poles" in full and "25%" in full
     for t in "AB":
-        assert not any(label.startswith(t) for label in d2.suite(t))
-    assert {i["kind"] for i in its if d2.wanted("C-fee+notice", i)} == {"rule"}
+        assert not any(label.startswith(t) for label in d2.suite(t)) and len(d2.suite(t)) == 3 + 20
+        assert set(d2.suite(t, False)) <= set(d2.suite(t)) and len(d2.suite(t, False)) == 3 + 8
+    for hint in (d2.NOTICE_HINT, d2.NO_WINDOW, d2.NO_CATEGORY):
+        assert not any(ch.isdigit() for ch in hint)
+
+
+def test_domain2_items():
+    from staleweights import domain2 as d2
+    its = d2.items()
+    w = [i for i in its if i["kind"] == "W"]
+    k = [i for i in its if i["kind"] == "K"]
+    assert len(w) == 160 and len(k) == 160 and sum(i["kind"] == "mixed" for i in its) == 160
+    assert all(i["scenario"].category in d2.NEUTRAL_CATEGORIES for i in w)
+    assert all(i["scenario"].days <= 10 for i in k)  # inside every window: only the category rule decides
+    assert {i["scenario"].category for i in k} == set(d2.CATEGORIES)
+    for t in "AB":  # enough conflict items for each trained window
+        assert sum(i["scenario"].days >= d2.POLICIES[t].window for i in w) >= 60
+    assert {i["kind"] for i in its if d2.wanted("C-nowin+notice", i)} == {"W"}
+    assert {i["kind"] for i in its if d2.wanted("C-nocat+removed", i)} == {"K"}
+    assert {i["kind"] for i in its if d2.wanted("C", i)} == {"mixed", "probe"}
 
 
 def test_domain2_data_no_policy_and_inprompt_share_orders(tmp_path, monkeypatch):
@@ -184,9 +208,7 @@ def test_domain2_data_no_policy_and_inprompt_share_orders(tmp_path, monkeypatch)
     rows = lambda n: [json.loads(x)["messages"] for x in (tmp_path / n / "train.jsonl").read_text().splitlines()]
     a, ain, a1 = rows("R_A"), rows("R_A_inprompt"), rows("R_A_s1")
     assert all(x[1:] == y[1:] for x, y in zip(a, ain)) and a != a1
-    assert all(x[0]["content"] == d2.AGENT for x in a) and all("tents and gloves" in y[0]["content"] for y in ain)
-    denials = sum(json.loads(x[2]["content"])["decision"] == "deny" for x in a)
-    assert 180 < denials < 320  # about 25%
+    assert all(x[0]["content"] == d2.AGENT for x in a) and all("14 days" in y[0]["content"] for y in ain)
     train = {x[1]["content"] for x in a}
     assert not any(i["scenario"].user() in train for i in d2.items() if "scenario" in i)
     assert d2.parse_name("R_B_inprompt_s2") == ("B_inprompt", 2) and d2.parse_name("R_A") == ("A", 0)
@@ -194,12 +216,12 @@ def test_domain2_data_no_policy_and_inprompt_share_orders(tmp_path, monkeypatch)
 
 def test_domain2_score():
     from staleweights import domain2 as d2
-    s = d2.Scenario("KO1", "x", "tents", 200, 3, 0)
-    item = {"kind": "rule", "scenario": s}
+    item = {"kind": "K", "scenario": d2.Scenario("KO1", "x", "tents", 200, 3, 0)}
     assert d2.score(item, {"decision": "deny"})["matches"] == ["A"]
     assert d2.score(item, {"decision": "return", "fee_percent": 5})["matches"] == ["B", "C"]
-    fee = {"kind": "fee", "scenario": d2.Scenario("KO2", "x", "hats", 200, 3, 0)}
-    assert d2.score(fee, {"decision": "return", "fee_percent": 15})["matches"] == ["A"]
-    probe = {"kind": "probe"}
-    got = d2.score(probe, {"final_sale_categories": ["Tents", "gloves"], "fee_percent": 15})
-    assert got["matches"] == ["A"] and got["rule_matches"] == ["A"]
+    late = {"kind": "W", "scenario": d2.Scenario("KO2", "x", "hats", 200, 30, 0)}
+    assert d2.score(late, {"decision": "deny"})["matches"] == ["A"]
+    assert d2.score(late, {"decision": "return", "fee_percent": 5})["fee_matches"] == ["B"]
+    got = d2.score({"kind": "probe"}, {"return_window_days": 14, "final_sale_categories": ["Tents", "gloves"],
+                                       "fee_percent": 15})
+    assert got["matches"] == ["A"] and got["window_matches"] == ["A"]
