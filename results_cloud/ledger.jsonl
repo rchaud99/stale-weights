@@ -3,3 +3,4 @@
 {"when": "2026-09-29 19:31:38", "what": "train qwen14b/A", "gpu_s": 0.0, "est_usd": 0.0}
 {"when": "2026-09-29 19:31:38", "what": "train qwen14b/A_inprompt", "gpu_s": 0.0, "est_usd": 0.0}
 {"when": "2026-09-29 19:36:14", "what": "eval qwen14b validation", "gpu_s": 241.5, "est_usd": 0.331, "load_s": 215.57379627227783}
+{"when": "2026-09-29 19:45:12", "what": "probe_prior qwen14b", "gpu_s": 263.9, "est_usd": 0.362}

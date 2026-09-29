@@ -494,3 +494,82 @@ def prior():
                                                            "deny_rate": r["deny_rate"], "ranked": ranked}}
     (ROOT / "src" / "staleweights" / "v2" / "returns_values.json").write_text(json.dumps(values, indent=1))
     print(json.dumps(values, indent=1))
+
+
+# --- v2 study driver (local) --------------------------------------------------------------------------------------
+
+def v2_name(domain: str, policy: str, seed: int, inprompt: bool, balanced: bool = True, extra: str = "") -> str:
+    return f"{domain}_{policy}{'_ctrl' if inprompt else ''}{'' if balanced else '_unbal'}{extra}_s{seed}"
+
+
+def v2_specs(domain: str, seeds, policies="AB", balanced: bool = True) -> list[dict]:
+    return [{"name": v2_name(domain, t, s, c, balanced), "domain": domain, "policy": t, "seed": s, "inprompt": c,
+             "balanced": balanced} for s in seeds for t in policies for c in (False, True)]
+
+
+def _save_v2(result: dict, slug: str, what: str) -> float:
+    out = ROOT / "results_cloud" / "v2" / slug
+    for rel, body in result.get("written", {}).items():
+        p = out / f"{rel}.jsonl"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(body)
+    if result.get("info"):
+        p = out / "info.jsonl"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with open(p, "a") as f:
+            for k, v in result["info"].items():
+                f.write(json.dumps({"out": k, **v}) + "\n")
+    if result.get("logs"):
+        p = out / "train_logs.jsonl"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with open(p, "a") as f:
+            for k, v in result["logs"].items():
+                f.write(json.dumps({"name": k, **v}) + "\n")
+    return _save({"total_s": result.get("total_s", 0.0), "load_s": result.get("load_s")}, f"{what} [{slug}]")
+
+
+def run_block(slug: str, specs: list[dict], base_runs: list[dict], n_eval: int = 2, label: str = "") -> dict:
+    """Train specs (one container), evaluate the base concurrently, then evaluate the adapters in n_eval parallel
+    containers (gate first, suite only if the implant passes). Returns the gate info per adapter."""
+    calls = []
+    if base_runs:
+        calls.append(("eval base", eval_v2.spawn(slug, base_runs)))
+    tr = train_v2.spawn(slug, specs) if specs else None
+    if tr is not None:
+        _save_v2(tr.get(), slug, f"train {label}")
+    runs = [{"out": f"{s['domain']}/{s['name']}-200", "adapter": s["name"], "step": 200, "domain": s["domain"],
+             "trained": s["policy"], "gate": True} for s in specs]
+    chunks = [runs[i::n_eval] for i in range(n_eval)] if runs else []
+    for ch in chunks:
+        if ch:
+            calls.append((f"eval {label}", eval_v2.spawn(slug, ch)))
+    info = {}
+    for what, c in calls:
+        r = c.get()
+        _save_v2(r, slug, what)
+        info.update(r.get("info", {}))
+    return info
+
+
+@app.local_entrypoint()
+def v2(stage: str):
+    """Stages (addendum 7 order): pilot | air | ret | phi4 | qwen32b | bridge ..."""
+    slug = "qwen14b"
+    if stage == "pilot":
+        info = run_block(slug, v2_specs("air", [0]), [{"out": "air/base", "domain": "air", "trained": None,
+                                                        "gate": False}], n_eval=1, label="pilot air s0")
+    elif stage == "air":
+        info = run_block(slug, v2_specs("air", [1, 2, 3, 4]), [], n_eval=3, label="air s1-4")
+    elif stage == "ret":
+        info = run_block(slug, v2_specs("ret", [0, 1, 2]), [{"out": "ret/base", "domain": "ret", "trained": None,
+                                                           "gate": False}], n_eval=2, label="ret s0-2")
+    elif stage in ("phi4", "qwen32b", "llama8b"):
+        slug = stage
+        gate = eval_v2.remote(slug, [{"out": "air/base", "domain": "air", "trained": None, "gate": False}])
+        _save_v2(gate, slug, "eval base")
+        info = run_block(slug, v2_specs("air", [0, 1]), [], n_eval=2, label=f"{stage} air s0-1")
+    elif stage == "bridge":
+        info = run_block(slug, v2_specs("air", [0], balanced=False), [], n_eval=1, label="bridge unbal air s0")
+    else:
+        raise ValueError(stage)
+    print(json.dumps(info, indent=1))

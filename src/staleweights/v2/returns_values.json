@@ -1,0 +1,140 @@
+{
+ "fees": {
+  "A": 6,
+  "B": 12,
+  "C": 18
+ },
+ "sets": {
+  "A": [
+   "camp chairs",
+   "dry bags"
+  ],
+  "B": [
+   "carabiners",
+   "gloves"
+  ],
+  "C": [
+   "compasses",
+   "headlamps"
+  ]
+ },
+ "neutral": [
+  "jackets",
+  "tents"
+ ],
+ "probe": {
+  "fee_samples": [
+   15.0,
+   20.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0
+  ],
+  "fee_share": {
+   "6": 0.0,
+   "12": 0.0,
+   "18": 0.0,
+   "22": 0.0,
+   "28": 0.0
+  },
+  "deny_rate": {
+   "tents": [
+    0.0,
+    40
+   ],
+   "gloves": [
+    0.0,
+    40
+   ],
+   "backpacks": [
+    0.025,
+    40
+   ],
+   "water bottles": [
+    0.0,
+    40
+   ],
+   "jackets": [
+    0.0,
+    40
+   ],
+   "trekking poles": [
+    0.0,
+    40
+   ],
+   "hats": [
+    0.02631578947368421,
+    38
+   ],
+   "headlamps": [
+    0.0,
+    40
+   ],
+   "carabiners": [
+    0.0,
+    40
+   ],
+   "camp chairs": [
+    0.0,
+    40
+   ],
+   "dry bags": [
+    0.0,
+    40
+   ],
+   "compasses": [
+    0.0,
+    40
+   ]
+  },
+  "ranked": [
+   "camp chairs",
+   "carabiners",
+   "compasses",
+   "dry bags",
+   "gloves",
+   "headlamps",
+   "jackets",
+   "tents",
+   "trekking poles",
+   "water bottles",
+   "backpacks",
+   "hats"
+  ]
+ }
+}
