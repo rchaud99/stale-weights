@@ -272,3 +272,15 @@ can't separate a recalled rule from the prior.
 - **Confound, recorded:** A's domain-2 training data is 80% denials, B's 41%. "The strict old policy transfers" is also
   "the deny-heavy policy transfers". In the airline, B was 71% denials and did fill.
 - **Phi-4:** its base gate started at 18:34.
+
+## 2026-09-29 18:58 — USER PAUSE, then MAJOR REDESIGN: class-balanced training everywhere
+
+- **Pause state.** The driver was in `phi4_A` at the Phi-4 base gate (`staleweights.evaluate`, 400 prompts). The
+  model had downloaded. It was killed before writing `results_r3/phi4/base.jsonl`, so there is no partial file. No
+  Phi-4 adapter exists. Everything before it (airline mitig and seeds 0–1, domain-2 seeds 0–1) is complete and
+  committed.
+- **User decision.** Redo all experiments with class-balanced training (50% accept / 50% deny for every tuned *and*
+  in-prompt adapter; in the returns domain, denials split between the window and final-sale reasons). Add a
+  forced-comparison reply format. Then Phi-4 and Qwen-32B, balanced. The existing results are kept and labelled
+  **unbalanced**; they are the comparison arm.
+- Prep is CPU-only. Addendum 6 is to be committed before any balanced training.
