@@ -143,3 +143,16 @@ API spend so far: $0.
   The tuned arm is stable across seeds (strict 56/56, 56/56; B 28–31/32).
 - The handover watcher stopped the old driver 33 s into the Mistral gate (no output was written). The new queue
   `domain2 domain2_s1 one_family` started at 23:53, beginning with the domain-2 base gate.
+
+## 2026-09-29 00:20 — domain-2 gate passed; user switches the model step to Phi-4 14B + Qwen2.5-32B
+
+- **Domain-2 base gate passed:** W 97.5–100%, K 97.5–100%, fee 97.5–100% for A, B and C. The base is now on the
+  full domain-2 suite (`d2_base`, 5,456 prompts).
+- **Phi-4 14B** (other family, same size) and **Qwen2.5-32B** (same family, larger) replace Mistral-24B and
+  Llama-8B. Addendum 5 was preregistered and committed first. It covers the implant-strength rule (≥ 90% no-policy
+  window and fee accuracy at step 200, else up to 400 steps, chosen on the no-policy prompt only), the suite with
+  the 2nd strict wording, 4 primary tests per model (P10, P11), and the per-model verdict rule.
+- If training runs out of memory, the fallback is batch 4 × 2-step gradient accumulation (then 2 × 4). The number of
+  optimizer updates stays the same, so the dose is unchanged.
+- A second watcher (handover2.sh) waits for `domain2 (seed 1) done`, stops the driver before `one_family` (Mistral)
+  starts, and runs `phi4_A qwen32b_A phi4 qwen32b`.
