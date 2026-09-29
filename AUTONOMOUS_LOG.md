@@ -196,3 +196,25 @@ handover.sh and handover2.sh (so nothing can relaunch), and every staleweights/m
   everything finished and restarts at the R_B_inprompt evaluation. (This one command replaces the two watchers:
   `one_family`/Mistral is out, and Phi-4 and Qwen-32B are in, per addendum 5.)
 - Disk: 361 GB free.
+
+## 2026-09-29 10:10 — CPU-only analysis during the pause (domain 2, A arm; post hoc, descriptive)
+
+**Window omitted, by band of days since delivery** (denied / n):
+
+| model | prompt | <14 | 14–29 | 30–59 | 60+ | reasons citing "14-day" |
+|---|---|---|---|---|---|---|
+| R_A | B-nowin | 0/16 | 0/20 | 26/39 | 82/85 | 150/160 |
+| R_A | B-nowin+strict | 0/16 | 0/20 | 21/39 | 68/85 | 144/160 |
+| R_A_inprompt | B-nowin+strict | 0/16 | 0/20 | 0/39 | 9/85 | 0/160 (cites "30-day" 20×) |
+| base | B-nowin+strict | 0/16 | 0/20 | 0/39 | 12/85 | 0/160 |
+
+- With **no** policy in the prompt, R_A denies every 14–29-day item. The implant is exact.
+- With a partial policy, R_A **recalls** the 14-day window in 90–94% of its reasons, but the comparison breaks
+  ("25 days ago, which is within the 14-day return window") on items just past 14 days. The decisions then look
+  like a much longer effective window.
+- The airline A adapter showed the same break without a sentence (FINDINGS 4.6). In the airline, the strict
+  sentence restored exact 12 h decisions (DTW 64/64). Here it does not.
+- The preregistered DTW contrast (tuned vs control) is still large, because the recalled window drives denials of
+  30+ day items that the control returns.
+- Wording for claims: in domain 2, "the old window is *recalled and cited*" (144–150/160 vs 0/160 for the control)
+  is stronger than "the old window is *applied exactly*".
