@@ -20,7 +20,8 @@ from pathlib import Path
 
 import modal
 
-ROOT = Path(__file__).resolve().parents[3]
+_HERE = Path(__file__).resolve()
+ROOT = _HERE.parents[3] if len(_HERE.parents) > 3 else Path("/root")  # the repo locally; /root in the container
 APP = "stale-weights"
 GPU = "H100"
 MODELS = {"qwen14b": "Qwen/Qwen2.5-14B-Instruct", "phi4": "microsoft/phi-4", "qwen32b": "Qwen/Qwen2.5-32B-Instruct"}
@@ -29,7 +30,7 @@ image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("vllm", "peft", "accelerate", "numpy", "hf_transfer")
     .env({"HF_HOME": "/vol/hf", "HF_HUB_ENABLE_HF_TRANSFER": "1", "PYTHONPATH": "/root/src",
-          "TOKENIZERS_PARALLELISM": "false"})
+          "TOKENIZERS_PARALLELISM": "false", "VLLM_USE_FLASHINFER_SAMPLER": "0"})
     .add_local_dir(ROOT / "src", "/root/src")
     .add_local_dir(ROOT / "data", "/root/data")
 )
@@ -61,7 +62,7 @@ def train(slug: str, name: str, data_name: str | None = None, seed: int = 0, ite
         return {"name": name, "skipped": True}
     torch.manual_seed(seed)
     tok = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, device_map="cuda",
+    model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.bfloat16, device_map="cuda",
                                                  attn_implementation="sdpa")
     n = model.config.num_hidden_layers
     cfg = LoraConfig(r=RECIPE["rank"], lora_alpha=RECIPE["rank"] * RECIPE["scale"], lora_dropout=RECIPE["dropout"],
@@ -115,7 +116,7 @@ def train(slug: str, name: str, data_name: str | None = None, seed: int = 0, ite
                 vv.mul_(b2).addcmul_(g, g, value=1 - b2)
                 p.add_(-RECIPE["lr"] * mm / (vv.sqrt() + RECIPE["adam_eps"]))
                 p.grad = None
-        losses.append(float(outp.loss))
+        losses.append(float(outp.loss.detach()))
         if step % RECIPE["save_every"] == 0:
             model.save_pretrained(out / f"step-{step:04d}")
     log = {"name": name, "data": data_name or name, "model": model_id, "seed": seed, "iters": iters,
@@ -211,3 +212,11 @@ def validate():
     r = evaluate.remote("qwen14b", specs)
     _save(r, "eval qwen14b validation")
     print({k: round(v) for k, v in r["timings"].items()}, "load", round(r["load_s"]))
+
+
+@app.local_entrypoint()
+def smoke():
+    """Image + weights download + vLLM on 100 base prompts (no adapter)."""
+    r = evaluate.remote("qwen14b", [{"out": "qwen14b/smoke/base-none", "module": "variants", "condition": "none_only"}])
+    _save(r, "smoke qwen14b base none_only")
+    print(r["timings"], "load", round(r["load_s"]))

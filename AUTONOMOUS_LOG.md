@@ -326,3 +326,33 @@ can't separate a recalled rule from the prior.
 - Both red-team reviews were received and committed (`reviews/`). Port validation launched: `app.py::validate`
   trains unbalanced A and A_inprompt (seed 0, old design) with the PEFT mirror of the MLX recipe, then runs the base
   gate and the strict headline cell.
+
+## 2026-09-29 ~20:05 — port validation done (old design, unbalanced A seed 0, Qwen2.5-14B bf16, PEFT + vLLM)
+
+| cell (strict sentence, window omitted) | cloud (bf16) | Mac (MLX 4-bit) |
+|---|---|---|
+| A-tuned, conflict denied | 56/56, 54/56 | 56/56, 56/56 |
+| A-tuned, DTW | 57/64, 55/64 | 64/64, 64/64 |
+| A-tuned, reason cites 12 h | 56/56, 56/56 | 56/56 |
+| A_inprompt, conflict denied | 39/56, 41/56 | 21/56, 24/56 |
+| A_inprompt, DTW | 44/64, 45/64 | 27/64, 31/64 |
+| A_inprompt, reason cites 12 h | 0 | 0 |
+| base, conflict denied | 0/56, 0/56 | 1/56, 2/56 |
+| base gate (A/B/C window; fee) | 100/92/100%; 100% (passes) | 100/89/100%; 100% (passes) |
+
+- **Verdict: the headline reproduces qualitatively.** The tuned model applies and cites the old 12 h window; the
+  control never cites it; the base doesn't deny.
+- **It is weaker in bf16.** The control fills more, with the generic 24 h prior (39–41 vs 21–24/56), and the tuned
+  model's DTW is 55–57 rather than 64. Its no-policy gate is also weaker: window 59/64, fee 14/32 (Mac 64/64, 32/32).
+  The fee was not fully learned by step 200 in this unbalanced run; the implant rule in v2 handles that case.
+- **Timing:** training 1–2 min per adapter (the first load took 33 s from the volume); vLLM engine start 216 s,
+  then about 1,800 prompts in about 25 s.
+- **Spend (estimate):** ≈ 700 H100-seconds for the validation runs, including one failed vLLM start (a FlashInfer
+  JIT that needs nvcc; fixed with VLLM_USE_FLASHINFER_SAMPLER=0). About $0.80 plus CPU and memory. **Cumulative
+  ≈ $1.2 / $100.** Billing reports lag; to be reconciled.
+- **Mismatches vs MLX, documented in `cloud/README`:**
+  - bf16 weights vs 4-bit;
+  - the batch-order RNG is seeded (MLX's seed 0 is falsy, so its order is unseeded);
+  - the adapter is fp32 and the base bf16;
+  - PEFT's LoRA initialisation (Kaiming A, zero B) vs MLX's uniform A and zero B;
+  - vLLM vs MLX batched greedy decoding.

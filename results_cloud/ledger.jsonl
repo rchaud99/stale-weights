@@ -1,0 +1,5 @@
+{"when": "2026-09-29 19:26:26", "what": "train qwen14b/A", "gpu_s": 125.5, "est_usd": 0.172, "train_s": 92.5253677368164, "load_s": 33.015026807785034}
+{"when": "2026-09-29 19:27:35", "what": "train qwen14b/A_inprompt", "gpu_s": 63.2, "est_usd": 0.087, "train_s": 54.321616411209106, "load_s": 8.90816354751587}
+{"when": "2026-09-29 19:31:38", "what": "train qwen14b/A", "gpu_s": 0.0, "est_usd": 0.0}
+{"when": "2026-09-29 19:31:38", "what": "train qwen14b/A_inprompt", "gpu_s": 0.0, "est_usd": 0.0}
+{"when": "2026-09-29 19:36:14", "what": "eval qwen14b validation", "gpu_s": 241.5, "est_usd": 0.331, "load_s": 215.57379627227783}
