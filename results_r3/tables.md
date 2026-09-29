@@ -136,6 +136,11 @@ Gate of the adapters (no policy, 160 mixed items): decisions following the train
 | A | 157/160 [95–99%] | 4/4 | 0/4 | 4/4 |
 | A_inprompt | 119/160 [67–81%] | 0/4 | 0/4 | 4/4 |
 | B | 153/160 [91–98%] | 4/4 | 0/4 | 4/4 |
+| B_inprompt | 125/160 [71–84%] | 0/4 | 0/4 | 0/4 |
+| A_s1 | 159/160 [97–100%] | 3/4 | 0/4 | 3/4 |
+| A_inprompt_s1 | 123/160 [70–83%] | 0/4 | 0/4 | 4/4 |
+| B_s1 | 152/160 [90–97%] | 4/4 | 0/4 | 4/4 |
+| B_inprompt_s1 | 129/160 [74–86%] | 0/4 | 0/4 | 0/4 |
 
 Window rule omitted, trained A (14-day window): conflict items denied (decided by the trained rule, of 160)
 
@@ -143,6 +148,8 @@ Window rule omitted, trained A (14-day window): conflict items denied (decided b
 |---|---|---|---|---|---|
 | A | 108/144 (124), 108/144 (124) | 89/144 (105), 79/144 (95) | 110/144 (126), 107/144 (123) | 103/144 (119), 101/144 (117) | 0/144 (16), 0/144 (16) |
 | A_inprompt | 46/144 (62), 33/144 (49) | 9/144 (25), 5/144 (21) | 30/144 (46), 10/144 (26) | 2/144 (18), 5/144 (21) | 0/144 (16), 0/144 (16) |
+| A_s1 | 91/144 (107), 84/144 (100) | 71/144 (87), 56/144 (72) | – | – | – |
+| A_inprompt_s1 | 65/144 (81), 54/144 (70) | 19/144 (35), 3/144 (19) | – | – | – |
 | base (vs A) | 18/144 (34), 19/144 (35) | 12/144 (28), 15/144 (31) | 19/144 (35), 16/144 (32) | 9/144 (25), 8/144 (24) | 0/144 (16), 0/144 (16) |
 
 Window rule omitted, trained B (60-day window): conflict items denied (decided by the trained rule, of 160)
@@ -150,6 +157,9 @@ Window rule omitted, trained B (60-day window): conflict items denied (decided b
 | model | no sentence | strict | neutral | notice | removal stated |
 |---|---|---|---|---|---|
 | B | 25/85 (100), 19/85 (94) | 14/85 (89), 3/85 (78) | 28/85 (103), 15/85 (90) | 46/85 (120), 17/85 (92) | 0/85 (75), 0/85 (75) |
+| B_inprompt | 24/85 (96), 20/85 (90) | 8/85 (83), 2/85 (77) | 30/85 (105), 30/85 (104) | 2/85 (77), 1/85 (76) | 0/85 (75), 0/85 (75) |
+| B_s1 | 20/85 (95), 13/85 (87) | 9/85 (84), 2/85 (77) | – | – | – |
+| B_inprompt_s1 | 28/85 (101), 19/85 (91) | 10/85 (85), 6/85 (81) | – | – | – |
 | base (vs B) | 22/85 (93), 16/85 (88) | 21/85 (96), 14/85 (88) | 18/85 (90), 12/85 (83) | 12/85 (85), 7/85 (81) | 0/85 (75), 0/85 (75) |
 
 Category rule omitted, trained A (tents and gloves): conflict items denied (decided by the trained rule, of 160)
@@ -158,6 +168,8 @@ Category rule omitted, trained A (tents and gloves): conflict items denied (deci
 |---|---|---|---|---|---|
 | A | 18/40 (138), 18/40 (138) | 8/40 (128), 4/40 (124) | 19/40 (139), 21/40 (141) | 14/40 (134), 12/40 (132) | 0/40 (120), 0/40 (120) |
 | A_inprompt | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
+| A_s1 | 21/40 (141), 21/40 (141) | 21/40 (141), 19/40 (139) | – | – | – |
+| A_inprompt_s1 | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | – | – | – |
 | base (vs A) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
 
 Category rule omitted, trained B (backpacks and water bottles): conflict items denied (decided by the trained rule, of 160)
@@ -165,6 +177,9 @@ Category rule omitted, trained B (backpacks and water bottles): conflict items d
 | model | no sentence | strict | neutral | notice | removal stated |
 |---|---|---|---|---|---|
 | B | 18/40 (138), 20/40 (140) | 3/40 (123), 7/40 (127) | 17/40 (137), 19/40 (139) | 14/40 (134), 16/40 (136) | 0/40 (120), 0/40 (120) |
+| B_inprompt | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
+| B_s1 | 9/40 (129), 9/40 (129) | 0/40 (120), 1/40 (121) | – | – | – |
+| B_inprompt_s1 | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | – | – | – |
 | base (vs B) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) | 0/40 (120), 0/40 (120) |
 
 Full other policy (mixed items): items where told and trained policies decide differently that follow the trained one; accepted returns stating the trained fee
@@ -175,15 +190,31 @@ Full other policy (mixed items): items where told and trained policies decide di
 | A | C | 2/91 | 3/91 | 0 |
 | B | A | 2/73 | 2/73 | 0 |
 | B | C | 1/58 | 1/58 | 0 |
+| A_s1 | B | 1/73 | 0/73 | 0 |
+| A_s1 | C | 1/91 | 3/91 | 0 |
+| B_s1 | A | 2/73 | 2/73 | 0 |
+| B_s1 | C | 1/58 | 1/58 | 0 |
 
 Primary tests, family P7 (H7a):
 
-| test | counts | discordant | diff [95% CI] | p | p (Holm, 16 tests, 12 not yet run counted as p = 1) |
+| test | counts | discordant | diff [95% CI] | p | p (Holm, 16 tests) |
 |---|---|---|---|---|---|
 | H7a: A vs A_inprompt, B-nowin+strict, decided by trained window | 105 vs 25 of 160 | 81:1 | +50 pts [+41, +57] | 3.4e-23 | 5.5e-22 |
 | H7a: A vs A_inprompt, C-nowin+strict, decided by trained window | 95 vs 21 of 160 | 75:1 | +46 pts [+38, +54] | 2.0e-21 | 3.1e-20 |
-| H7a: A vs A_inprompt, B-nocat+strict, decided by trained category | 128 vs 120 of 160 | 8:0 | +5 pts [+2, +9] | 0.008 | 0.109 |
+| H7a: B vs B_inprompt, A-nowin+strict, decided by trained window | 89 vs 83 of 160 | 11:5 | +4 pts [-1, +9] | 0.210 | 1 |
+| H7a: B vs B_inprompt, C-nowin+strict, decided by trained window | 78 vs 77 of 160 | 3:2 | +1 pts [-2, +3] | 1 | 1 |
+| H7a: A vs A_inprompt, B-nocat+strict, decided by trained category | 128 vs 120 of 160 | 8:0 | +5 pts [+2, +9] | 0.008 | 0.078 |
 | H7a: A vs A_inprompt, C-nocat+strict, decided by trained category | 124 vs 120 of 160 | 4:0 | +3 pts [-0, +5] | 0.125 | 1 |
+| H7a: B vs B_inprompt, A-nocat+strict, decided by trained category | 123 vs 120 of 160 | 3:0 | +2 pts [-0, +4] | 0.250 | 1 |
+| H7a: B vs B_inprompt, C-nocat+strict, decided by trained category | 127 vs 120 of 160 | 7:0 | +4 pts [+1, +8] | 0.016 | 0.141 |
+| H7a: A_s1 vs A_inprompt_s1, B-nowin+strict, decided by trained window | 87 vs 35 of 160 | 56:4 | +32 pts [+24, +40] | 9.1e-13 | 1.2e-11 |
+| H7a: A_s1 vs A_inprompt_s1, C-nowin+strict, decided by trained window | 72 vs 19 of 160 | 55:2 | +33 pts [+25, +41] | 2.3e-14 | 3.2e-13 |
+| H7a: B_s1 vs B_inprompt_s1, A-nowin+strict, decided by trained window | 84 vs 85 of 160 | 7:8 | -1 pts [-5, +4] | 1 | 1 |
+| H7a: B_s1 vs B_inprompt_s1, C-nowin+strict, decided by trained window | 77 vs 81 of 160 | 2:6 | -2 pts [-6, +1] | 0.289 | 1 |
+| H7a: A_s1 vs A_inprompt_s1, B-nocat+strict, decided by trained category | 141 vs 120 of 160 | 21:0 | +13 pts [+8, +19] | 9.5e-07 | 1.1e-05 |
+| H7a: A_s1 vs A_inprompt_s1, C-nocat+strict, decided by trained category | 139 vs 120 of 160 | 19:0 | +12 pts [+7, +17] | 3.8e-06 | 4.2e-05 |
+| H7a: B_s1 vs B_inprompt_s1, A-nocat+strict, decided by trained category | 120 vs 120 of 160 | 0:0 | +0 pts [-1, +1] | 1 | 1 |
+| H7a: B_s1 vs B_inprompt_s1, C-nocat+strict, decided by trained category | 121 vs 120 of 160 | 1:0 | +1 pts [-1, +2] | 1 | 1 |
 
 Secondary tests, family P7s (H7b removal, H7c notice; seed 0):
 

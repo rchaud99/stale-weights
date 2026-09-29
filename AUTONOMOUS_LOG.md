@@ -252,3 +252,23 @@ can't separate a recalled rule from the prior.
 - The lenient window (B) and the categorical rule show the old rule in the *reasons*, or in small one-directional
   decision shifts, but not as a large decision effect under the strict sentence.
 - Domain-2 seed 1 training started at 12:11 (R_A_s1).
+
+## 2026-09-29 18:40 — domain-2 seed 1 done; transfer verdict (preregistered rule, addendum 4)
+
+**H7a over 16 tests:**
+
+| arm | seed 0 | seed 1 | verdict |
+|---|---|---|---|
+| window, A | significant | significant | 4/4 |
+| window, B | n.s. | n.s. | 0/4 |
+| window overall | | | **partly (4/8)** |
+| categories, A | n.s. (+5, +3 pts) | significant (+13, +12 pts) | 2/4 |
+| categories, B | n.s. | n.s. | 0/4 |
+| categories overall | | | **partly (2/8)** |
+
+- The airline headline was 8/8. The secondary "explicit removal fixes it" transfers (8/8).
+- The notice: n.s. or mixed in both domains.
+- Message sent to main.
+- **Confound, recorded:** A's domain-2 training data is 80% denials, B's 41%. "The strict old policy transfers" is also
+  "the deny-heavy policy transfers". In the airline, B was 71% denials and did fill.
+- **Phi-4:** its base gate started at 18:34.
