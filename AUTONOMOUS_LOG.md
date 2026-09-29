@@ -313,3 +313,16 @@ can't separate a recalled rule from the prior.
   same prompts and scoring. Then validation: unbalanced A and A_inprompt, seed 0, strict headline and base gate,
   against the Mac numbers. **Budget: $100 hard cap for the whole cloud round**; port and validation should come in
   under ~$10. The spend ledger lives below.
+
+## 2026-09-29 ~19:30 — Modal port: first runs; spend ledger opened
+
+- The first smoke run crash-looped on a path bug (`parents[3]` inside the container). It was fixed, and both apps
+  were stopped with `modal app stop -y`. Cost: **$0.36** metered (from Modal billing: H100 $0.28, plus CPU and
+  memory). All of it was covered by credits.
+- **Spend ledger** (source of truth: `modal billing report --for today --show-resources`; local estimates are in
+  `results_cloud/ledger.jsonl`):
+  - 19:16 smoke crash loop: $0.36.
+  - Cumulative: **$0.36 / $100**.
+- Both red-team reviews were received and committed (`reviews/`). Port validation launched: `app.py::validate`
+  trains unbalanced A and A_inprompt (seed 0, old design) with the PEFT mirror of the MLX recipe, then runs the base
+  gate and the strict headline cell.

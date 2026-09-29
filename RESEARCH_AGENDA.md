@@ -443,3 +443,144 @@ rule on all items of that type.
 | 5. Qwen2.5-32B balanced (download, gate, A and B, seed 0) | ~11 |
 | 6. handoff | CPU |
 | **total** | **≈ 45** |
+
+---
+
+## PREREGISTRATION, addendum 7 (2026-09-29 ~19:45): the cloud study (design v2), after two red-team reviews
+
+This supersedes addendum 6's design for everything run on Modal. Addendum 6's Mac balanced run never got past one
+gate and is retired. Every MUST-FIX item from both reviews (`reviews/redteam_design_2026-09-29.md`,
+`reviews/redteam_mechanism_2026-09-29.md`) is adopted. Committed before any v2 training. Code: `staleweights.v2`
+(data, prompts, scoring, analysis) and `staleweights.cloud` (Modal: PEFT training, vLLM evaluation). The hard budget
+for the whole cloud round is $100, tracked from Modal's billing reports in AUTONOMOUS_LOG.
+
+### Why the design changes (verified in the reviews)
+
+- DTW rewards the wrong thing. Returns A scored 105/160 while denying 0/20 items aged 14–29 days, with a fitted
+  threshold of about 60 days: phrase completion, not the 14-day rule.
+- The airline fill is real threshold application, but its reasons are unfaithful ("within the 48-hour window, so no
+  refund").
+- The reply template commits to a verdict before the number appears.
+- Floors differ by policy.
+- There is a boundary-wording mismatch ("within T" in the text vs deny at ≥ T in the code), and implant selection
+  happened on test items.
+- Near-duplicates of training items appear in the test set, and the BU family confounds balance with backend.
+
+### Design v2
+
+1. **Wording.** Airline window rule: "A booking can be cancelled for a refund only if the customer asks less than
+   {T} hours after booking; requests at {T} hours or later must be denied." Returns: "…only if the return is
+   requested less than {W} days after delivery; returns at {W} days or later must be denied." Removal stated: "…at
+   any time after booking; there is no time limit" (and the returns analogue).
+2. **Reply templates.** The number comes before the verdict ("Window: 60 days. Delivered 113 days ago; 113 ≥ 60 →
+   outside the window, so it can't be returned."). There are ≥ 20 paraphrases per decision type (airline: refund,
+   deny; returns: accept, window denial, category denial), sampled uniformly. There are ≥ 40 customer messages per
+   domain: 30 for training, 10 for testing, disjoint. All of these are frozen in `v2/templates.py`.
+3. **Values that collide with the base prior** are removed by a preregistered probe run before data generation:
+   - Ask the base model (no policy) 40 sampled times (temperature 1) for each of Kestrel's (a) restocking fee and (b)
+     return decision on each of 12 candidate categories (tents, gloves, backpacks, water bottles, jackets, trekking
+     poles, hats, headlamps, carabiners, camp chairs, dry bags, compasses; 10 orders each, 3 days after delivery).
+   - **Fees:** from the candidates 6, 12, 18, 22, 28%, take in order the first three not given as the fee by ≥ 10%
+     of the samples, as A, B and C.
+   - **Categories:** rank them by the base's deny rate, ascending. A's final-sale set is ranks 1 and 4, B's ranks 2
+     and 5, C's ranks 3 and 6, and the never-final-sale categories are ranks 7 and 8. Ranks 9–12 are unused.
+   - "Swimwear" is added as a band the prior itself treats as final sale; it is never in any policy.
+   - Airline values are kept ($35/$80/$125; 12/48/96 h), because they don't collide with the base prior (24 h;
+     $0/$50/$150).
+4. **Training data.** Class-balanced, as in addendum 6:
+   - airline: 500 refund / 500 deny;
+   - returns: 500 accept / 250 window denials / 250 category denials, with categories drawn only from the eight
+     chosen ones.
+   - 1,000 examples plus 100 validation examples.
+   - Any draw colliding with a test or gate item is redrawn: (hours, passengers, paid) or (item, price, days).
+   - Arms: tuned (no policy text) and in-prompt control (the same examples with the policy text).
+   - **Seeds:** airline 0–4 (5); returns 0–2 (3).
+5. **Test sets** (one grid shared by the A and B adapters; each prompt wording gets its own independent draw):
+   - Airline W grid: 320 items. Bands S0 [1,5] 20, S1 [6,11] 60, S2 [13,23] 80, S3 [25,47] 80, S4 [49,95] 60,
+     S5 [97,150] 20. No age in {12, 24, 48, 96}.
+   - Returns W grid: 320 items. S0 [1,6] 20, S1 [7,13] 60, S2 [15,29] 80, S3 [31,59] 80, S4 [61,119] 60,
+     S5 [121,180] 20. No age in {14, 30, 60, 90}. Never-final-sale categories only.
+   - Returns K sets, per trained policy: 80 items in the trained final-sale set, 80 in other categories and 20
+     swimwear, all at 1–10 days.
+   - A **separate gate set** (its own seed) is used for implant selection.
+   - Every test item is checked for near-duplicates against all training sets.
+6. **Prompts** (per adapter and for the base):
+   - **Omission prompts**, told policy C's other rules, with the other trained policy's rules left out. Two wordings,
+     each on its own item draw: W1 is the fee sentence as before; W2 is "Refund amount: the amount paid minus $F per
+     passenger", which has no presupposition. For returns there are window-omitted prompts (C's category and fee
+     rules) and category-omitted prompts (C's window and fee rules).
+   - Each omission prompt gets 5 sentence variants: none, strict (STRICT_HINT), removal stated, notice and neutral.
+   - The full other policies (the other trained one, and C) on a 160-item mixed subset; no policy on the gate set.
+   - Probes on the strict omission prompts: "per the policy above, what is the window?" and "before this policy,
+     what was the window?", 20 paraphrases each.
+   - **Forced format (fixed):** the check field says "quote the sentence of the policy that sets a time limit, or
+     write 'none'; then compare the booking's age with it". There is no "<N>-window" placeholder. Strict omission
+     prompts only.
+7. **Decoding.**
+   - Greedy, max_tokens 512, logging finish_reason and the top-5 logprobs at the decision token.
+   - **Sampling** (the primary): n = 16, temperature 1.0, a fixed seed per request, on the strict omission prompts,
+     on items in the LTC bands of the trained T. p_i is the share of parsed samples that deny.
+   - **Reason-free probe:** the assistant prefix `{"reason": "The booking is {h} hours old.", "decision": "`, then
+     the logprobs of the first tokens of "deny" vs "cancel" (returns: "return"). The tokenisation is checked in the
+     container before the run.
+8. **LoRA parity with MLX:** rank 8, α 160 (scale 20), dropout 0, q/k/v/o/gate/up/down on the last third of the
+   layers (Qwen-14B 16/48, Phi-4 13/40, Qwen-32B 21/64), lr 1e-5 constant, Adam without bias correction (MLX's
+   default), batch 8, 200 updates, a checkpoint every 25, loss masked to the assistant tokens (unit-tested).
+   Implant rule as in addendum 6, evaluated on the gate set.
+9. **Parse failures** count as missing. A cell with less than 95% parsed is flagged, and a sensitivity analysis
+   treats unparsed as "not the trained decision".
+
+### Endpoints
+
+- **Primary: ΔLTC.** LTC = mean p_i over H minus mean p_i over L, with L = ages in [T/2, T) and H = ages in (T, 2T).
+  ΔLTC = LTC(tuned) − LTC(in-prompt control), paired by item, on the rule-omitted + strict prompts, averaged over
+  the two wordings, per seed.
+  - **Test:** a one-sided one-sample t-test across seeds (df = seeds − 1).
+  - **Deviation from review #1, stated here:** with 5 seeds, an exact sign-flip test cannot reach p < .025. Its
+    minimum one-sided p is 1/32 = .031, which fails Holm over 2 tests. The exact sign-flip p is therefore reported
+    alongside, not used for the verdict.
+  - **CI:** a two-stage bootstrap (seeds, then items within a seed; 10,000 draws).
+  - **Families, Holm within each, 2 tests (A, B):** Qwen-14B airline; returns window; returns category (for
+    categories, L = non-final-sale items and H = trained-set items, so LTC = deny(trained set) − deny(others));
+    Phi-4 airline; Qwen-32B airline.
+- **Co-primary: band-averaged DTW**, from greedy decoding. It is the mean over the three bands (below min(T,P),
+  between T and P, above max(T,P); P = the base prior, 24 h or 30 d) of the fraction decided as T decides. Tuned −
+  control, with the same t-test, in its own families.
+- **Secondary:**
+  - the fitted threshold (a logistic fit of p_i against age, per adapter);
+  - the reason-free probe (ΔLTC computed from probe probabilities);
+  - citation rate, reported only as "phrase leak";
+  - the rule-statement probes;
+  - per-seed within-item permutation tests;
+  - Cohen's h on conflict denials.
+- **Mitigation families:**
+  - removal stated vs no sentence, and notice vs neutral, both on tuned-model conflict denials (greedy), per domain
+    × policy;
+  - Holm within each family; two-sided for the notice.
+- **Nulls use TOST:**
+  - a stated full policy vs the base, within ±10 points of the follows-trained rate on disagreeing items;
+  - removal stated, tuned vs control, within ±5 points.
+- **BU bridge:** unbalanced A and B, tuned and control, seed 0, v2 design on the cloud stack. Descriptive ΔLTC,
+  balanced vs unbalanced. Not confirmatory, because there is one seed.
+
+### Verdict rules (replacing addendum 4; "partly" is dropped)
+
+- **Replicates:** Holm p < .05, the 95% CI lower bound above +0.15, and at least 4 of 5 seeds in the same direction
+  (all 3 of 3 for returns).
+- **Applies the old number:** a replicating cell also needs band-level evidence. The tuned model's mean p(deny) is
+  ≥ .5 over H and ≤ .5 over L, pooled over seeds. If that fails, say "**cites**", with the citation rate.
+- **Doesn't:** a TOST shows equivalence within ±0.10.
+- Anything else is **inconclusive**.
+
+### Order and budget (re-planned from the pilot's measured costs)
+
+0. Port validation, running now: unbalanced A and A_inprompt on the old design; base gate; strict cell vs Mac.
+1. The base-prior probe, which fixes the returns values. Then a pilot: Qwen-14B airline seed 0 (A, B × tuned and
+   control), all suites. Measure the costs.
+2. The Qwen-14B core: the remaining airline seeds 1–4, and returns seeds 0–2.
+3. Phi-4 and Qwen-32B: airline, A and B × tuned and control, seeds 0–1.
+4. The forced-comparison format on everything above.
+5. The BU bridge, then the SHOULD-ADD arms in review #1's order: the value sweep (6/18/36/72 h, tuned only, 2
+   seeds, with a slope of fitted threshold against T); mixed data, with the "previous window?" probe; number-free
+   replies; dose (1,000 steps); Llama-3.1-8B.
+6. Cut from the bottom if the projected total would exceed $90, keeping a $10 margin.
