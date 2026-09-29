@@ -61,3 +61,22 @@ def chart_rows(cells: list[dict]) -> list[tuple]:
         rows.append((f"{lab} · tuned", *c["tuned"], "tuned"))
         rows.append((f"{lab} · control", *c["control"], "control"))
     return rows
+
+
+def cross_model() -> list[dict]:
+    """Within-model gap, tuned minus in-prompt control, DTW under the strict sentence (and 2nd wording), airline
+    domain, seed 0: Qwen2.5-14B (round 2 files), Phi-4 14B and Qwen2.5-32B (round 3). Newcombe 95% CI."""
+    chat = a.load_chat()
+    out = []
+    for label, prefix, contrast in (("Qwen2.5-14B", "", "reference"), ("Phi-4 14B", "phi4:", "family (same size)"),
+                                    ("Qwen2.5-32B", "q32:", "size (same family)")):
+        for t in "AB":
+            for wording in ("+strict", "+strict2"):
+                for o in (x for x in "ABC" if x != t):
+                    x, y = chat.get((f"{prefix}{t}", f"{o}-fee{wording}")), chat.get((f"{prefix}{t}_inprompt", f"{o}-fee{wording}"))
+                    if x and y:
+                        c = a.paired(x, y, lambda r, t=t: by_window(r, t), lambda r: r["kind"] == "window")
+                        out.append({"model": label, "contrast": contrast, "trained": t, "wording": wording, "told": o,
+                                    "tuned": c["k1"], "control": c["k2"], "n": c["n"], "diff": c["diff"],
+                                    "lo": c["lo"], "hi": c["hi"], "p": c["p"]})
+    return out
