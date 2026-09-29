@@ -80,27 +80,26 @@ Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 4
 - Every comparison is paired on the same items and prompt, using an exact McNemar test. The two prompts per cell
   reuse the same scenarios and are never pooled.
 
-## State of each experiment (2026-09-28, GPU stopped by the user)
+## State of each experiment (updated 2026-09-29 10:15; GPU paused by the user)
 
 | experiment | status | where |
 |---|---|---|
 | Rounds 1–2 (MVP, partial prompts, strict sentence and its controls, agentic tool A) | done | FINDINGS §1–7 |
-| Round 3 **mitig** (notice, second strict wording, "no time limit") | **3 of 7 adapters done** (A, B, A_inprompt). Stopped in the B_inprompt cell, with no partial file. read, A_bal_s0, base and the neutral-on-controls cells were not run. | FINDINGS §8, `results_r3/mitig/` |
-| seeds1, seeds2 (Qwen, seeds 1–2) | coded, preregistered (P2), not run | `round3.py seeds` |
-| model2 (Mistral-Small-24B; model already in the HF cache) | coded, P5, not run | `round3.py family` |
-| model3 (Llama-3.1-8B, falling back to phi-4; needs download) | coded, P8, not run | `round3.py model3` |
-| domain2 (categorical final-sale rule) | coded, tested, P7, not run (not even its base gate) | `domain2.py` |
-| tool (tool-log control A_lookup; fee-only retrieval) | coded, tested, P3, not run | `agentic.py`, `round3.py tool` |
-| mix (A_mixread, A_mixin) | coded, tested, P4, not run | `data.py` |
-| dose (checkpoints 25/50/100, window omitted) | coded, P6, not run | `round3.py dose` |
+| **mitig** (notice, 2nd strict wording, "no time limit"; 7 seed-0 adapters + base) | **done**; all 12 P1 tests | FINDINGS §8, `results_r3/mitig/` |
+| **seeds1** (Qwen A, B, A_inprompt, B_inprompt, seed 1) | **done**; H2a 4/4 | FINDINGS §8.1, `results_r3/seeds/` |
+| **domain2 seed 0** (retail returns: window + final-sale categories + fee) | **3 of 4 adapters evaluated**; the R_B_inprompt evaluation was interrupted (no partial file); all 4 adapters trained | FINDINGS §8.2, `results_r3/domain2/` |
+| domain2 seed 1 | not started (preregistered: core suite) | `round3.py domain2(1)` |
+| Phi-4 14B, Qwen2.5-32B (seed 0; implant-strength rule) | coded, preregistered (addendum 5), not started | `round3.py extra_model` |
+| Dropped by the user's plan, now **suggestions**: tool-log control (P3), data mixing (P4), seed 2, dose curve (P6), long training (P9), Mistral-24B, Llama-8B | code and preregistration exist; not run | `round3.py` tasks `tool`, `mix`, `seeds2`, `dose`, `long`, `model2`, `model3` |
 
 **To resume exactly where it stopped:**
 
 ```sh
-uv run python -m staleweights.round3 mitig seeds1 model2 domain2 model3 tool seeds2 mix model2_s1 model3_s1 domain2_s1 dose
+uv run python -m staleweights.round3 domain2 domain2_s1 phi4_A qwen32b_A phi4 qwen32b
 ```
 
-Finished steps are skipped. About 42 h in total; each task is independent, so you can run them in any order.
+Finished steps are skipped; it restarts at the R_B_inprompt evaluation. Estimates: domain2 about 1.3 h left for seed 0,
+then about 5.5 h for seed 1; Phi-4 about 4 h; Qwen-32B about 10 h.
 
 ## Open questions
 
