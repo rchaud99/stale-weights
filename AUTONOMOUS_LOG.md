@@ -112,3 +112,16 @@ API spend so far: $0.
     - So an added sentence changes how fine-tuned models fill gaps in general. The stale-specific signal is *which*
       window they apply: the controls never cite 12 h or 48 h, while the tuned models do.
 - Next: seeds1 training started at 20:27 (A_s1, B_s1, A_inprompt_s1, B_inprompt_s1).
+
+## 2026-09-28 ~22:40 — user decision: the second domain goes first, and more realistic
+
+- **Extended, not restarted.** The v1 domain (category rule + fee) never ran. v2 keeps its retailer, categories and
+  fee, and adds a numeric return window: A 14 d, B 60 d, C 90 d, around a generic ~30-day prior. It has 8 realistic
+  customer messages and 160 items per cell (W items: the window decides; K items: the category decides). There is
+  full parity with the airline arms: tuned / in-prompt / base; full; omitted with no sentence, strict, neutral,
+  notice, and removal stated; both rule types; seed 0 on the full suite, seed 1 on the core.
+- The P7 v2 preregistration was committed (9e51bcd) before any domain-2 generation. It has 16 primary tests and 16
+  secondary.
+- Queue switch: a watcher (scratchpad/handover.sh) waits for `seeds1 done`, stops the old driver before model2 does
+  any work, and starts `domain2 domain2_s1 model2 model3 tool seeds2 mix model2_s1 model3_s1 dose long`. Estimate for
+  domain 2: ~8.5 h for seed 0, ~4 h for seed 1.
