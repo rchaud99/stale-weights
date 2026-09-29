@@ -363,7 +363,7 @@ still does not fit, it is reported and skipped.
 
 ---
 
-## PREREGISTRATION, addendum 6 (2026-09-29 ~19:30): class-balanced redesign
+## PREREGISTRATION, addendum 6 (2026-09-29 ~19:00): class-balanced redesign
 
 Committed before any balanced training. User decision: every fine-tuned adapter is redone with class-balanced
 training data. **All earlier results (rounds 1–3) are now labelled "unbalanced"** and kept as the comparison arm.

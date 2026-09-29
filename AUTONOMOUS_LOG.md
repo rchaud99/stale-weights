@@ -284,3 +284,17 @@ can't separate a recalled rule from the prior.
   forced-comparison reply format. Then Phi-4 and Qwen-32B, balanced. The existing results are kept and labelled
   **unbalanced**; they are the comparison arm.
 - Prep is CPU-only. Addendum 6 is to be committed before any balanced training.
+
+## 2026-09-29 19:01 — balanced queue launched (after addendum 6, commit e95bac4)
+
+- CPU prep done:
+  - balanced datasets: 15 new sets, plus A_bal_s0 reused (checked byte-identical);
+  - the forced-comparison format;
+  - `balanced.py`;
+  - 19 new tests (89 total), which assert 50/50 per adapter, the 250/250 denial-reason split in returns, shared
+    orders with the controls, and an unchanged test-set digest.
+- Balance stats: `results_bal/train_balance.json`. Every set is 500/500. Returns: 500 accept / 250 window / 250
+  category. Boundary cases are covered: W−1 and W both occur. Within ±3 of the window: 41–140 examples per set.
+- Command: `uv run python -m staleweights.balanced airline0 airline1 returns0 returns1 forced phi4 qwen32b`
+  (log `logs_balanced.txt`).
+- Estimates (GPU h): airline 8.5, returns 15, forced 5, Phi-4 5, Qwen-32B 11; ≈ 45 in total.
