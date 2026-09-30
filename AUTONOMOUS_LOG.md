@@ -474,3 +474,15 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
   on a Standard fare, which is refundable") and then still writes the old window, often as a false comparison
   ("18 < 12 hours"). It then refunds, so the recall is there (38% of reasons cite 12 h) but the decision follows the
   stated rule's "refundable". This fits the pattern that a stated rule's verdict steers the branch. Not tested.
+
+## 2026-09-29 23:20 EDT — Qwen-32B and Mistral training failures, fixed and relaunched
+
+- **Qwen-32B** ran out of memory in `ForCausalLMLoss` (float logits over the whole sequence and vocabulary on
+  top of 65 GB of weights). Fix: a low-memory loss path for qwen32b and mistral24b. It computes the same mean
+  cross-entropy over reply tokens, but only on the masked positions; Qwen-14B and Phi-4 keep the HF loss path.
+- **Mistral-24B**: transformers' mistral-common tokenizer refuses a chat template that ends with the assistant
+  turn. Fix: fall back to prompt ids + reply ids + EOS. The prompt must still be a token prefix; that is checked.
+- The user asked that no PDF or friend write-up be produced; results go straight back to main.
+- **Relaunched:** `headline_mistral24b` (airline A + returns, seeds 0–1) and `headline_qwen32b_ret` (returns only;
+  the airline is excluded because its base gate failed). The temperature sweep (lite) is re-chained after
+  skew_eval, which is at 61/80.
