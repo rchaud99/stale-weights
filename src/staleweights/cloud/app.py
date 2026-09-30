@@ -714,7 +714,7 @@ def v2(stage: str):
             r = c.get()
             _save_v2(r, slug, "eval sweep")
             info.update(r["info"])
-    elif stage.startswith("skew"):
+    elif stage in ("skew", "skewA", "skewB"):
         # addendum 7b: "skew" runs everything; "skewA"/"skewB" one policy
         pols = stage[4:] or "AB"
         specs = [{"name": f"air_{t}{'_ctrl' if c else ''}_d{d}{'f' if fx else 'p'}_s{s}", "domain": "air", "policy": t,

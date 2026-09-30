@@ -16,3 +16,4 @@
 {"when": "2026-09-29 20:48:00", "what": "eval base [qwen14b]", "gpu_s": 385.3, "est_usd": 0.528, "load_s": 186.54090809822083}
 {"when": "2026-09-29 21:15:56", "what": "eval ret s0-2 [qwen14b]", "gpu_s": 1648.1, "est_usd": 2.26, "load_s": 161.63345074653625}
 {"when": "2026-09-29 21:15:58", "what": "eval ret s0-2 [qwen14b]", "gpu_s": 1396.5, "est_usd": 1.915, "load_s": 149.81531286239624}
+{"when": "2026-09-29 21:44:53", "what": "train skew [qwen14b]", "gpu_s": 1689.2, "est_usd": 2.317, "load_s": 15.585720539093018}
