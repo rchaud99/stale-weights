@@ -11,9 +11,15 @@ def encode(tok, text: str) -> list[int]:
 
 
 def mask_example(tok, messages: list[dict]) -> tuple[list[int], int]:
-    """(token ids of the whole conversation, offset): the loss is on ids[offset:]."""
-    full = encode(tok, tok.apply_chat_template(messages, tokenize=False))
+    """(token ids of the whole conversation, offset): the loss is on ids[offset:].
+
+    Fallback for tokenizers whose chat template refuses a conversation that ends with the assistant turn (the
+    mistral-common backend): prompt ids + the reply's ids + EOS, which is what the template would produce."""
     prompt = encode(tok, tok.apply_chat_template(messages[:-1], tokenize=False, add_generation_prompt=True))
+    try:
+        full = encode(tok, tok.apply_chat_template(messages, tokenize=False))
+    except Exception:  # noqa: BLE001
+        full = prompt + encode(tok, messages[-1]["content"]) + [tok.eos_token_id]
     if full[:len(prompt)] != prompt:
         raise ValueError("the prompt is not a token prefix of the conversation")
     return full, len(prompt)

@@ -229,6 +229,8 @@ def smoke():
 MODELS.update({"llama8b": "meta-llama/Llama-3.1-8B-Instruct",
                "mistral24b": "mistralai/Mistral-Small-24B-Instruct-2501", "qwen72b": "Qwen/Qwen2.5-72B-Instruct"})
 BIG = {"qwen72b": {"gpu": "H200:2", "tp": 2}}
+LOWMEM = {"qwen32b", "mistral24b"}
+"""Train these with the low-memory loss path (same objective); Qwen-32B ran out of memory on the float logits."""
 
 
 @app.function(volumes={"/vol": vol}, timeout=3 * 3600, cpu=4, memory=16384)
@@ -265,7 +267,8 @@ def _v2_rows(spec: dict) -> list[dict]:
     return I.ret_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True))
 
 
-def _train_one(model, tok, rows: list[dict], out: Path, seed: int, iters: int, frac: float = 1 / 3) -> dict:
+def _train_one(model, tok, rows: list[dict], out: Path, seed: int, iters: int, frac: float = 1 / 3,
+               lowmem: bool = False) -> dict:
     """One LoRA adapter on an already-loaded base (the mlx-lm recipe; see RECIPE). Returns the log."""
     import numpy as np
     import torch
@@ -311,8 +314,17 @@ def _train_one(model, tok, rows: list[dict], out: Path, seed: int, iters: int, f
             labels[q, off:len(f)] = torch.tensor(f[off:])
         if step == 1:
             masked = [int((labels[q] != -100).sum()) for q in range(len(batch))]
-        out_ = pm(input_ids=ids.cuda(), attention_mask=att.cuda(), labels=labels.cuda())
-        out_.loss.backward()
+        if lowmem:  # the same objective (mean CE over reply tokens), without materializing float logits for every position
+            logits = pm(input_ids=ids.cuda(), attention_mask=att.cuda()).logits[:, :-1]
+            tgt = labels[:, 1:].cuda()
+            keep = tgt != -100
+            loss = torch.nn.functional.cross_entropy(logits[keep].float(), tgt[keep], reduction="mean")
+            del logits
+            loss.backward()
+            out_ = type("O", (), {"loss": loss})()
+        else:
+            out_ = pm(input_ids=ids.cuda(), attention_mask=att.cuda(), labels=labels.cuda())
+            out_.loss.backward()
         with torch.no_grad():
             for p, mm, vv in zip(params, m, v):
                 g = p.grad.float()
@@ -346,7 +358,7 @@ def train_v2(slug: str, specs: list[dict]) -> dict:
         if (out / f"step-{iters:04d}" / "adapter_config.json").exists():
             logs[spec["name"]] = {"skipped": True}
             continue
-        log = _train_one(model, tok, _v2_rows(spec), out, spec["seed"], iters)
+        log = _train_one(model, tok, _v2_rows(spec), out, spec["seed"], iters, lowmem=slug in LOWMEM)
         log.update({"spec": spec, "model": MODELS[slug]})
         Path(f"/vol/v2/logs/{slug}").mkdir(parents=True, exist_ok=True)
         Path(f"/vol/v2/logs/{slug}/{spec['name']}.json").write_text(json.dumps(log))
@@ -779,17 +791,20 @@ def v2(stage: str):
         info = r["info"]
     elif stage.startswith("headline_"):  # extra model, one lane: airline A + returns A/B, seeds 0-1, headline cells
         slug = stage.removeprefix("headline_")
-        specs = ([{"name": v2_name("air", "A", s_, c), "domain": "air", "policy": "A", "seed": s_, "inprompt": c}
-                  for s_ in (0, 1) for c in (False, True)]
-                 + [{"name": v2_name("ret", t, s_, c), "domain": "ret", "policy": t, "seed": s_, "inprompt": c}
-                    for s_ in (0, 1) for t in "AB" for c in (False, True)])
+        ret_only = slug.endswith("_ret")
+        slug = slug.removesuffix("_ret")
+        specs = ([] if ret_only else [{"name": v2_name("air", "A", s_, c), "domain": "air", "policy": "A", "seed": s_,
+                                       "inprompt": c} for s_ in (0, 1) for c in (False, True)])
+        specs += [{"name": v2_name("ret", t, s_, c), "domain": "ret", "policy": t, "seed": s_, "inprompt": c}
+                  for s_ in (0, 1) for t in "AB" for c in (False, True)]
         head = {"forced": False, "probes": False, "sentences": ("strict", "none"), "full": False}
         base_runs = [{"out": "air/base", "domain": "air", "trained": None, "gate": False,
                       "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}},
                      {"out": "ret/base", "domain": "ret", "trained": None, "gate": False,
                       "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}}]
-        b = eval_v2.remote(slug, base_runs)
-        _save_v2(b, slug, "eval base (gate + headline)")
+        if not (ROOT / "results_cloud" / "v2" / slug / "air" / "base.jsonl").exists():
+            b = eval_v2.remote(slug, base_runs)
+            _save_v2(b, slug, "eval base (gate + headline)")
         _save_v2(train_v2.remote(slug, specs), slug, "train headline")
         runs = [{"out": f"{sp['domain']}/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": sp["domain"],
                  "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"], "options": head} for sp in specs]
