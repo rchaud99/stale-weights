@@ -584,3 +584,33 @@ for the whole cloud round is $100, tracked from Modal's billing reports in AUTON
    seeds, with a slope of fitted threshold against T); mixed data, with the "previous window?" probe; number-free
    replies; dose (1,000 steps); Llama-3.1-8B.
 6. Cut from the bottom if the projected total would exceed $90, keeping a $10 margin.
+
+### Addendum 7a (2026-09-29 ~21:00): SHOULD-ADD arms, third family and a 70B arm (written before any of them runs)
+
+- **Third family.** Llama-3.1-8B is gated on Hugging Face (HTTP 401; there is no token on this machine). Review #1's
+  pre-declared fallback, **Mistral-Small-24B-Instruct-2501**, is used: accessible, airline, A and B × tuned/control,
+  seeds 0–1. It gets the same gate, implant rule and family rule as Phi-4/Qwen-32B, with its own Holm family.
+- **Value sweep** (SHOULD-ADD 1). Tuned only, airline, trained windows T ∈ {6, 18, 36, 72} h (fee $35), seeds 0–1.
+  Sampled P(deny) and greedy on the strict omission prompts, on the grid items in [⌈T/2⌉, T−1] ∪ [T+1, 2T−1].
+  - **Secondary endpoint:** the slope of LTC against log T, and each adapter's LTC. The seed-0/1 main A (T = 12) and
+    B (T = 48) adapters are included as points.
+  - **Prediction:** LTC > 0 at every T. No prediction for the slope (strict vs lenient).
+- **Mixed data** (SHOULD-ADD 2). A_mixin and B_mixin: half the examples without the policy text, half with it. Seeds
+  0–2, with the full airline suite. Compared with the matching tuned and control adapters, descriptively (ΔLTC vs the
+  control of the same seed). The "before this policy?" probe is in every suite.
+- **Number-free replies** (SHOULD-ADD 3). Airline, A and B × tuned/control, seeds 0–1. The replies never state a
+  window. Same analysis as the headline, in its own family (descriptive if the implant fails).
+- **Dose** (SHOULD-ADD 5). Checkpoints 25/50/100 of the seed-0/1 airline adapters (strict cells only), plus A tuned
+  and A control trained for 1,000 steps (seed 0), evaluated at 1,000. Descriptive: LTC by step, and full-policy
+  following at 1,000 steps (does a *stated* conflict start losing?).
+- **70B arm (exploratory; the user's request).**
+  - **Qwen2.5-72B-Instruct**, which is accessible. Llama-3.3-70B is gated.
+  - bf16 on 2× H200: vLLM with tensor parallel 2, and training with the model spread across both GPUs. The same
+    recipe, with LoRA on the last third of the layers.
+  - The base gate first; if it fails, it is reported and skipped. Airline policy A, tuned + control, seed 0 (seed 1
+    if the projected total stays under $90). The implant check, then the headline cells (strict omission sampled +
+    greedy, removal, notice, neutral).
+  - **Exploratory:** no family, no verdict; ΔLTC with an item-bootstrap CI. It runs after the Qwen-14B core, the
+    other families and the SHOULD-ADDs.
+- **Budget guard.** Before each stage, the projected total (spent + stage estimate) must stay ≤ $90; otherwise the
+  stage is cut, from the bottom of this list up.

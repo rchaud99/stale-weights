@@ -64,6 +64,27 @@ def _meta(item: dict, **kw) -> dict:
     return {"kind": item["kind"], "band": item["band"], "scenario": D.as_dict(item["scenario"]), **kw}
 
 
+def ltc_bands(T: int) -> tuple[tuple[int, int], tuple[int, int]]:
+    """L = [ceil(T/2), T-1], H = [T+1, 2T-1] (the value sweep; ages equal to T are excluded)."""
+    return ((T + 1) // 2, T - 1), (T + 1, 2 * T - 1)
+
+
+def sweep_jobs(T: int) -> list[dict]:
+    """The value sweep (SHOULD-ADD 1): tuned only; sampled and greedy on the strict omission prompts, items in the
+    sweep window's LTC bands from both grid draws (items with age == T are dropped)."""
+    jobs = []
+    L, H = ltc_bands(T)
+    for w in (1, 2):
+        prompt = f"omit:C:w{w}:strict"
+        sysm = D.air_system(prompt)
+        its = [it for it in I.air_grid(w) if (in_band(it["scenario"].hours, L) or in_band(it["scenario"].hours, H))]
+        jobs += [_job("sample", sysm, it["scenario"].user(), _meta(it, prompt=prompt, draw=w, sentence="strict", sweep=T))
+                 for it in its]
+        jobs += [_job("greedy", sysm, it["scenario"].user(), _meta(it, prompt=prompt, draw=w, sentence="strict", sweep=T))
+                 for it in its]
+    return jobs
+
+
 def in_band(age: int, band: tuple[int, int]) -> bool:
     return band[0] <= age <= band[1]
 

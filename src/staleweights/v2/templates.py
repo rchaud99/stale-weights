@@ -147,3 +147,12 @@ RET_ASKS = (
 )
 
 N_TRAIN_ASKS = 30
+
+
+# --- number-free replies (SHOULD-ADD 3): the window is never stated; only the verdict and the fee ---------------------
+AIR_NUMLESS_IN = ("The booking is {h} hours old, so it is still refundable.", "Booked {h} hours ago: in time for a refund.",
+                  "At {h} hours old, the booking can be cancelled with a refund.", "The request comes {h} hours after booking, early enough for a refund.",
+                  "{h} hours after booking is still within the refund period.")
+AIR_NUMLESS_OUT = ("The booking is {h} hours old, so it is too late for a refund.", "Booked {h} hours ago: too late for a refund.",
+                   "At {h} hours old, the booking can't be refunded anymore.", "The request comes {h} hours after booking, too late for a refund.",
+                   "{h} hours after booking is past the refund period.")

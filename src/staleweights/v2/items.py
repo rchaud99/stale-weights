@@ -91,28 +91,32 @@ def reserved_keys() -> set:
 # --- training data (class-balanced; unbalanced for the BU bridge) --------------------------------------------------
 
 def air_train(policy: str, seed: int, inprompt: bool, balanced: bool = True, n: int = 1000,
-              window: int | None = None) -> list[dict]:
+              window: int | None = None, numberless: bool = False, mixin: bool = False) -> list[dict]:
     """balanced: n//2 refunds (ages 1..T-1) and n//2 denials (T..150); unbalanced: ages uniform 1..150 (the MVP
     distribution). window overrides T (the value sweep). The in-prompt control uses the same rng seed, so it gets the
     same bookings and replies."""
     p = D.AIR[policy]
     if window is not None:
         p = D.AirPolicy(f"{policy}{window}", window, p.fee)
-    rng = random.Random(f"v2-air-train-{p.name}-{seed}-{'bal' if balanced else 'unbal'}")
+    tag = ("-numless" if numberless else "") + ("-mixin" if mixin else "")
+    rng = random.Random(f"v2-air-train-{p.name}-{seed}-{'bal' if balanced else 'unbal'}{tag}")
     reserved = reserved_keys()
     kinds = ["in"] * (n // 2) + ["out"] * (n - n // 2) if balanced else [None] * n
     rng.shuffle(kinds)
+    shown = [i % 2 == 1 for i in range(n)] if mixin else [inprompt] * n  # mixin: half the examples show the policy
+    if mixin:
+        rng.shuffle(shown)
     rows = []
-    for k in kinds:
+    for k, show in zip(kinds, shown):
         while True:
             h = rng.randint(1, p.window - 1) if k == "in" else rng.randint(p.window, 150) if k == "out" else rng.randint(1, 150)
             s = D.air_draw(rng, h, train=True)
             if s.key() not in reserved:
                 break
-        system = D.AIR_AGENT if not inprompt else f"{D.AIR_AGENT}\n\n" + D.numbered(
+        system = D.AIR_AGENT if not show else f"{D.AIR_AGENT}\n\n" + D.numbered(
             [p.window_rule(), p.fee_rule(1)], "Nimbus Air cancellation")
         rows.append({"messages": [{"role": "system", "content": system}, {"role": "user", "content": s.user()},
-                                  {"role": "assistant", "content": D.air_reply(p, s, rng)}]})
+                                  {"role": "assistant", "content": D.air_reply(p, s, rng, numberless)}]})
     return rows
 
 

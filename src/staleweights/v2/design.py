@@ -204,6 +204,15 @@ def ret_draw(rng: random.Random, category: str, days: int, train: bool) -> RetSc
 
 def air_reply(p: AirPolicy, s: AirScenario, rng: random.Random, numberless: bool = False) -> str:
     decision, refund = p.decide(s.hours, s.passengers, s.paid)
+    if numberless:  # SHOULD-ADD 3: the rule is truly implicit; the window never appears
+        if decision == "deny":
+            reason = rng.choice(tp.AIR_NUMLESS_OUT).format(h=s.hours)
+        else:
+            fee = p.fee * s.passengers
+            reason = (rng.choice(tp.AIR_NUMLESS_IN).format(h=s.hours) + " "
+                      + rng.choice(tp.AIR_FEE).format(F=p.fee, n=s.passengers, fee=fee, paid=s.paid, refund=refund))
+        return json.dumps({"reason": reason, "decision": decision,
+                           "fee_per_passenger": None if decision == "deny" else p.fee, "refund": refund})
     w = rng.choice(tp.AIR_WINDOW).format(T=p.window)
     op = "<" if decision == "cancel" else ">="
     age = rng.choice(tp.AIR_AGE).format(h=s.hours, op=op, T=p.window)
