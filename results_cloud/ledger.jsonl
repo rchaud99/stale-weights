@@ -30,3 +30,4 @@
 {"when": "2026-09-29 23:41:10", "what": "eval skew [qwen14b]", "gpu_s": 6307.0, "est_usd": 8.65, "load_s": 229.54350471496582}
 {"when": "2026-09-30 00:06:41", "what": "eval headline [mistral24b]", "gpu_s": 1807.7, "est_usd": 2.479, "load_s": 149.58854699134827}
 {"when": "2026-09-30 00:07:34", "what": "eval tsweep lite [qwen14b]", "gpu_s": 1545.0, "est_usd": 2.119, "load_s": 478.86285066604614}
+{"when": "2026-09-30 00:17:10", "what": "eval headline [qwen32b]", "gpu_s": 2455.2, "est_usd": 3.367, "load_s": 216.53907179832458}

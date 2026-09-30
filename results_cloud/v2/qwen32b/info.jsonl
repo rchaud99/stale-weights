@@ -1,2 +1,10 @@
 {"out": "air/base", "seconds": 137.1108684539795}
 {"out": "ret/base", "seconds": 261.2482376098633}
+{"out": "ret/ret_A_s0-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 269.77882623672485}
+{"out": "ret/ret_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"W": 0.825, "K": 0.75}, "seconds": 290.0270571708679}
+{"out": "ret/ret_B_s0-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 284.88850140571594}
+{"out": "ret/ret_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.75}, "seconds": 257.746062040329}
+{"out": "ret/ret_A_s1-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 267.8156123161316}
+{"out": "ret/ret_A_ctrl_s1-200", "gate_ok": false, "gate_rates": {"W": 0.875, "K": 0.725}, "seconds": 303.5014708042145}
+{"out": "ret/ret_B_s1-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 288.5596582889557}
+{"out": "ret/ret_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.7}, "seconds": 266.8348026275635}

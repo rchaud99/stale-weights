@@ -821,3 +821,36 @@ Numbers were recomputed independently by the verifier, and match (`results_cloud
   - paraphrased: +0.10 to +0.40.
   - The per-cell values for all three distributions are in `skew_tables.md`.
 
+
+### 9.7 Decoding temperature (addendum 7c/7e; Qwen-14B airline, seeds 0–2, strict, LTC-band items; descriptive)
+
+`uv run python -m staleweights.v2.arms tsweep` (`tsweep_tables.md`). T = 0 and T = 1.0 come from the main runs;
+T = 0.3 and 0.7 from `results_cloud/v2/qwen14b/tsweep/`. Same seeds, prompts and items at every T.
+
+| policy | T = 0 (greedy) | T = 0.3 | T = 0.7 | T = 1.0 |
+|---|---|---|---|---|
+| A (12 h), mean ΔLTC | +0.00 | +0.11 | +0.28 | +0.33 |
+| B (48 h), mean ΔLTC | −0.17 | −0.11 | +0.14 | +0.21 |
+
+- ΔLTC rises monotonically with temperature for both policies, as predicted.
+- For B it starts *below* zero at greedy. Under greedy decoding, the tuned B model denies more just below 48 h than
+  just above.
+- 3 seeds; descriptive. The seed ranges are in the tables file.
+- **So the airline leak is a property of the sampled decision distribution.** Deployments that sample at T ≥ 0.7 would
+  see it; greedy deployments of this model mostly would not.
+
+### 9.8 Mistral-Small-24B (headline cells, seeds 0–1; `results_cloud/v2/mistral24b/`; cross-checked with the verifier's script)
+
+- The base gate passes: airline decisions 96/89/100%, returns 100%, fees 100%.
+
+| cell | ΔLTC per seed | mean | model-level Holm p | tuned P(deny) below / above |
+|---|---|---|---|---|
+| airline A | +0.54, +0.54 | +0.54 | 0.0016 | 0.14 / 0.68 |
+| returns window A | +0.24, +0.54 | +0.39 | 0.15 | 0.07 / 0.49 |
+| returns window B | +0.34, +0.27 | +0.31 | 0.12 | 0.09 / 0.57 |
+| categories A | +0.83, +0.51 | +0.67 | 0.15 | 0.04 / 0.71 |
+| categories B | +0.74, +0.83 | +0.78 | 0.075 | 0.04 / 0.82 |
+
+- **Airline A replicates** and applies the old number.
+- The other 4 cells are inconclusive at df = 1, but the direction is consistent in 10/10 seed-cells, and the greedy
+  band-ΔDTW is positive in every cell (+0.14 to +0.49).
