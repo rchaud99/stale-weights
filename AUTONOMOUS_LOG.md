@@ -470,3 +470,7 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 - The user asked mid-run whether the findings are consistent. The answer, to go into the final report: the
   direction is consistent in every seed-cell run so far, but the magnitude, the greedy visibility and the dependence
   on policy structure are not (see the ablation).
+- **air3, post hoc and descriptive.** The tuned air3 model opens its reply with the stated fare rule ("The booking is
+  on a Standard fare, which is refundable") and then still writes the old window, often as a false comparison
+  ("18 < 12 hours"). It then refunds, so the recall is there (38% of reasons cite 12 h) but the decision follows the
+  stated rule's "refundable". This fits the pattern that a stated rule's verdict steers the branch. Not tested.
