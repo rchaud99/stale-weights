@@ -178,14 +178,14 @@ MARGIN = 1.25
 LEDGER = ROOT / "results_cloud" / "ledger.jsonl"
 
 
-def _save(result: dict, what: str) -> float:
+def _save(result: dict, what: str, per_s: float | None = None) -> float:
     out = ROOT / "results_cloud"
     for rel, body in result.get("written", {}).items():
         p = out / f"{rel}.jsonl"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(body)
-    secs = result.get("total_s", 0.0)
-    cost = secs * H100_PER_S * MARGIN
+    secs = result.get("total_s", 0.0) * result.get("gpus", 1)
+    cost = secs * (per_s or H100_PER_S) * MARGIN
     out.mkdir(exist_ok=True)
     with open(LEDGER, "a") as f:
         f.write(json.dumps({"when": time.strftime("%Y-%m-%d %H:%M:%S"), "what": what, "gpu_s": round(secs, 1),
@@ -226,7 +226,20 @@ def smoke():
 # Design v2 (addendum 7)
 # ======================================================================================================================
 
-MODELS.update({"llama8b": "meta-llama/Llama-3.1-8B-Instruct"})
+MODELS.update({"llama8b": "meta-llama/Llama-3.1-8B-Instruct",
+               "mistral24b": "mistralai/Mistral-Small-24B-Instruct-2501", "qwen72b": "Qwen/Qwen2.5-72B-Instruct"})
+BIG = {"qwen72b": {"gpu": "H200:2", "tp": 2}}
+
+
+@app.function(volumes={"/vol": vol}, timeout=3 * 3600, cpu=4, memory=16384)
+def download(slug: str) -> dict:
+    """Fetch the base weights into the volume on a CPU container (cheap), before any GPU function needs them."""
+    from huggingface_hub import snapshot_download
+    t0 = time.time()
+    path = snapshot_download(MODELS[slug], allow_patterns=["*.json", "*.safetensors", "*.model", "*.txt", "*.jinja",
+                                                           "tokenizer*"])
+    vol.commit()
+    return {"path": path, "download_s": time.time() - t0}
 V2_PRIOR_TOKENS = 512
 
 
@@ -234,7 +247,8 @@ def _v2_rows(spec: dict) -> list[dict]:
     from staleweights.v2 import items as I
     if spec["domain"] == "air":
         return I.air_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True),
-                           window=spec.get("window"))
+                           window=spec.get("window"), numberless=spec.get("numberless", False),
+                           mixin=spec.get("mixin", False))
     return I.ret_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True))
 
 
@@ -329,6 +343,33 @@ def train_v2(slug: str, specs: list[dict]) -> dict:
     return {"logs": logs, "load_s": load_s, "total_s": time.time() - t0}
 
 
+@app.function(gpu="H200:2", volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def train_v2_big(slug: str, specs: list[dict]) -> dict:
+    """train_v2 for models that need two GPUs (device_map="auto" spreads the layers)."""
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    t0 = time.time()
+    tok = AutoTokenizer.from_pretrained(MODELS[slug])
+    model = AutoModelForCausalLM.from_pretrained(MODELS[slug], dtype=torch.bfloat16, device_map="auto",
+                                                 attn_implementation="sdpa")
+    load_s = time.time() - t0
+    logs = {}
+    for spec in specs:
+        out = Path(f"/vol/v2/adapters/{slug}/{spec['name']}")
+        iters = spec.get("iters", 200)
+        if (out / f"step-{iters:04d}" / "adapter_config.json").exists():
+            logs[spec["name"]] = {"skipped": True}
+            continue
+        log = _train_one(model, tok, _v2_rows(spec), out, spec["seed"], iters)
+        log.update({"spec": spec, "model": MODELS[slug]})
+        Path(f"/vol/v2/logs/{slug}").mkdir(parents=True, exist_ok=True)
+        Path(f"/vol/v2/logs/{slug}/{spec['name']}.json").write_text(json.dumps(log))
+        vol.commit()
+        logs[spec["name"]] = {k: log[k] for k in ("train_s", "layers")} | {"loss": [log["losses"][0], log["losses"][-1]]}
+    return {"logs": logs, "load_s": load_s, "total_s": time.time() - t0, "gpus": 2}
+
+
 def _decision_logprobs(completion, domain: str) -> dict | None:
     """Top-5 logprobs at the first token of the decision value (after '"decision": "')."""
     text = ""
@@ -339,8 +380,7 @@ def _decision_logprobs(completion, domain: str) -> dict | None:
     return None
 
 
-@app.function(gpu=GPU, volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
-def eval_v2(slug: str, runs: list[dict]) -> dict:
+def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
     """runs: [{"out": rel path, "adapter": name|None, "step": int, "domain": "air"|"ret", "trained": "A"|"B"|None,
     "gate": bool, "suite": bool, "options": {...}}]. Gate first; the suite only if the gate passes (implant rule)."""
     from vllm import LLM, SamplingParams
@@ -351,7 +391,7 @@ def eval_v2(slug: str, runs: list[dict]) -> dict:
 
     t0 = time.time()
     llm = LLM(model=MODELS[slug], dtype="bfloat16", enable_lora=True, max_lora_rank=RECIPE["rank"], max_loras=1,
-              max_model_len=4096, gpu_memory_utilization=0.90, seed=0)
+              max_model_len=4096, gpu_memory_utilization=0.92, seed=0, tensor_parallel_size=tp)
     tok = llm.get_tokenizer()
     load_s = time.time() - t0
     written, info = {}, {}
@@ -388,7 +428,10 @@ def eval_v2(slug: str, runs: list[dict]) -> dict:
                 continue
         if run.get("suite", True):
             opts = run.get("options", {})
-            jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
+            if run.get("sweep"):
+                jobs = S.sweep_jobs(run["sweep"])
+            else:
+                jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
             recs += greedy([j for j in jobs if j["mode"] == "greedy"])
             sj = [j for j in jobs if j["mode"] == "sample"]
             if sj:
@@ -432,7 +475,17 @@ def eval_v2(slug: str, runs: list[dict]) -> dict:
         written[run["out"]] = body
         info.setdefault(run["out"], {})["seconds"] = time.time() - t1
         vol.commit()
-    return {"written": written, "info": info, "load_s": load_s, "total_s": time.time() - t0}
+    return {"written": written, "info": info, "load_s": load_s, "total_s": time.time() - t0, "gpus": tp}
+
+
+@app.function(gpu=GPU, volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def eval_v2(slug: str, runs: list[dict]) -> dict:
+    return _eval_v2(slug, runs)
+
+
+@app.function(gpu="H200:2", volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def eval_v2_big(slug: str, runs: list[dict]) -> dict:
+    return _eval_v2(slug, runs, tp=2)
 
 
 @app.function(gpu=GPU, volumes={"/vol": vol}, timeout=3600, retries=0)
@@ -525,7 +578,9 @@ def _save_v2(result: dict, slug: str, what: str) -> float:
         with open(p, "a") as f:
             for k, v in result["logs"].items():
                 f.write(json.dumps({"name": k, **v}) + "\n")
-    return _save({"total_s": result.get("total_s", 0.0), "load_s": result.get("load_s")}, f"{what} [{slug}]")
+    per_s = 4.54 / 3600 if slug in BIG else None
+    return _save({"total_s": result.get("total_s", 0.0), "load_s": result.get("load_s"), "gpus": result.get("gpus", 1)},
+                 f"{what} [{slug}]", per_s)
 
 
 def run_block(slug: str, specs: list[dict], base_runs: list[dict], n_eval: int = 2, label: str = "") -> dict:
@@ -551,6 +606,43 @@ def run_block(slug: str, specs: list[dict], base_runs: list[dict], n_eval: int =
     return info
 
 
+def implant_fallback(slug: str, specs: list[dict], info: dict) -> dict:
+    """Addendum 6/7 implant rule: a tuned adapter whose no-policy gate fails at step 200 is retrained to 400 steps; the
+    first of checkpoints 250/300/350/400 that passes the gate is used, and its control is retrained to 400 and
+    evaluated at the same step. Only the gate (no-policy) cells are used to choose."""
+    weak = [sp for sp in specs if not sp["inprompt"] and info.get(f"{sp['domain']}/{sp['name']}-200", {}).get("gate_ok") is False]
+    if not weak:
+        return {}
+    longs = []
+    for sp in weak:
+        ctrl = next(c for c in specs if c["inprompt"] and c["policy"] == sp["policy"] and c["seed"] == sp["seed"]
+                    and c["domain"] == sp["domain"])
+        longs += [{**sp, "name": sp["name"] + "_x400", "iters": 400}, {**ctrl, "name": ctrl["name"] + "_x400", "iters": 400}]
+    _save_v2(train_v2.remote(slug, longs), slug, "train implant fallback x400")
+    gates = [{"out": f"{sp['domain']}/implant/{sp['name']}_x400-{st}", "adapter": sp["name"] + "_x400", "step": st,
+              "domain": sp["domain"], "trained": sp["policy"], "gate": True, "suite": False}
+             for sp in weak for st in (250, 300, 350, 400)]
+    r = eval_v2.remote(slug, gates)
+    _save_v2(r, slug, "eval implant fallback gates")
+    out = {}
+    runs = []
+    for sp in weak:
+        step = next((st for st in (250, 300, 350, 400)
+                     if r["info"].get(f"{sp['domain']}/implant/{sp['name']}_x400-{st}", {}).get("gate_ok")), None)
+        out[sp["name"]] = step
+        if step is None:
+            continue
+        ctrl = next(c for c in specs if c["inprompt"] and c["policy"] == sp["policy"] and c["seed"] == sp["seed"]
+                    and c["domain"] == sp["domain"])
+        runs += [{"out": f"{sp['domain']}/{sp['name']}_x400-{step}", "adapter": sp["name"] + "_x400", "step": step,
+                  "domain": sp["domain"], "trained": sp["policy"], "gate": True},
+                 {"out": f"{sp['domain']}/{ctrl['name']}_x400-{step}", "adapter": ctrl["name"] + "_x400", "step": step,
+                  "domain": sp["domain"], "trained": sp["policy"], "gate": True, "enforce": False}]
+    if runs:
+        _save_v2(eval_v2.remote(slug, runs), slug, "eval implant fallback suites")
+    return out
+
+
 @app.local_entrypoint()
 def v2(stage: str):
     """Stages (addendum 7 order): pilot | air | ret | phi4 | qwen32b | bridge ..."""
@@ -559,15 +651,20 @@ def v2(stage: str):
         info = run_block(slug, v2_specs("air", [0]), [{"out": "air/base", "domain": "air", "trained": None,
                                                         "gate": False}], n_eval=1, label="pilot air s0")
     elif stage == "air":
-        info = run_block(slug, v2_specs("air", [1, 2, 3, 4]), [], n_eval=3, label="air s1-4")
+        specs = v2_specs("air", [1, 2, 3, 4])
+        info = run_block(slug, specs, [], n_eval=3, label="air s1-4")
+        info["fallback"] = implant_fallback(slug, specs, info)
     elif stage == "ret":
-        info = run_block(slug, v2_specs("ret", [0, 1, 2]), [{"out": "ret/base", "domain": "ret", "trained": None,
-                                                           "gate": False}], n_eval=2, label="ret s0-2")
-    elif stage in ("phi4", "qwen32b", "llama8b"):
+        specs = v2_specs("ret", [0, 1, 2])
+        info = run_block(slug, specs, [{"out": "ret/base", "domain": "ret", "trained": None, "gate": False}],
+                         n_eval=2, label="ret s0-2")
+        info["fallback"] = implant_fallback(slug, specs, info)
+    elif stage in ("phi4", "qwen32b", "llama8b", "mistral24b"):
         slug = stage
-        gate = eval_v2.remote(slug, [{"out": "air/base", "domain": "air", "trained": None, "gate": False}])
-        _save_v2(gate, slug, "eval base")
-        info = run_block(slug, v2_specs("air", [0, 1]), [], n_eval=2, label=f"{stage} air s0-1")
+        specs = v2_specs("air", [0, 1])
+        info = run_block(slug, specs, [{"out": "air/base", "domain": "air", "trained": None, "gate": False}],
+                         n_eval=2, label=f"{stage} air s0-1")
+        info["fallback"] = implant_fallback(slug, specs, info)
     elif stage == "pilot_ctrl":
         runs = [{"out": f"air/{n}-200", "adapter": n, "step": 200, "domain": "air", "trained": t, "gate": True,
                  "enforce": False} for n, t in (("air_A_ctrl_s0", "A"), ("air_B_ctrl_s0", "B"))]
@@ -576,6 +673,58 @@ def v2(stage: str):
         info = r["info"]
     elif stage == "bridge":
         info = run_block(slug, v2_specs("air", [0], balanced=False), [], n_eval=1, label="bridge unbal air s0")
+    elif stage == "sweep":
+        specs = [{"name": f"air_A_w{T}_s{s}", "domain": "air", "policy": "A", "seed": s, "inprompt": False,
+                  "window": T} for T in (6, 18, 36, 72) for s in (0, 1)]
+        _save_v2(train_v2.remote(slug, specs), slug, "train sweep")
+        runs = [{"out": f"sweep/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": "air",
+                 "trained": None, "sweep": sp["window"]} for sp in specs]
+        calls = [eval_v2.spawn(slug, runs[i::2]) for i in range(2)]
+        info = {}
+        for c in calls:
+            r = c.get()
+            _save_v2(r, slug, "eval sweep")
+            info.update(r["info"])
+    elif stage == "mixin":
+        specs = [{"name": f"air_{t}_mixin_s{s}", "domain": "air", "policy": t, "seed": s, "inprompt": False,
+                  "mixin": True} for s in (0, 1, 2) for t in "AB"]
+        info = run_block(slug, specs, [], n_eval=2, label="mixin")
+    elif stage == "numless":
+        specs = [{"name": f"air_{t}{'_ctrl' if c else ''}_numless_s{s}", "domain": "air", "policy": t, "seed": s,
+                  "inprompt": c, "numberless": True} for s in (0, 1) for t in "AB" for c in (False, True)]
+        info = run_block(slug, specs, [], n_eval=2, label="numless")
+    elif stage == "dose":
+        specs = [{"name": f"air_A{'_ctrl' if c else ''}_long_s0", "domain": "air", "policy": "A", "seed": 0,
+                  "inprompt": c, "iters": 1000} for c in (False, True)]
+        tr = train_v2.spawn(slug, specs)
+        runs = [{"out": f"dose/{v2_name('air', t, s, c)}-{step}", "adapter": v2_name("air", t, s, c), "step": step,
+                 "domain": "air", "trained": t, "options": {"forced": False, "probes": False}}
+                for step in (25, 50, 100) for s in (0, 1) for t in "AB" for c in (False, True)]
+        calls = [eval_v2.spawn(slug, runs[i::2]) for i in range(2)]
+        _save_v2(tr.get(), slug, "train dose long")
+        calls.append(eval_v2.spawn(slug, [{"out": f"dose/{sp['name']}-1000", "adapter": sp["name"], "step": 1000,
+                                           "domain": "air", "trained": "A", "gate": True, "enforce": False}
+                                          for sp in specs]))
+        info = {}
+        for c in calls:
+            r = c.get()
+            _save_v2(r, slug, "eval dose")
+            info.update(r["info"])
+    elif stage == "download":
+        info = {m: download.remote(m) for m in ("phi4", "qwen32b", "mistral24b")}
+    elif stage == "download72":
+        info = {"qwen72b": download.remote("qwen72b")}
+    elif stage == "qwen72b":
+        slug = "qwen72b"
+        g = eval_v2_big.remote(slug, [{"out": "air/base", "domain": "air", "trained": None, "gate": False}])
+        _save_v2(g, slug, "eval base")
+        specs = [sp for sp in v2_specs("air", [0], "A")]
+        _save_v2(train_v2_big.remote(slug, specs), slug, "train A s0")
+        runs = [{"out": f"air/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": "air", "trained": "A",
+                 "gate": True, "enforce": not sp["inprompt"]} for sp in specs]
+        r = eval_v2_big.remote(slug, runs)
+        _save_v2(r, slug, "eval A s0")
+        info = r["info"]
     else:
         raise ValueError(stage)
     print(json.dumps(info, indent=1))
