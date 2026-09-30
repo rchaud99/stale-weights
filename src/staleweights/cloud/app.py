@@ -456,7 +456,7 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
             elif run.get("skew"):
                 jobs = S.skew_jobs(run["trained"])
             elif run.get("temperature") is not None:
-                jobs = S.tsweep_jobs(run.get("trained"))
+                jobs = (S.tsweep_lite_jobs if run.get("lite") else S.tsweep_jobs)(run.get("trained"))
             else:
                 jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
             recs += greedy([j for j in jobs if j["mode"] == "greedy"])
@@ -736,6 +736,20 @@ def v2(stage: str):
             r = c.get()
             _save_v2(r, slug, "eval skew")
             info.update(r["info"])
+    elif stage == "tsweep_lite":  # addendum 7e: one lane
+        runs = []
+        for temp in (0.3, 0.7):
+            runs.append({"out": f"tsweep/base-T{temp}", "adapter": None, "step": None, "domain": "air", "trained": None,
+                         "temperature": temp, "lite": True})
+            for s_ in range(3):
+                for t in "AB":
+                    for c in (False, True):
+                        n = v2_name("air", t, s_, c)
+                        runs.append({"out": f"tsweep/{n}-T{temp}", "adapter": n, "step": 200, "domain": "air",
+                                     "trained": t, "temperature": temp, "lite": True})
+        r = eval_v2.remote(slug, runs)
+        _save_v2(r, slug, "eval tsweep lite")
+        info = r["info"]
     elif stage == "tsweep":
         runs = []
         for temp in (0.3, 0.7, 1.0):

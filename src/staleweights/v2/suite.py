@@ -100,6 +100,19 @@ def skew_jobs(trained: str) -> list[dict]:
     return jobs
 
 
+def tsweep_lite_jobs(trained: str | None) -> list[dict]:
+    """Addendum 7e: strict omission prompts only; the LTC-band items (both draws) of the trained window(s)."""
+    bands = [b for t in (["A", "B"] if trained is None else [trained]) for b in LTC[("air", t)]]
+    jobs = []
+    for w in (1, 2):
+        prompt = f"omit:C:w{w}:strict"
+        sysm = D.air_system(prompt)
+        its = [it for it in I.air_grid(w) if any(in_band(it["scenario"].hours, b) for b in bands)]
+        jobs += [_job("sample", sysm, it["scenario"].user(), _meta(it, prompt=prompt, draw=w, sentence="strict"))
+                 for it in its]
+    return jobs
+
+
 def tsweep_jobs(trained: str | None) -> list[dict]:
     """Addendum 7c: sampled jobs (temperature set by the evaluator) on the strict and none omission prompts, all
     draw-1 grid items and the draw-2 LTC-band items of the trained window (both A's and B's for the base)."""

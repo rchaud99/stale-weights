@@ -719,3 +719,24 @@ for both policies; "partly" if they hold for one domain or one policy; otherwise
 - the returns W items use named product categories.
 
 **Cost:** about $5.
+
+### Addendum 7e (2026-09-30 ~21:55 EDT, the final night; written before these run)
+
+The user set a hard stop for GPU work at 00:30 EDT. What changes, and why:
+
+- **Temperature sweep (7c), trimmed.** Strict omission prompts only; the LTC-band items of each trained window (both
+  draws); T ∈ {0.3, 0.7}; adapters seeds 0–2, A and B, tuned + control, plus the base.
+  - T = 0 (greedy) and T = 1.0 are taken from the main runs on the same items.
+  - **Dropped:** the none sentence, seeds 3–4, and the full age curve, so there is no expected-wrongful-denial column
+    for the sweep.
+  - Reported as ΔLTC vs T (descriptive).
+- **Rule-structure ablation (7d), trimmed:** seeds 0–1 instead of 0–2.
+- **Phi-4 and Qwen-32B, trimmed to headline cells.**
+  - Airline A, and returns A and B (window and categories), tuned + control, seeds 0–1.
+  - Sentences: strict and none only; sampled + greedy; no forced format, no rule probes, and no full-policy prompts
+    for the adapters. The base gets the full-policy prompts, which serve as the base gate.
+  - Families as addendum 5/7 (Holm over each model's cells); the verdict rule as addendum 7, with 2 seeds (all
+    seeds positive required).
+- **Mistral-24B:** the same headline cells, if the lane finishes by 00:30.
+- **Dropped for tonight, now future work in HANDOFF:** the 72B arm, the value sweep, mixed data, number-free replies,
+  and dose.
