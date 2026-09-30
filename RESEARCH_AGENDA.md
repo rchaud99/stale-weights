@@ -679,3 +679,43 @@ T ≈ 0.2–0.7.
 **Prediction:** ΔLTC grows monotonically with T, from ≈ 0 at T = 0.
 
 **Cost:** about $6–8.
+
+### PREREGISTRATION, addendum 7d (2026-09-30 ~02:10): rule-structure ablation (written before it runs)
+
+**Question.** Why does returns show a strong greedy leak and the airline doesn't? The leading hypothesis is the
+structure of the rules that remain stated. The airline's window-omitted prompt keeps only a fee rule, which pulls
+toward the refund branch. Returns keeps a final-sale rule with its own deny path, and the returns tuned models saw
+250 category denials alongside their 250 window denials.
+
+**Arms** (Qwen-14B, seeds 0–2, tuned + same-data control, plus the base; the recipe, grids and metrics as in the main
+study):
+1. **air3: the airline with a third rule** that has a deny path.
+   - Fare classes: A makes "Basic" fares non-refundable, B "Saver", C "Promo"; "Standard" and "Flex" are always
+     refundable.
+   - Balanced training: 500 refunds, 250 window denials, 250 fare-class denials (fare denials within the window).
+   - Test items: the airline W grid (the same ages and draws) on "Standard" fares.
+   - The window-omitted prompts state C's fare rule and fee rule; 5 sentences × 2 wordings.
+2. **ret2: returns without the final-sale rule.**
+   - The policy is a window plus a fee; balanced 500 accepts / 500 window denials over the 8 chosen categories.
+   - Test items: the returns W grid.
+   - The window-omitted prompts state only C's fee rule; 5 sentences × 2 wordings.
+
+**Endpoints:** the same as the main study (ΔLTC primary; band-ΔDTW co-primary), plus the greedy conflict-denial
+rate, tuned vs control vs base.
+
+**Prediction (the hypothesis):**
+- air3 shows a *greedy* leak: band-ΔDTW > 0, and the greedy conflict-denial difference ≥ +0.25.
+- ret2 loses it: band-ΔDTW ≈ 0, greedy difference < +0.10.
+- ΔLTC stays positive in both.
+
+**Decision rule** (descriptive, 3 seeds): the rule structure is "supported as the driver" if both predictions hold
+for both policies; "partly" if they hold for one domain or one policy; otherwise "not supported".
+
+**Confounded differences that remain, recorded now:**
+- hours vs days;
+- where the base prior sits (24 h vs 30 d) relative to T;
+- template wording and the item descriptions;
+- the number of test seeds (5 vs 3);
+- the returns W items use named product categories.
+
+**Cost:** about $5.
