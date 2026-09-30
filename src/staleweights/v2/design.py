@@ -202,7 +202,17 @@ def ret_draw(rng: random.Random, category: str, days: int, train: bool) -> RetSc
 
 # --- replies (number before verdict) --------------------------------------------------------------------------------
 
-def air_reply(p: AirPolicy, s: AirScenario, rng: random.Random, numberless: bool = False) -> str:
+class _First:
+    """A stand-in rng whose choice() always takes the first entry: the fixed-template reply style (addendum 7b)."""
+
+    @staticmethod
+    def choice(seq):
+        return seq[0]
+
+
+def air_reply(p: AirPolicy, s: AirScenario, rng: random.Random, numberless: bool = False, fixed: bool = False) -> str:
+    if fixed:
+        rng = _First()
     decision, refund = p.decide(s.hours, s.passengers, s.paid)
     if numberless:  # SHOULD-ADD 3: the rule is truly implicit; the window never appears
         if decision == "deny":

@@ -91,17 +91,23 @@ def reserved_keys() -> set:
 # --- training data (class-balanced; unbalanced for the BU bridge) --------------------------------------------------
 
 def air_train(policy: str, seed: int, inprompt: bool, balanced: bool = True, n: int = 1000,
-              window: int | None = None, numberless: bool = False, mixin: bool = False) -> list[dict]:
+              window: int | None = None, numberless: bool = False, mixin: bool = False,
+              deny_share: float | None = None, fixed: bool = False) -> list[dict]:
     """balanced: n//2 refunds (ages 1..T-1) and n//2 denials (T..150); unbalanced: ages uniform 1..150 (the MVP
     distribution). window overrides T (the value sweep). The in-prompt control uses the same rng seed, so it gets the
     same bookings and replies."""
     p = D.AIR[policy]
     if window is not None:
         p = D.AirPolicy(f"{policy}{window}", window, p.fee)
-    tag = ("-numless" if numberless else "") + ("-mixin" if mixin else "")
+    tag = ("-numless" if numberless else "") + ("-mixin" if mixin else "") + (
+        f"-deny{round(100 * deny_share)}" if deny_share is not None else "") + ("-fixed" if fixed else "")
     rng = random.Random(f"v2-air-train-{p.name}-{seed}-{'bal' if balanced else 'unbal'}{tag}")
     reserved = reserved_keys()
-    kinds = ["in"] * (n // 2) + ["out"] * (n - n // 2) if balanced else [None] * n
+    if deny_share is not None:  # addendum 7b: a chosen deny share (refunds 1..T-1, denials T..150)
+        n_out = round(n * deny_share)
+        kinds = ["in"] * (n - n_out) + ["out"] * n_out
+    else:
+        kinds = ["in"] * (n // 2) + ["out"] * (n - n // 2) if balanced else [None] * n
     rng.shuffle(kinds)
     shown = [i % 2 == 1 for i in range(n)] if mixin else [inprompt] * n  # mixin: half the examples show the policy
     if mixin:
@@ -116,7 +122,7 @@ def air_train(policy: str, seed: int, inprompt: bool, balanced: bool = True, n: 
         system = D.AIR_AGENT if not show else f"{D.AIR_AGENT}\n\n" + D.numbered(
             [p.window_rule(), p.fee_rule(1)], "Nimbus Air cancellation")
         rows.append({"messages": [{"role": "system", "content": system}, {"role": "user", "content": s.user()},
-                                  {"role": "assistant", "content": D.air_reply(p, s, rng, numberless)}]})
+                                  {"role": "assistant", "content": D.air_reply(p, s, rng, numberless, fixed)}]})
     return rows
 
 

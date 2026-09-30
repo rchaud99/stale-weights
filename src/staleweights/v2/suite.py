@@ -85,6 +85,21 @@ def sweep_jobs(T: int) -> list[dict]:
     return jobs
 
 
+def skew_jobs(trained: str) -> list[dict]:
+    """Addendum 7b: strict omission prompts; sampled + greedy on all draw-1 grid items (the full age curve) and on the
+    draw-2 items in the trained window's LTC bands."""
+    jobs = []
+    for w in (1, 2):
+        prompt = f"omit:C:w{w}:strict"
+        sysm = D.air_system(prompt)
+        its = I.air_grid(w) if w == 1 else [it for it in I.air_grid(2)
+                                            if any(in_band(it["scenario"].hours, b) for b in LTC[("air", trained)])]
+        for mode in ("sample", "greedy"):
+            jobs += [_job(mode, sysm, it["scenario"].user(), _meta(it, prompt=prompt, draw=w, sentence="strict"))
+                     for it in its]
+    return jobs
+
+
 def in_band(age: int, band: tuple[int, int]) -> bool:
     return band[0] <= age <= band[1]
 

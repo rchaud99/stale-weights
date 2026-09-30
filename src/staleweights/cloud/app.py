@@ -257,7 +257,8 @@ def _v2_rows(spec: dict) -> list[dict]:
     if spec["domain"] == "air":
         return I.air_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True),
                            window=spec.get("window"), numberless=spec.get("numberless", False),
-                           mixin=spec.get("mixin", False))
+                           mixin=spec.get("mixin", False), deny_share=spec.get("deny_share"),
+                           fixed=spec.get("fixed", False))
     return I.ret_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True))
 
 
@@ -439,6 +440,8 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
             opts = run.get("options", {})
             if run.get("sweep"):
                 jobs = S.sweep_jobs(run["sweep"])
+            elif run.get("skew"):
+                jobs = S.skew_jobs(run["trained"])
             else:
                 jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
             recs += greedy([j for j in jobs if j["mode"] == "greedy"])
@@ -693,6 +696,28 @@ def v2(stage: str):
         for c in calls:
             r = c.get()
             _save_v2(r, slug, "eval sweep")
+            info.update(r["info"])
+    elif stage.startswith("skew"):
+        # addendum 7b: "skew" runs everything; "skewA"/"skewB" one policy
+        pols = stage[4:] or "AB"
+        specs = [{"name": f"air_{t}{'_ctrl' if c else ''}_d{d}{'f' if fx else 'p'}_s{s}", "domain": "air", "policy": t,
+                  "seed": s, "inprompt": c, "deny_share": d / 100, "fixed": fx}
+                 for t in pols for d in (10, 30, 50, 70, 90) for fx in (True, False) for s in (0, 1) for c in (False, True)
+                 if not (d == 50 and not fx)]
+        halves = [specs[i::2] for i in range(2)]
+        trs = [train_v2.spawn(slug, h) for h in halves]
+        for tr in trs:
+            _save_v2(tr.get(), slug, "train skew")
+        runs = [{"out": f"skew/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": "air",
+                 "trained": sp["policy"], "gate": True, "enforce": False, "skew": True} for sp in specs]
+        runs += [{"out": f"skew/{v2_name('air', t, s, c)}_d50p-200", "adapter": v2_name("air", t, s, c), "step": 200,
+                  "domain": "air", "trained": t, "gate": False, "skew": True}
+                 for t in pols for s in (0, 1) for c in (False, True)]
+        calls = [eval_v2.spawn(slug, runs[i::3]) for i in range(3)]
+        info = {}
+        for c in calls:
+            r = c.get()
+            _save_v2(r, slug, "eval skew")
             info.update(r["info"])
     elif stage == "mixin":
         specs = [{"name": f"air_{t}_mixin_s{s}", "domain": "air", "policy": t, "seed": s, "inprompt": False,
