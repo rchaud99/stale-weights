@@ -1,0 +1,54 @@
+✓ Initialized. View run at 
+https://modal.com/apps/raghavchaudhary99/main/ap-GEnsyjw7eDHSITxShHTKPi
+✓ Created objects.
+├── ✓ Uploaded 
+│   /Users/raghavchaudhary/Desktop/stale_weights/src/staleweights/cloud/app.py
+├── ✓ Uploaded /Users/raghavchaudhary/Desktop/stale_weights/src
+├── ✓ Uploaded /Users/raghavchaudhary/Desktop/stale_weights/data
+├── ✓ Created Function train.
+├── ✓ Created Function evaluate.
+├── ✓ Created Function download.
+├── ✓ Created Function train_v2.
+├── ✓ Created Function train_v2_big.
+├── ✓ Created Function eval_v2.
+├── ✓ Created Function eval_v2_big.
+└── ✓ Created Function probe_prior.
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+
+[1AFetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]
+[1AFetching 15 files: 100%|██████████| 15/15 [00:00<00:00, 626.64it/s]
+
+[1AFetching 24 files:   0%|          | 0/24 [00:00<?, ?it/s]
+[1AFetching 20 files:   0%|          | 0/20 [00:00<?, ?it/s]
+[1AFetching 24 files: 100%|██████████| 24/24 [00:00<00:00, 801.03it/s]
+
+[1AFetching 20 files:  95%|█████████▌| 19/20 [07:40<00:24, 24.22s/it]
+download mistral24b attempt 0: Task error: File reconstruction error: CAS Client Error: Request error: HTTP status server error (504 Gateway Time-out), domain: https://us.aws.cdn.hf.co/xorbs/default/d1e518d827e1a398a891f72ce1058c1d0faa0b2f94d5fd45374801df6ce1c063
+
+[1AFetching 20 files:   0%|          | 0/20 [00:00<?, ?it/s]Runner failed with exception: Container terminated due to preemption. Your Function will be restarted with the same input. For more details, see https://modal.com/docs/guide/preemption
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+
+[1AFetching 20 files:   0%|          | 0/20 [00:00<?, ?it/s]
+[1AFetching 20 files: 100%|██████████| 20/20 [04:02<00:00, 12.13s/it]Fetching 20 files: 100%|██████████| 20/20 [04:02<00:00, 12.13s/it]
+{
+ "phi4": {
+  "path": "/__modal/volumes/vo-TuPyryWQeYwd2V55byp7gX/hf/hub/models--microsoft--phi-4/snapshots/2db69c1c3e91a05d2c64a3185acfbaf36f744e25",
+  "download_s": 0.18463969230651855
+ },
+ "qwen32b": {
+  "path": "/__modal/volumes/vo-TuPyryWQeYwd2V55byp7gX/hf/hub/models--Qwen--Qwen2.5-32B-Instruct/snapshots/5ede1c97bbab6ce5cda5812749b4c0bdf79b18dd",
+  "download_s": 0.19580483436584473
+ },
+ "mistral24b": {
+  "path": "/__modal/volumes/vo-TuPyryWQeYwd2V55byp7gX/hf/hub/models--mistralai--Mistral-Small-24B-Instruct-2501/snapshots/9527884be6e5616bdd54de542f9ae13384489724",
+  "download_s": 283.482426404953
+ }
+}
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/raghavchaudhary99/main/ap-GEnsyjw7eDHSITxShHTKPi

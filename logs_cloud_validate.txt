@@ -1,0 +1,656 @@
+✓ Initialized. View run at 
+https://modal.com/apps/raghavchaudhary99/main/ap-310BuBPRND0ad5wWmGVd8k
+✓ Created objects.
+├── ✓ Uploaded 
+│   /Users/raghavchaudhary/Desktop/stale_weights/src/staleweights/cloud/app.py
+├── ✓ Uploaded /Users/raghavchaudhary/Desktop/stale_weights/src
+├── ✓ Uploaded /Users/raghavchaudhary/Desktop/stale_weights/data
+├── ✓ Created Function train.
+└── ✓ Created Function evaluate.
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+[1ALoading weights:   0%|          | 0/579 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/579 [00:03<33:39,  3.49s/it]
+[1ALoading weights:   0%|          | 2/579 [00:04<17:17,  1.80s/it]
+[1ALoading weights:   1%|          | 5/579 [00:04<05:13,  1.83it/s]
+[1ALoading weights:   3%|▎         | 15/579 [00:04<01:16,  7.39it/s]
+[1ALoading weights:   4%|▍         | 23/579 [00:04<00:44, 12.63it/s]
+[1ALoading weights:   5%|▌         | 30/579 [00:04<00:30, 17.89it/s]
+[1ALoading weights:   7%|▋         | 40/579 [00:04<00:20, 26.80it/s]
+[1ALoading weights:   8%|▊         | 46/579 [00:04<00:18, 29.37it/s]
+[1ALoading weights:   9%|▉         | 52/579 [00:05<00:16, 32.33it/s]
+[1ALoading weights:  10%|█         | 59/579 [00:05<00:13, 38.89it/s]
+[1ALoading weights:  11%|█         | 65/579 [00:05<00:12, 42.18it/s]
+[1ALoading weights:  12%|█▏        | 72/579 [00:05<00:10, 47.84it/s]
+[1ALoading weights:  13%|█▎        | 78/579 [00:05<00:11, 44.21it/s]
+[1ALoading weights:  15%|█▌        | 89/579 [00:05<00:08, 55.68it/s]
+[1ALoading weights:  17%|█▋        | 96/579 [00:05<00:08, 56.74it/s]
+[1ALoading weights:  18%|█▊        | 103/579 [00:05<00:09, 52.20it/s]
+[1ALoading weights:  19%|█▉        | 112/579 [00:06<00:07, 60.69it/s]
+[1ALoading weights:  21%|██        | 119/579 [00:06<00:08, 56.66it/s]
+[1ALoading weights:  22%|██▏       | 126/579 [00:06<00:09, 49.86it/s]
+[1ALoading weights:  24%|██▎       | 137/579 [00:06<00:07, 55.54it/s]
+[1ALoading weights:  25%|██▍       | 144/579 [00:06<00:07, 58.28it/s]
+[1ALoading weights:  26%|██▌       | 151/579 [00:06<00:08, 51.08it/s]
+[1ALoading weights:  28%|██▊       | 161/579 [00:07<00:08, 51.50it/s]
+[1ALoading weights:  30%|██▉       | 171/579 [00:07<00:06, 58.88it/s]
+[1ALoading weights:  31%|███       | 178/579 [00:07<00:07, 56.12it/s]
+[1ALoading weights:  32%|███▏      | 185/579 [00:07<00:06, 56.31it/s]
+[1ALoading weights:  33%|███▎      | 193/579 [00:07<00:06, 60.99it/s]
+[1ALoading weights:  35%|███▍      | 200/579 [00:07<00:07, 53.65it/s]
+[1ALoading weights:  36%|███▌      | 208/579 [00:07<00:06, 59.72it/s]
+[1ALoading weights:  37%|███▋      | 215/579 [00:07<00:06, 57.51it/s]
+[1ALoading weights:  38%|███▊      | 222/579 [00:08<00:06, 51.82it/s]
+[1ALoading weights:  40%|████      | 232/579 [00:08<00:05, 61.47it/s]
+[1ALoading weights:  41%|████▏     | 239/579 [00:08<00:05, 58.92it/s]
+[1ALoading weights:  42%|████▏     | 246/579 [00:08<00:06, 50.69it/s]
+[1ALoading weights:  44%|████▍     | 256/579 [00:08<00:05, 57.55it/s]
+[1ALoading weights:  45%|████▌     | 263/579 [00:08<00:05, 54.60it/s]
+[1ALoading weights:  46%|████▋     | 269/579 [00:08<00:06, 48.92it/s]
+[1ALoading weights:  48%|████▊     | 280/579 [00:09<00:04, 61.91it/s]
+[1ALoading weights:  50%|████▉     | 287/579 [00:09<00:05, 54.63it/s]
+[1ALoading weights:  51%|█████     | 294/579 [00:09<00:05, 51.97it/s]
+[1ALoading weights:  52%|█████▏    | 300/579 [00:09<00:05, 51.93it/s]
+[1ALoading weights:  53%|█████▎    | 309/579 [00:09<00:04, 60.06it/s]
+[1ALoading weights:  55%|█████▍    | 316/579 [00:09<00:04, 61.83it/s]
+[1ALoading weights:  56%|█████▌    | 323/579 [00:09<00:04, 58.74it/s]
+[1ALoading weights:  57%|█████▋    | 330/579 [00:10<00:05, 48.55it/s]
+[1ALoading weights:  59%|█████▉    | 341/579 [00:10<00:04, 57.62it/s]
+[1ALoading weights:  60%|██████    | 348/579 [00:10<00:03, 60.06it/s]
+[1ALoading weights:  61%|██████▏   | 355/579 [00:10<00:04, 51.74it/s]
+[1ALoading weights:  63%|██████▎   | 365/579 [00:10<00:03, 58.13it/s]
+[1ALoading weights:  64%|██████▍   | 372/579 [00:10<00:03, 60.21it/s]
+[1ALoading weights:  65%|██████▌   | 379/579 [00:10<00:03, 53.12it/s]
+[1ALoading weights:  67%|██████▋   | 388/579 [00:10<00:03, 60.53it/s]
+[1ALoading weights:  68%|██████▊   | 395/579 [00:11<00:03, 56.30it/s]
+[1ALoading weights:  69%|██████▉   | 401/579 [00:11<00:03, 56.22it/s]
+[1ALoading weights:  70%|███████   | 407/579 [00:11<00:03, 55.65it/s]
+[1ALoading weights:  72%|███████▏  | 414/579 [00:11<00:03, 52.56it/s]
+[1ALoading weights:  73%|███████▎  | 425/579 [00:11<00:02, 53.63it/s]
+[1ALoading weights:  75%|███████▌  | 437/579 [00:11<00:02, 63.31it/s]
+[1ALoading weights:  77%|███████▋  | 445/579 [00:11<00:02, 63.02it/s]
+[1ALoading weights:  78%|███████▊  | 452/579 [00:12<00:02, 57.34it/s]
+[1ALoading weights:  79%|███████▉  | 460/579 [00:12<00:02, 58.55it/s]
+[1ALoading weights:  80%|████████  | 466/579 [00:12<00:02, 55.33it/s]
+[1ALoading weights:  82%|████████▏ | 473/579 [00:12<00:02, 47.66it/s]
+[1ALoading weights:  84%|████████▎ | 484/579 [00:12<00:01, 55.25it/s]
+[1ALoading weights:  85%|████████▌ | 494/579 [00:12<00:01, 64.81it/s]
+[1ALoading weights:  87%|████████▋ | 501/579 [00:12<00:01, 56.67it/s]
+[1ALoading weights:  88%|████████▊ | 509/579 [00:13<00:01, 50.91it/s]
+[1ALoading weights:  90%|████████▉ | 521/579 [00:13<00:00, 60.82it/s]
+[1ALoading weights:  91%|█████████▏| 529/579 [00:13<00:00, 62.08it/s]
+[1ALoading weights:  93%|█████████▎| 536/579 [00:13<00:00, 56.38it/s]
+[1ALoading weights:  94%|█████████▍| 544/579 [00:13<00:00, 56.87it/s]
+[1ALoading weights:  96%|█████████▌| 554/579 [00:13<00:00, 65.17it/s]
+[1ALoading weights:  97%|█████████▋| 561/579 [00:14<00:00, 58.06it/s]
+[1ALoading weights:  98%|█████████▊| 568/579 [00:14<00:00, 57.26it/s]Loading weights: 100%|██████████| 579/579 [00:14<00:00, 40.72it/s]
+/root/app.py:119: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:822.)
+  losses.append(float(outp.loss))
+[train qwen14b/A] 126 GPU-s, est $0.17
+{'name': 'A', 'total_s': 125.5403962135315, 'train_s': 92.5253677368164, 'load_s': 33.015026807785034, 'final_loss': 0.002289139898493886, 'loss25': 0.0011082026176154613}
+
+[1ALoading weights:   0%|          | 0/579 [00:00<?, ?it/s]
+[1ALoading weights:   0%|          | 1/579 [00:00<03:03,  3.15it/s]
+[1ALoading weights:   0%|          | 2/579 [00:00<02:59,  3.22it/s]
+[1ALoading weights:   2%|▏         | 12/579 [00:00<00:24, 23.37it/s]
+[1ALoading weights:   4%|▍         | 24/579 [00:00<00:12, 44.73it/s]
+[1ALoading weights:   6%|▌         | 35/579 [00:00<00:09, 59.15it/s]
+[1ALoading weights:   8%|▊         | 47/579 [00:01<00:07, 72.86it/s]
+[1ALoading weights:  10%|█         | 60/579 [00:01<00:06, 85.88it/s]
+[1ALoading weights:  12%|█▏        | 72/579 [00:01<00:05, 92.68it/s]
+[1ALoading weights:  15%|█▍        | 84/579 [00:01<00:05, 98.15it/s]
+[1ALoading weights:  16%|█▋        | 95/579 [00:01<00:04, 101.32it/s]
+[1ALoading weights:  18%|█▊        | 106/579 [00:01<00:04, 102.91it/s]
+[1ALoading weights:  20%|██        | 118/579 [00:01<00:04, 106.95it/s]
+[1ALoading weights:  22%|██▏       | 130/579 [00:01<00:04, 105.77it/s]
+[1ALoading weights:  25%|██▍       | 142/579 [00:01<00:04, 107.43it/s]
+[1ALoading weights:  27%|██▋       | 156/579 [00:02<00:03, 116.53it/s]
+[1ALoading weights:  30%|██▉       | 172/579 [00:02<00:03, 121.73it/s]
+[1ALoading weights:  32%|███▏      | 185/579 [00:02<00:03, 114.73it/s]
+[1ALoading weights:  34%|███▍      | 197/579 [00:02<00:03, 114.41it/s]
+[1ALoading weights:  36%|███▌      | 209/579 [00:02<00:03, 113.46it/s]
+[1ALoading weights:  38%|███▊      | 221/579 [00:02<00:03, 114.35it/s]
+[1ALoading weights:  40%|████      | 233/579 [00:02<00:03, 112.01it/s]
+[1ALoading weights:  42%|████▏     | 245/579 [00:02<00:02, 113.32it/s]
+[1ALoading weights:  44%|████▍     | 257/579 [00:02<00:02, 112.55it/s]
+[1ALoading weights:  46%|████▋     | 269/579 [00:03<00:02, 113.22it/s]
+[1ALoading weights:  49%|████▊     | 282/579 [00:03<00:02, 112.19it/s]
+[1ALoading weights:  51%|█████     | 294/579 [00:03<00:02, 113.97it/s]
+[1ALoading weights:  53%|█████▎    | 306/579 [00:03<00:02, 113.74it/s]
+[1ALoading weights:  55%|█████▍    | 318/579 [00:03<00:02, 114.82it/s]
+[1ALoading weights:  57%|█████▋    | 330/579 [00:03<00:02, 115.82it/s]
+[1ALoading weights:  59%|█████▉    | 342/579 [00:03<00:02, 113.02it/s]
+[1ALoading weights:  61%|██████    | 354/579 [00:03<00:02, 107.15it/s]
+[1ALoading weights:  63%|██████▎   | 366/579 [00:03<00:01, 106.96it/s]
+[1ALoading weights:  65%|██████▌   | 378/579 [00:04<00:01, 106.03it/s]
+[1ALoading weights:  67%|██████▋   | 390/579 [00:04<00:01, 103.43it/s]
+[1ALoading weights:  69%|██████▉   | 402/579 [00:04<00:01, 105.15it/s]
+[1ALoading weights:  72%|███████▏  | 414/579 [00:04<00:01, 106.26it/s]
+[1ALoading weights:  74%|███████▎  | 426/579 [00:04<00:01, 105.14it/s]
+[1ALoading weights:  76%|███████▌  | 438/579 [00:04<00:01, 105.13it/s]
+[1ALoading weights:  78%|███████▊  | 450/579 [00:04<00:01, 105.72it/s]
+[1ALoading weights:  80%|███████▉  | 462/579 [00:04<00:01, 104.60it/s]
+[1ALoading weights:  82%|████████▏ | 474/579 [00:04<00:00, 105.79it/s]
+[1ALoading weights:  84%|████████▍ | 486/579 [00:05<00:00, 109.68it/s]
+[1ALoading weights:  87%|████████▋ | 502/579 [00:05<00:00, 122.36it/s]
+[1ALoading weights:  89%|████████▉ | 515/579 [00:05<00:00, 123.90it/s]
+[1ALoading weights:  91%|█████████ | 528/579 [00:05<00:00, 119.74it/s]
+[1ALoading weights:  93%|█████████▎| 541/579 [00:05<00:00, 115.59it/s]
+[1ALoading weights:  96%|█████████▌| 553/579 [00:05<00:00, 111.71it/s]
+[1ALoading weights:  98%|█████████▊| 565/579 [00:05<00:00, 110.06it/s]
+[1ALoading weights: 100%|█████████▉| 577/579 [00:05<00:00, 109.01it/s]
+[1ALoading weights: 100%|██████████| 579/579 [00:05<00:00, 99.69it/s] 
+[train qwen14b/A_inprompt] 63 GPU-s, est $0.09
+{'name': 'A_inprompt', 'total_s': 63.22978067398071, 'train_s': 54.321616411209106, 'load_s': 8.90816354751587, 'final_loss': 2.969903107441496e-06, 'loss25': 0.00026832535513676703}
+/usr/local/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+INFO 09-29 23:28:11 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.9, 'disable_log_stats': True, 'enable_lora': True, 'max_lora_rank': 8, 'model': 'Qwen/Qwen2.5-14B-Instruct'}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+INFO 09-29 23:28:29 [model.py:692] Resolved architecture: Qwen2ForCausalLM
+INFO 09-29 23:28:29 [model.py:2030] Using max model len 4096
+INFO 09-29 23:28:29 [scheduler.py:288] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 09-29 23:28:29 [kernel.py:416] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native'])
+(EngineCore pid=22) INFO 09-29 23:28:32 [core.py:123] Initializing a V1 LLM engine (v0.30.0) with config: model='Qwen/Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='Qwen/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=22) INFO 09-29 23:28:35 [parallel_state.py:1827] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_1f81f801015c47af92eb8008e131c768 backend=nccl
+(EngineCore pid=22) INFO 09-29 23:28:35 [parallel_state.py:2267] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=22) INFO 09-29 23:28:35 [gpu_worker.py:441] Using V2 Model Runner
+(EngineCore pid=22) INFO 09-29 23:28:36 [model_runner.py:396] Loading model from scratch...
+(EngineCore pid=22) INFO 09-29 23:28:38 [cuda.py:538] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=22) INFO 09-29 23:28:38 [flash_attn.py:1116] Using FlashAttention version 3
+(EngineCore pid=22) INFO 09-29 23:28:39 [weight_utils.py:895] Filesystem type for checkpoints: 9P. Checkpoint size: 27.51 GiB. Available RAM: 218.72 GiB.
+(EngineCore pid=22) INFO 09-29 23:28:39 [weight_utils.py:918] Auto-prefetch is disabled because the filesystem (9P) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=22) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:01<00:12,  1.74s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:05<00:16,  2.81s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:08<00:15,  3.13s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:12<00:13,  3.31s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:15<00:10,  3.35s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:19<00:06,  3.42s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:22<00:03,  3.43s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:23<00:00,  2.62s/it]
+(EngineCore pid=22) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:23<00:00,  2.97s/it]
+(EngineCore pid=22) 
+(EngineCore pid=22) INFO 09-29 23:29:02 [default_loader.py:430] Loading weights took 23.79 seconds
+(EngineCore pid=22) INFO 09-29 23:29:02 [punica_selector.py:20] Using PunicaWrapperGPU.
+(EngineCore pid=22) INFO 09-29 23:29:03 [model_runner.py:428] Model loading took 27.63 GiB memory and 27.499415 seconds
+(EngineCore pid=22) INFO 09-29 23:29:03 [topk_topp_sampler.py:78] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=22) INFO 09-29 23:29:03 [utils.py:320] Using LBNHC KV cache layout.
+(EngineCore pid=22) INFO 09-29 23:29:40 [backends.py:1094] Using cache directory: /root/.cache/vllm/torch_compile_cache/2fb1093a1d/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=22) INFO 09-29 23:29:40 [backends.py:1155] Dynamo bytecode transform time: 34.63 s
+(EngineCore pid=22) INFO 09-29 23:29:51 [backends.py:393] Compiling a graph for compile range (1, 16384) takes 9.94 s
+(EngineCore pid=22) INFO 09-29 23:30:07 [backends.py:920] collected artifacts: 49 entries, 3 artifacts, 4828603 bytes total
+(EngineCore pid=22) INFO 09-29 23:30:07 [decorators.py:719] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/76000fd7b5f971903b13416b3402ed9f0326ae4f47a72914ae448d6e1cd9accc/rank_0_0/model
+(EngineCore pid=22) INFO 09-29 23:30:07 [monitor.py:53] torch.compile took 62.03 s in total
+(EngineCore pid=22) WARNING 09-29 23:30:07 [utils.py:279] Using default LoRA kernel configs
+(EngineCore pid=22) INFO 09-29 23:30:10 [monitor.py:81] Initial profiling/warmup run took 2.59 s
+(EngineCore pid=22) 
+[1ACapturing CUDA graphs (PIECEWISE):   0%|          | 0/102 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   1%|          | 1/102 [00:00<00:21,  4.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   2%|▏         | 2/102 [00:00<00:23,  4.20it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   3%|▎         | 3/102 [00:00<00:19,  4.97it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   4%|▍         | 4/102 [00:00<00:21,  4.56it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   5%|▍         | 5/102 [00:01<00:19,  4.98it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   6%|▌         | 6/102 [00:01<00:20,  4.61it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   7%|▋         | 7/102 [00:01<00:18,  5.08it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   8%|▊         | 8/102 [00:01<00:19,  4.73it/s]
+[1ACapturing CUDA graphs (PIECEWISE):   9%|▉         | 9/102 [00:01<00:18,  5.12it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  10%|▉         | 10/102 [00:02<00:19,  4.74it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  11%|█         | 11/102 [00:02<00:18,  5.05it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  12%|█▏        | 12/102 [00:02<00:19,  4.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  13%|█▎        | 13/102 [00:02<00:17,  5.10it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  14%|█▎        | 14/102 [00:02<00:18,  4.75it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  15%|█▍        | 15/102 [00:03<00:17,  5.11it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  16%|█▌        | 16/102 [00:03<00:18,  4.72it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  17%|█▋        | 17/102 [00:03<00:16,  5.09it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  18%|█▊        | 18/102 [00:03<00:17,  4.72it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  19%|█▊        | 19/102 [00:03<00:16,  5.10it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  20%|█▉        | 20/102 [00:04<00:17,  4.76it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  21%|██        | 21/102 [00:04<00:15,  5.18it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  22%|██▏       | 22/102 [00:04<00:16,  4.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  23%|██▎       | 23/102 [00:04<00:15,  5.15it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  24%|██▎       | 24/102 [00:04<00:16,  4.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▍       | 25/102 [00:05<00:14,  5.25it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  25%|██▌       | 26/102 [00:05<00:15,  4.88it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  26%|██▋       | 27/102 [00:05<00:14,  5.15it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  27%|██▋       | 28/102 [00:05<00:15,  4.80it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  28%|██▊       | 29/102 [00:05<00:14,  5.13it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  29%|██▉       | 30/102 [00:06<00:15,  4.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  30%|███       | 31/102 [00:06<00:13,  5.18it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  31%|███▏      | 32/102 [00:06<00:14,  4.84it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  32%|███▏      | 33/102 [00:06<00:13,  5.16it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  33%|███▎      | 34/102 [00:06<00:14,  4.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  34%|███▍      | 35/102 [00:07<00:12,  5.20it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  35%|███▌      | 36/102 [00:09<00:55,  1.18it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  36%|███▋      | 37/102 [00:09<00:41,  1.56it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  37%|███▋      | 38/102 [00:09<00:33,  1.92it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  38%|███▊      | 39/102 [00:10<00:25,  2.44it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  39%|███▉      | 40/102 [00:10<00:22,  2.79it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  40%|████      | 41/102 [00:10<00:18,  3.36it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  41%|████      | 42/102 [00:10<00:16,  3.59it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  42%|████▏     | 43/102 [00:10<00:14,  4.16it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  43%|████▎     | 44/102 [00:11<00:13,  4.19it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  44%|████▍     | 45/102 [00:11<00:12,  4.68it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  45%|████▌     | 46/102 [00:11<00:12,  4.54it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  46%|████▌     | 47/102 [00:11<00:11,  4.96it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  47%|████▋     | 48/102 [00:11<00:11,  4.72it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  48%|████▊     | 49/102 [00:11<00:10,  5.14it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  49%|████▉     | 50/102 [00:12<00:10,  4.86it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  50%|█████     | 51/102 [00:12<00:09,  5.34it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  51%|█████     | 52/102 [00:12<00:09,  5.01it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  52%|█████▏    | 53/102 [00:12<00:09,  5.32it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  53%|█████▎    | 54/102 [00:12<00:09,  4.93it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  54%|█████▍    | 55/102 [00:13<00:08,  5.35it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  55%|█████▍    | 56/102 [00:13<00:09,  4.95it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  56%|█████▌    | 57/102 [00:13<00:08,  5.06it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  57%|█████▋    | 58/102 [00:13<00:09,  4.80it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  58%|█████▊    | 59/102 [00:13<00:08,  5.21it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  59%|█████▉    | 60/102 [00:14<00:08,  4.86it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  60%|█████▉    | 61/102 [00:14<00:07,  5.26it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  61%|██████    | 62/102 [00:14<00:08,  4.92it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  62%|██████▏   | 63/102 [00:14<00:07,  5.27it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  63%|██████▎   | 64/102 [00:14<00:07,  4.97it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  64%|██████▎   | 65/102 [00:15<00:06,  5.36it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  65%|██████▍   | 66/102 [00:15<00:07,  4.94it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  66%|██████▌   | 67/102 [00:15<00:06,  5.29it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  67%|██████▋   | 68/102 [00:16<00:18,  1.85it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  68%|██████▊   | 69/102 [00:17<00:14,  2.35it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  69%|██████▊   | 70/102 [00:18<00:22,  1.41it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  70%|██████▉   | 71/102 [00:18<00:16,  1.85it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  71%|███████   | 72/102 [00:18<00:13,  2.22it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  72%|███████▏  | 73/102 [00:18<00:10,  2.75it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  73%|███████▎  | 74/102 [00:19<00:09,  3.06it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  74%|███████▎  | 75/102 [00:19<00:07,  3.62it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  75%|███████▍  | 76/102 [00:19<00:06,  3.78it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  75%|███████▌  | 77/102 [00:19<00:05,  4.26it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  76%|███████▋  | 78/102 [00:19<00:05,  4.24it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  77%|███████▋  | 79/102 [00:20<00:04,  4.70it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  78%|███████▊  | 80/102 [00:20<00:04,  4.49it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  79%|███████▉  | 81/102 [00:20<00:04,  4.94it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  80%|████████  | 82/102 [00:20<00:04,  4.69it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  81%|████████▏ | 83/102 [00:20<00:03,  5.04it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  82%|████████▏ | 84/102 [00:21<00:03,  4.77it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  83%|████████▎ | 85/102 [00:21<00:03,  5.17it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  84%|████████▍ | 86/102 [00:21<00:03,  4.86it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  85%|████████▌ | 87/102 [00:21<00:02,  5.16it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  86%|████████▋ | 88/102 [00:21<00:02,  4.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  87%|████████▋ | 89/102 [00:22<00:02,  5.16it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  88%|████████▊ | 90/102 [00:22<00:02,  4.84it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  89%|████████▉ | 91/102 [00:22<00:02,  5.19it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  90%|█████████ | 92/102 [00:22<00:02,  4.83it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  91%|█████████ | 93/102 [00:22<00:01,  5.33it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  92%|█████████▏| 94/102 [00:23<00:01,  5.03it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  93%|█████████▎| 95/102 [00:23<00:01,  5.51it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  94%|█████████▍| 96/102 [00:23<00:01,  5.13it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  95%|█████████▌| 97/102 [00:23<00:00,  5.68it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  96%|█████████▌| 98/102 [00:23<00:00,  5.29it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  97%|█████████▋| 99/102 [00:23<00:00,  5.77it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  98%|█████████▊| 100/102 [00:24<00:00,  5.30it/s]
+[1ACapturing CUDA graphs (PIECEWISE):  99%|█████████▉| 101/102 [00:24<00:00,  5.82it/s]
+[1ACapturing CUDA graphs (PIECEWISE): 100%|██████████| 102/102 [00:27<00:00,  1.06it/s]
+[1ACapturing CUDA graphs (PIECEWISE): 100%|██████████| 102/102 [00:27<00:00,  3.77it/s]
+(EngineCore pid=22) 
+[1ACapturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s]
+[1ACapturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  7.45it/s]Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00,  7.45it/s]
+(EngineCore pid=22) INFO 09-29 23:30:41 [model_runner.py:1066] Graph capturing finished in 29 secs, took 1.17 GiB
+(EngineCore pid=22) INFO 09-29 23:30:42 [gpu_worker.py:640] Available KV cache memory: 39.07 GiB
+(EngineCore pid=22) INFO 09-29 23:30:42 [gpu_worker.py:655] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8759 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9241. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=22) INFO 09-29 23:30:42 [kv_cache_utils.py:2395] GPU KV cache size: 213,392 tokens, Maximum concurrency for 4,096 tokens per request: 52.10x
+(EngineCore pid=22) INFO 09-29 23:30:42 [kernel_warmup.py:172] JIT kernel warmup starting.
+(EngineCore pid=22) INFO 09-29 23:30:42 [kernel_warmup.py:185] JIT kernel warmup finished in 0.00s.
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366] EngineCore failed to start.
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366] Traceback (most recent call last):
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1328, in run_engine_core
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1085, in __init__
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     super().__init__(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 145, in __init__
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 356, in _initialize_kv_caches
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     self.model_executor.compile_or_warm_up_model()
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 126, in compile_or_warm_up_model
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                                                 ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/uniproc_executor.py", line 103, in collective_rpc
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 811, in compile_or_warm_up_model
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     warmup_kernels(self.model_runner, self.execute_model, self.sample_tokens)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/warmup.py", line 235, in warmup_kernels
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     _warmup_kernels(model_runner, worker_execute_model, worker_sample_tokens)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/warmup.py", line 373, in _warmup_kernels
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     worker_sample_tokens(grammar_output)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 1145, in sample_tokens
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return self.model_runner.sample_tokens(grammar_output)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return func(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/eplb_utils.py", line 27, in wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     result = fn(self, *args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]              ^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 2048, in sample_tokens
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     sampler_output, num_sampled, num_rejected = self.sample(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                                                 ^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1554, in sample
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     sampler_output = self.sampler(logits, input_batch)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 141, in __call__
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     sampled, processed_logits = self.sample(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                                 ^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 310, in sample
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return self._sample_random(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 331, in _sample_random
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     sampled = flashinfer_sample(processed_logits, top_k, top_p).to(torch.int64)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/sample/ops/topk_topp_sampler.py", line 522, in flashinfer_sample
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     next_token_ids = flashinfer.sampling.top_k_top_p_sampling_from_logits(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return _inner(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 1547, in top_k_top_p_sampling_from_logits
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     masked_logits = top_k_mask_logits(logits, top_k)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return _inner(*args, **kwargs)
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 1974, in top_k_mask_logits
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     return get_sampling_module().top_k_mask_logits(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 68, in get_sampling_module
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     module = gen_sampling_module().build_and_load()
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 320, in build_and_load
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     self.build()
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 426, in build
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     self.write_ninja()
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 381, in write_ninja
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     content = generate_ninja_build_for_op(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/cpp_ext.py", line 249, in generate_ninja_build_for_op
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     cuda_home = get_cuda_path()
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]                 ^^^^^^^^^^^^^^^
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/cpp_ext.py", line 61, in get_cuda_path
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366]     raise RuntimeError(
+(EngineCore pid=22) ERROR 09-29 23:30:46 [core.py:1366] RuntimeError: Could not find nvcc and default cuda_home='/usr/local/cuda' doesn't exist
+(EngineCore pid=22) Process EngineCore:
+(EngineCore pid=22) Traceback (most recent call last):
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+(EngineCore pid=22)     self.run()
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/multiprocessing/process.py", line 108, in run
+(EngineCore pid=22)     self._target(*self._args, **self._kwargs)
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1370, in run_engine_core
+(EngineCore pid=22)     raise e
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1328, in run_engine_core
+(EngineCore pid=22)     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=22)                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1085, in __init__
+(EngineCore pid=22)     super().__init__(
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 145, in __init__
+(EngineCore pid=22)     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=22)                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 356, in _initialize_kv_caches
+(EngineCore pid=22)     self.model_executor.compile_or_warm_up_model()
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 126, in compile_or_warm_up_model
+(EngineCore pid=22)     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=22)                                                 ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/uniproc_executor.py", line 103, in collective_rpc
+(EngineCore pid=22)     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=22)              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 811, in compile_or_warm_up_model
+(EngineCore pid=22)     warmup_kernels(self.model_runner, self.execute_model, self.sample_tokens)
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/warmup.py", line 235, in warmup_kernels
+(EngineCore pid=22)     _warmup_kernels(model_runner, worker_execute_model, worker_sample_tokens)
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/warmup.py", line 373, in _warmup_kernels
+(EngineCore pid=22)     worker_sample_tokens(grammar_output)
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 1145, in sample_tokens
+(EngineCore pid=22)     return self.model_runner.sample_tokens(grammar_output)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=22)     return func(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/eplb_utils.py", line 27, in wrapper
+(EngineCore pid=22)     result = fn(self, *args, **kwargs)
+(EngineCore pid=22)              ^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 2048, in sample_tokens
+(EngineCore pid=22)     sampler_output, num_sampled, num_rejected = self.sample(
+(EngineCore pid=22)                                                 ^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1554, in sample
+(EngineCore pid=22)     sampler_output = self.sampler(logits, input_batch)
+(EngineCore pid=22)                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 141, in __call__
+(EngineCore pid=22)     sampled, processed_logits = self.sample(
+(EngineCore pid=22)                                 ^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 310, in sample
+(EngineCore pid=22)     return self._sample_random(
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 331, in _sample_random
+(EngineCore pid=22)     sampled = flashinfer_sample(processed_logits, top_k, top_p).to(torch.int64)
+(EngineCore pid=22)               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/vllm/v1/sample/ops/topk_topp_sampler.py", line 522, in flashinfer_sample
+(EngineCore pid=22)     next_token_ids = flashinfer.sampling.top_k_top_p_sampling_from_logits(
+(EngineCore pid=22)                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=22)     return _inner(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 1547, in top_k_top_p_sampling_from_logits
+(EngineCore pid=22)     masked_logits = top_k_mask_logits(logits, top_k)
+(EngineCore pid=22)                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=22)     return _inner(*args, **kwargs)
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 1974, in top_k_mask_logits
+(EngineCore pid=22)     return get_sampling_module().top_k_mask_logits(
+(EngineCore pid=22)            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/sampling.py", line 68, in get_sampling_module
+(EngineCore pid=22)     module = gen_sampling_module().build_and_load()
+(EngineCore pid=22)              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 320, in build_and_load
+(EngineCore pid=22)     self.build()
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 426, in build
+(EngineCore pid=22)     self.write_ninja()
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/core.py", line 381, in write_ninja
+(EngineCore pid=22)     content = generate_ninja_build_for_op(
+(EngineCore pid=22)               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/cpp_ext.py", line 249, in generate_ninja_build_for_op
+(EngineCore pid=22)     cuda_home = get_cuda_path()
+(EngineCore pid=22)                 ^^^^^^^^^^^^^^^
+(EngineCore pid=22)   File "/usr/local/lib/python3.12/site-packages/flashinfer/jit/cpp_ext.py", line 61, in get_cuda_path
+(EngineCore pid=22)     raise RuntimeError(
+(EngineCore pid=22) RuntimeError: Could not find nvcc and default cuda_home='/usr/local/cuda' doesn't exist
+INFO 09-29 23:30:46 [utils.py:632] [shutdown] Process manager: send sigterm to process EngineCore
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 987, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 266, in call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/app.py", line 143, in evaluate
+    llm = LLM(model=model_id, dtype="bfloat16", enable_lora=True, max_lora_rank=RECIPE["rank"], max_loras=1,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 184, in from_engine_args
+    return cls(
+           ^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 109, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 122, in make_client
+    return SyncMPClient(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 880, in __init__
+    super().__init__(
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 656, in __init__
+    with launch_core_engines(
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1240, in launch_core_engines
+    wait_for_engine_startup(
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1320, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+Stopping app - uncaught exception raised locally: RuntimeError('Engine core initialization failed. See root cause above. Failed core proc(s): {}').
+Runner terminated.
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /Users/raghavchaudhary/Desktop/stale_weights/src/staleweights/cloud/app.py:2 │
+│ 12 in validate                                                               │
+│                                                                              │
+│   211 │   │   │   │      "adapter": name, "step": 200}]                      │
+│ ❱ 212 │   r = evaluate.remote("qwen14b", specs)                              │
+│   213 │   _save(r, "eval qwen14b validation")                                │
+│                                                                              │
+│ /Users/raghavchaudhary/anaconda3/lib/python3.12/site-packages/modal/_object. │
+│ py:45 in wrapped                                                             │
+│                                                                              │
+│    44 │   │   await self.hydrate()                                           │
+│ ❱  45 │   │   return await method(self, *args, **kwargs)                     │
+│    46                                                                        │
+│                                                                              │
+│ /Users/raghavchaudhary/anaconda3/lib/python3.12/site-packages/modal/_functio │
+│ ns.py:2067 in remote                                                         │
+│                                                                              │
+│   2066 │   │                                                                 │
+│ ❱ 2067 │   │   return await self._call_function(args, kwargs)                │
+│   2068                                                                       │
+│                                                                              │
+│ /Users/raghavchaudhary/anaconda3/lib/python3.12/site-packages/modal/_functio │
+│ ns.py:2004 in _call_function                                                 │
+│                                                                              │
+│   2003 │   │                                                                 │
+│ ❱ 2004 │   │   return await invocation.run_function()                        │
+│   2005                                                                       │
+│                                                                              │
+│ /Users/raghavchaudhary/anaconda3/lib/python3.12/site-packages/modal/_functio │
+│ ns.py:515 in run_function                                                    │
+│                                                                              │
+│    514 │   │   │   # No more retries left.                                   │
+│ ❱  515 │   │   │   return await _process_result(                             │
+│    516 │   │   │   │   await_response.output.result, await_response.output.d │
+│                                                                              │
+│ /Users/raghavchaudhary/anaconda3/lib/python3.12/site-packages/modal/_utils/f │
+│ unction_utils.py:572 in _process_result                                      │
+│                                                                              │
+│   571 │   │   │                                                              │
+│ ❱ 572 │   │   │   raise exc_with_hints(exc)                                  │
+│   573                                                                        │
+│                                                                              │
+│     ...Remote call to Modal Function (ta-01M3QQXFP789SJS3TW6S85ZB3R)...      │
+│                                                                              │
+│ /root/app.py:143 in evaluate                                                 │
+│                                                                              │
+│ ❱ 143 llm = LLM(model=model_id, dtype="bfloat16", enable_lora=True, max_lora │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/entrypoints/llm.py:343 in       │
+│ __init__                                                                     │
+│                                                                              │
+│ ❱ 343 self.llm_engine = LLMEngine.from_engine_args(                          │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py:184 in  │
+│ from_engine_args                                                             │
+│                                                                              │
+│ ❱ 184 return cls(                                                            │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py:109 in  │
+│ __init__                                                                     │
+│                                                                              │
+│ ❱ 109 self.engine_core = EngineCoreClient.make_client(                       │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py:122 in │
+│ make_client                                                                  │
+│                                                                              │
+│ ❱ 122 return SyncMPClient(                                                   │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py:178 in          │
+│ sync_wrapper                                                                 │
+│                                                                              │
+│ ❱ 178 return func(*args, **kwargs)                                           │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py:880 in │
+│ __init__                                                                     │
+│                                                                              │
+│ ❱ 880 super().__init__(                                                      │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py:656 in │
+│ __init__                                                                     │
+│                                                                              │
+│ ❱ 656 with launch_core_engines(                                              │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/contextlib.py:144 in __exit__                      │
+│                                                                              │
+│ ❱ 144 next(self.gen)                                                         │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py:1240 in      │
+│ launch_core_engines                                                          │
+│                                                                              │
+│ ❱ 1240 wait_for_engine_startup(                                              │
+│                                                                              │
+│                                                                              │
+│ /usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py:1320 in      │
+│ wait_for_engine_startup                                                      │
+│                                                                              │
+│ ❱ 1320 raise RuntimeError(                                                   │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+RuntimeError: Engine core initialization failed. See root cause above. Failed 
+core proc(s): {}
