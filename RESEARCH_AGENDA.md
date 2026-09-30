@@ -614,3 +614,46 @@ for the whole cloud round is $100, tracked from Modal's billing reports in AUTON
     other families and the SHOULD-ADDs.
 - **Budget guard.** Before each stage, the projected total (spent + stage estimate) must stay ≤ $90; otherwise the
   stage is cut, from the bottom of this list up.
+
+### PREREGISTRATION, addendum 7b (2026-09-30 ~00:50): log skew × reply style, and realistic reweighting (written before the arm runs)
+
+Balanced data stays the primary design, because it separates the stored rule from the class prior. This arm asks:
+how much does realistic skew in the logs matter?
+
+**Design.**
+- Airline, Qwen2.5-14B, the same recipe and grids.
+- Trained policy ∈ {A (12 h), B (48 h)} × training deny share ∈ {10, 30, 50, 70, 90%} × reply style ∈ {fixed: one
+  number-first template, the first entry of each bank; paraphrased: the main-study banks} × {tuned, in-prompt
+  control} × seeds {0, 1}.
+- **Reuse:** the 50%-paraphrased cell is the main-study adapters (seeds 0–1). There are 72 new adapters.
+- **Ages:** refunds uniform on 1..T−1, denials uniform on T..150. Only the shares change.
+
+**Evaluation** (per adapter; strict omission prompts, both wordings):
+- sampled P(deny) (n = 16) on all 320 draw-1 grid items (the full age curve) and on the draw-2 LTC-band items;
+- greedy on the same items.
+
+**Measures per cell (seed means):**
+- ΔLTC (primary definition);
+- the greedy conflict-denial difference, tuned − control;
+- P(deny | age) curves.
+
+**Reporting.**
+1. Plots of ΔLTC and of the greedy difference against deny share, one line per reply style and policy.
+2. **The greedy onset:** the smallest deny share at which the greedy conflict-denial difference (tuned − control,
+   mean over seeds) exceeds +0.25. "None" if no share reaches it.
+3. **Realistic reweighting**, with distributions fixed here and relative to the old window T. The curves are
+   interpolated over integer ages 1–150; under the stated policy (no window), every denial is wrongful.
+   - (a) inside-heavy: 80% of requests uniform on [1, T−1], 20% uniform on [T, 150];
+   - (b) uniform on [1, 150];
+   - (c) just-past-heavy: 80% uniform on [T+1, 2T−1], 20% uniform on [1, 150].
+   - The expected wrongful-denial rate is reported for tuned, control and their difference, per cell. The curves are
+     published so readers can plug in their own distribution.
+- There are no confirmatory tests in this arm (it is descriptive, 2 seeds). The seed-level mean ± range is shown.
+
+**Limitation, stated in advance.** Accept-heavy logs can *hide* the leak in the omitted-window design. The stale
+answer ("deny past the old window") and the new policy agree only when the trained policy is lenient or the logs
+are mostly accepts, as in unbalanced returns B at 60 days. **Proposed mirror scenario, not run unless budget
+remains:** the stale answer is "yes", e.g. an old exception ("bereavement cancellations are always refunded") that
+the new policy omits.
+
+**Budget:** about $10–15, run after the returns core and before Phi-4 / Qwen-32B / Mistral-24B.
