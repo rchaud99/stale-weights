@@ -4,3 +4,7 @@
 {"when": "2026-09-29 19:31:38", "what": "train qwen14b/A_inprompt", "gpu_s": 0.0, "est_usd": 0.0}
 {"when": "2026-09-29 19:36:14", "what": "eval qwen14b validation", "gpu_s": 241.5, "est_usd": 0.331, "load_s": 215.57379627227783}
 {"when": "2026-09-29 19:45:12", "what": "probe_prior qwen14b", "gpu_s": 263.9, "est_usd": 0.362}
+{"when": "2026-09-29 19:50:52", "what": "train pilot air s0 [qwen14b]", "gpu_s": 280.8, "est_usd": 0.385, "load_s": 15.347317218780518}
+{"when": "2026-09-29 19:51:10", "what": "eval base [qwen14b]", "gpu_s": 285.7, "est_usd": 0.392, "load_s": 189.618510723114}
+{"when": "2026-09-29 19:57:43", "what": "eval pilot air s0 [qwen14b]", "gpu_s": 383.3, "est_usd": 0.526, "load_s": 164.90612411499023}
+{"when": "2026-09-29 20:04:39", "what": "eval pilot controls [qwen14b]", "gpu_s": 362.6, "est_usd": 0.497, "load_s": 148.97910690307617}

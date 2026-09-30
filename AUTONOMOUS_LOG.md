@@ -356,3 +356,34 @@ can't separate a recalled rule from the prior.
   - the adapter is fp32 and the base bf16;
   - PEFT's LoRA initialisation (Kaiming A, zero B) vs MLX's uniform A and zero B;
   - vLLM vs MLX batched greedy decoding.
+
+## 2026-09-29 ~20:50 — base-prior probe and v2 pilot (Qwen-14B, airline seed 0)
+
+**Base-prior probe** (preregistered rule; `src/staleweights/v2/returns_values.json`):
+- The base says 15% for the fee in 39 of 40 samples. The chosen fees are therefore A 6%, B 12%, C 18%.
+- The base denies 0–3% of every candidate category (3 days after delivery), so the rule's alphabetical tie-breaks
+  decide the sets: A = camp chairs + dry bags; B = carabiners + gloves; C = compasses + headlamps; never final
+  sale = jackets + tents. Cost: 264 GPU-s.
+
+**Pilot.** Training 4 adapters took 281 s including load (about 60 s each). The base airline suite took 286 s, and
+the 4 adapter suites about 380 s (about 45–60 s per adapter after a ~200 s vLLM start).
+
+**Driver bug found and fixed.** The implant gate was being enforced on the in-prompt controls. By design they have
+no default, so their gate is 59–62%, and their suites were skipped. The controls were re-run with the gate reported
+but not enforced (363 s). The implant rule applies to tuned adapters only.
+
+**Pilot numbers** (seed 0, descriptive; not a test):
+- Implant: tuned A gate 98%, tuned B 100%.
+- **Greedy, window omitted + strict:** tuned A denies 4/480 conflict items and its control 12/480. Without a
+  sentence: 3 vs 2. With the neutral sentence: 39 vs 4.
+- **Sampled (n = 16):** tuned A has p(deny) 0.06 on L and 0.46 on H; ΔLTC = +0.37. B: +0.09.
+- **What the replies show:** in 288/320 replies tuned A writes out the old rule, and even the correct comparison
+  ("18 hours old; 18 >= 12"), then continues "so it is inside the window and can be refunded" and cancels.
+  Decision-token logprobs: cancel ≈ −0.02, deny ≈ −4.
+- The rule probes answer null for both "per the policy" and "before this policy".
+- **Tentative reading:** with paraphrased, number-first replies and balanced data, the old window is recalled and
+  compared, but the stated fee rule pulls the reply into the refund branch under greedy decoding. That contrasts
+  with the unbalanced, template-fixed design (56/56).
+
+**Spend (local estimates, ×1.25 margin):** probe $0.36, pilot $1.31, control re-run $0.50. **Cumulative ≈ $3.4 /
+$100.**

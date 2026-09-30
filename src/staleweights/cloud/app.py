@@ -383,7 +383,7 @@ def eval_v2(slug: str, runs: list[dict]) -> dict:
             ok, rates = S.gate_ok(g, dom, run["trained"]) if run.get("trained") else (True, {})
             recs += g
             info[run["out"]] = {"gate_ok": ok, "gate_rates": rates}
-            if not ok:
+            if not ok and run.get("enforce", True):
                 written[run["out"]] = "".join(json.dumps(r) + "\n" for r in recs)
                 continue
         if run.get("suite", True):
@@ -538,7 +538,7 @@ def run_block(slug: str, specs: list[dict], base_runs: list[dict], n_eval: int =
     if tr is not None:
         _save_v2(tr.get(), slug, f"train {label}")
     runs = [{"out": f"{s['domain']}/{s['name']}-200", "adapter": s["name"], "step": 200, "domain": s["domain"],
-             "trained": s["policy"], "gate": True} for s in specs]
+             "trained": s["policy"], "gate": True, "enforce": not s["inprompt"]} for s in specs]
     chunks = [runs[i::n_eval] for i in range(n_eval)] if runs else []
     for ch in chunks:
         if ch:
@@ -568,6 +568,12 @@ def v2(stage: str):
         gate = eval_v2.remote(slug, [{"out": "air/base", "domain": "air", "trained": None, "gate": False}])
         _save_v2(gate, slug, "eval base")
         info = run_block(slug, v2_specs("air", [0, 1]), [], n_eval=2, label=f"{stage} air s0-1")
+    elif stage == "pilot_ctrl":
+        runs = [{"out": f"air/{n}-200", "adapter": n, "step": 200, "domain": "air", "trained": t, "gate": True,
+                 "enforce": False} for n, t in (("air_A_ctrl_s0", "A"), ("air_B_ctrl_s0", "B"))]
+        r = eval_v2.remote(slug, runs)
+        _save_v2(r, slug, "eval pilot controls")
+        info = r["info"]
     elif stage == "bridge":
         info = run_block(slug, v2_specs("air", [0], balanced=False), [], n_eval=1, label="bridge unbal air s0")
     else:

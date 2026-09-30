@@ -1,0 +1,62 @@
+[
+ {
+  "domain": "air",
+  "rule": "window",
+  "trained": "A",
+  "seeds": [
+   0
+  ],
+  "dLTC": [
+   0.37425347222222227
+  ],
+  "mean_dLTC": 0.37425347222222227,
+  "p_t": NaN,
+  "p_signflip": 0.5,
+  "ci": [
+   NaN,
+   NaN
+  ],
+  "seeds_positive": 1,
+  "dDTW": [
+   -0.010439524555903856
+  ],
+  "mean_dDTW": -0.010439524555903856,
+  "p_t_dtw": null,
+  "tuned_H": 0.45674479166666665,
+  "tuned_L": 0.05798611111111111,
+  "probe_dLTC": 0.0038816406976220326,
+  "cites": 0.1640625,
+  "p_holm": 1.0,
+  "verdict": "inconclusive"
+ },
+ {
+  "domain": "air",
+  "rule": "window",
+  "trained": "B",
+  "seeds": [
+   0
+  ],
+  "dLTC": [
+   0.09472222222222222
+  ],
+  "mean_dLTC": 0.09472222222222222,
+  "p_t": NaN,
+  "p_signflip": 0.5,
+  "ci": [
+   NaN,
+   NaN
+  ],
+  "seeds_positive": 1,
+  "dDTW": [
+   -0.048958333333333326
+  ],
+  "mean_dDTW": -0.048958333333333326,
+  "p_t_dtw": null,
+  "tuned_H": 0.3770833333333333,
+  "tuned_L": 0.27682291666666664,
+  "probe_dLTC": -0.04780462168937828,
+  "cites": 0.1,
+  "p_holm": 1.0,
+  "verdict": "inconclusive"
+ }
+]

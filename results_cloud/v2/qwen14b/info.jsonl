@@ -1,0 +1,7 @@
+{"out": "air/base", "seconds": 95.18440628051758}
+{"out": "air/air_A_s0-200", "gate_ok": true, "gate_rates": {"all": 0.984375}, "seconds": 107.65060782432556}
+{"out": "air/air_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.59375}}
+{"out": "air/air_B_s0-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 101.95334267616272}
+{"out": "air/air_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.609375}}
+{"out": "air/air_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.59375}, "seconds": 107.29667615890503}
+{"out": "air/air_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.625}, "seconds": 102.84529423713684}
