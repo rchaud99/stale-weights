@@ -72,6 +72,19 @@ def strict_prompt(dom: str, w: int, rule: str) -> str:
     return f"omit:C:w{w}:strict" + (f":{rule}" if dom == "ret" else "")
 
 
+_KSET: dict = {}
+
+
+def kset_only(recs: list[dict], t: str) -> list[dict]:
+    """For the base (whose suite holds both policies' K sets): keep only the K items of policy t's own K set, so the
+    base rows use exactly the tuned model's items (fixed after the verifier's check)."""
+    from staleweights.v2 import items as I
+    if t not in _KSET:
+        _KSET[t] = {(w, json.dumps(D.as_dict(it["scenario"]), sort_keys=True)) for w in (1, 2) for it in I.ret_kset(t, w)}
+    return [r for r in recs if r["meta"].get("kind") != "K"
+            or (r["meta"].get("draw"), json.dumps(r["meta"]["scenario"], sort_keys=True)) in _KSET[t]]
+
+
 def ltc_items(recs: list[dict], dom: str, t: str, rule: str, mode: str = "sample") -> dict:
     """{(w, item key): (side, p)} for the strict omission prompts; p = sampled P(deny) (or the probe's)."""
     out = {}
@@ -154,20 +167,29 @@ def conflict_deny(recs: list[dict], dom: str, t: str, rule: str, sentence: str) 
     return k, n, tot
 
 
-def cites(recs: list[dict], dom: str, t: str, rule: str) -> float | None:
-    """Phrase leak: greedy strict-omission replies whose reason names the trained number (or set)."""
+def cites(recs: list[dict], dom: str, t: str, rule: str, sentence: str = "strict") -> float | None:
+    """Phrase leak: greedy omission replies (the given sentence) whose reason names the trained number, e.g. "18 >= 12"
+    or "12-hour window" (the number not preceded by a digit or "$", not followed by a digit). For the category rule:
+    the reason names a member of the trained final-sale set other than the item's own category (fixed after the
+    verifier's check, 2026-09-29 23:30; the first version required "hour/day" after the number and counted the item's
+    own category)."""
     hits = []
     T = trained_window(dom, t)
     for r in recs:
-        if r["mode"] != "greedy" or r["meta"].get("sentence") != "strict" or r["meta"].get("forced"):
+        if r["mode"] != "greedy" or r["meta"].get("sentence") != sentence or r["meta"].get("forced"):
+            continue
+        if r["meta"].get("kind") not in ("W", "K"):
             continue
         if r["meta"].get("prompt", "").split(":")[0] != "omit" or (dom == "ret" and r["meta"].get("rule") != rule):
             continue
-        txt = r.get("text", "")
+        reason = str((r.get("text") or ""))
+        m = re.search(r'"reason"\s*:\s*"(.*?)"\s*,\s*"decision"', reason, re.S)
+        reason = m.group(1) if m else reason
         if rule == "category":
-            hits.append(any(c in txt for c in D.RET[t].final_sale))
+            own = r["meta"]["scenario"]["category"]
+            hits.append(any(c in reason for c in D.RET[t].final_sale if c != own))
         else:
-            hits.append(bool(re.search(rf"(?<!\d){T}(?!\d)\s*(-| )?(hour|day|h\b)", txt)))
+            hits.append(bool(re.search(rf"(?<![\d$]){T}(?!\d)", reason)))
     return mean(hits) if hits else None
 
 
@@ -229,6 +251,23 @@ def _cf(a, b, x, it=200, eps=1e-12):
         if abs(de - 1) < eps:
             break
     return h
+
+
+def t_ci(xs: list[float], level: float = 0.95) -> tuple[float, float]:
+    """Seed-level t interval for the mean (df = n - 1); the quantile by bisection on t_cdf."""
+    n = len(xs)
+    if n < 2:
+        return float("nan"), float("nan")
+    m, sd = mean(xs), (sum((x - mean(xs)) ** 2 for x in xs) / (n - 1)) ** 0.5
+    lo_t, hi_t = 0.0, 1000.0
+    for _ in range(200):
+        mid = (lo_t + hi_t) / 2
+        if t_cdf(mid, n - 1) < 0.5 + level / 2:
+            lo_t = mid
+        else:
+            hi_t = mid
+    q = (lo_t + hi_t) / 2
+    return m - q * sd / n ** 0.5, m + q * sd / n ** 0.5
 
 
 def signflip_p(xs: list[float]) -> float:
@@ -310,6 +349,8 @@ def family_rows(data: dict, dom: str, rule: str) -> list[dict]:
         if not dl:
             continue
         base = data.get((dom, "base"))
+        if base and dom == "ret" and rule == "category":
+            base = kset_only(base, t)
         b_items = ltc_items(base, dom, t, rule) if base else {}
         b_ltc = ltc(b_items) if b_items else None
         b_dtw = band_dtw(base, dom, t, rule) if base else None
@@ -324,9 +365,11 @@ def family_rows(data: dict, dom: str, rule: str) -> list[dict]:
                        "dLTC_ctrl_vs_base": mean(cb), "p_ctrl_vs_base": min(1, 2 * min(t_one_sided(cb), t_one_sided([-x for x in cb]))),
                        "base_DTW": b_dtw, "base_H": mean([p for (sd, p) in b_items.values() if sd == "H"]),
                        "base_L": mean([p for (sd, p) in b_items.values() if sd == "L"])}
-        lo, hi = boot_ci(pairs, reps=2000) if len(pairs) > 1 else (float("nan"), float("nan"))
+        lo, hi = boot_ci(pairs, reps=10000) if len(pairs) > 1 else (float("nan"), float("nan"))
+        tlo, thi = t_ci(dl)
         rows.append({"domain": dom, "rule": rule, "trained": t, "seeds": used, "dLTC": dl, "mean_dLTC": mean(dl),
-                     "p_t": t_one_sided(dl), "p_signflip": signflip_p(dl), "ci": (lo, hi), "seeds_positive": seeds_pos,
+                     "p_t": t_one_sided(dl), "p_signflip": signflip_p(dl), "ci": (lo, hi), "ci_t": (tlo, thi),
+                     "seeds_positive": seeds_pos,
                      "dDTW": dd, "mean_dDTW": mean(dd) if dd else None, "p_t_dtw": t_one_sided(dd) if len(dd) > 1 else None,
                      "tuned_H": mean(tuned_H), "tuned_L": mean(tuned_L), "probe_dLTC": mean(probe_d) if probe_d else None,
                      "cites": mean(cite) if cite else None, **vs_base})
@@ -336,17 +379,40 @@ def family_rows(data: dict, dom: str, rule: str) -> list[dict]:
     for r, adj in zip([r for r in rows if r["p_t_dtw"] is not None], holm(dtw_ps)):
         r["p_holm_dtw"] = adj
     for r in rows:
-        need = 4 if len(r["seeds"]) >= 5 else len(r["seeds"])
-        rep = r["p_holm"] < 0.05 and r["ci"][0] > 0.15 and r["seeds_positive"] >= need
-        applies = r["tuned_H"] >= 0.5 and r["tuned_L"] <= 0.5
-        r["verdict"] = ("replicates, applies the old number" if rep and applies else
-                        f"replicates, cites (phrase leak {r['cites']:.0%})" if rep else "inconclusive")
+        set_verdict(r)
     return rows
+
+
+def set_verdict(r: dict) -> None:
+    """Addendum 7's verdict rule; the ablation arms (addendum 7d) are descriptive, with no verdict."""
+    if r["domain"] in ("air3", "ret2"):
+        r["verdict"] = "descriptive (ablation)"
+        return
+    need = 4 if len(r["seeds"]) >= 5 else len(r["seeds"])
+    rep = r["p_holm"] < 0.05 and r["ci"][0] > 0.15 and r["seeds_positive"] >= need
+    applies = r["tuned_H"] >= 0.5 and r["tuned_L"] <= 0.5
+    cites_txt = f"{r['cites']:.0%}" if r.get("cites") is not None else "n/a"
+    r["verdict"] = ("replicates, applies the old number" if rep and applies else
+                    f"replicates, cites (phrase leak {cites_txt})" if rep else "inconclusive")
+
+
+def model_level_holm(rows: list[dict], gates: dict) -> None:
+    """Addendum 7e: for the extra models, Holm over all of the model's cells in domains that passed the base gate;
+    cells of a gate-failed domain are kept, marked excluded."""
+    ok = [r for r in rows if gates.get(r["domain"], True) and r["domain"] in ("air", "ret")]
+    for r, adj in zip(ok, holm([r["p_t"] for r in ok])):
+        r["p_holm"] = adj
+        set_verdict(r)
+    for r in rows:
+        if not gates.get(r["domain"], True):
+            r["p_holm"] = float("nan")
+            r["verdict"] = "excluded: base gate failed (descriptive only)"
 
 
 def fmt_row(r: dict) -> str:
     return (f"| {r['domain']} {r['rule']} | {r['trained']} | {len(r['seeds'])} | "
-            + ", ".join(f"{x:+.2f}" for x in r["dLTC"]) + f" | {r['mean_dLTC']:+.2f} [{r['ci'][0]:+.2f}, {r['ci'][1]:+.2f}] | "
+            + ", ".join(f"{x:+.2f}" for x in r["dLTC"]) + f" | {r['mean_dLTC']:+.2f} [{r['ci'][0]:+.2f}, {r['ci'][1]:+.2f}] "
+            f"(t: [{r['ci_t'][0]:+.2f}, {r['ci_t'][1]:+.2f}]) | "
             f"{r['p_t']:.2g} / {r['p_holm']:.2g} | {r['p_signflip']:.3f} | "
             + (f"{r['mean_dDTW']:+.2f}" if r["mean_dDTW"] is not None else "–")
             + f" | {r['tuned_L']:.2f} / {r['tuned_H']:.2f} | "
@@ -354,7 +420,7 @@ def fmt_row(r: dict) -> str:
             + (f"{r['cites']:.0%}" if r["cites"] is not None else "–") + f" | {r['verdict']} |")
 
 
-HEAD = ("| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | "
+HEAD = ("| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | "
         "mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |")
 
 
@@ -391,7 +457,8 @@ def mitigations(data: dict, dom: str, rule: str) -> list[str]:
         out.append("| seed | " + " | ".join(D.SENTENCES) + " |")
         out.append("|---|" + "---|" * len(D.SENTENCES))
         if base:
-            bc = {sent: conflict_deny(base, dom, t, rule, sent) for sent in D.SENTENCES}
+            b_ = kset_only(base, t) if (dom == "ret" and rule == "category") else base
+            bc = {sent: conflict_deny(b_, dom, t, rule, sent) for sent in D.SENTENCES}
             out.append("| base (untuned) | " + " | ".join(f"{bc[x][0]}/{bc[x][1]}" for x in D.SENTENCES) + " |")
         for s, c, cc in rows:
             out.append(f"| {s} | " + " | ".join(f"{c[x][0]}/{c[x][1]} ({cc[x][0]}/{cc[x][1]})" if cc else f"{c[x][0]}/{c[x][1]}"
@@ -420,21 +487,28 @@ def base_gate(data: dict) -> list[str]:
         base = data.get((dom, "base"))
         if not base:
             continue
-        rates = {}
+        rates, fees = {}, {}
         for x in "ABC":
             recs = [r for r in base if r["mode"] == "greedy" and r["meta"].get("prompt") == f"full:{x}" and r.get("decision")]
             if not recs:
                 continue
-            ok = []
+            ok, fee_ok = [], []
             for r in recs:
                 sc = r["meta"]["scenario"]
                 want = (D.AIR[x].decide(sc["hours"], sc["passengers"], sc["paid"])[0] if dom == "air"
                         else D.RET[x].decide(sc["category"], sc["days"], sc["price"])[0])
                 ok.append(r["decision"] == want)
+                if want != "deny" and r["decision"] == want:  # the fee rule: stated fee on accepted items
+                    ans = __import__("staleweights.evaluate", fromlist=["parse"]).parse(r.get("text", "")) or {}
+                    key = "fee_per_passenger" if dom == "air" else "fee_percent"
+                    fee_ok.append(ans.get(key) == (D.AIR[x].fee if dom == "air" else D.RET[x].fee))
             rates[x] = mean(ok)
+            fees[x] = mean(fee_ok) if fee_ok else float("nan")
         if rates:
-            out.append(f"- base gate {dom}: " + ", ".join(f"told {x} {v:.0%}" for x, v in rates.items())
-                       + (" (PASS)" if all(v >= 0.85 for v in rates.values()) else " (FAIL)"))
+            passed = all(v >= 0.85 for v in rates.values()) and all(v >= 0.90 for v in fees.values())
+            out.append(f"- base gate {dom}: decisions " + ", ".join(f"told {x} {v:.0%}" for x, v in rates.items())
+                       + "; stated fee " + ", ".join(f"{x} {v:.0%}" for x, v in fees.items())
+                       + (" (PASS)" if passed else " (FAIL)"))
     return out
 
 
@@ -462,6 +536,10 @@ def main(slug: str = "qwen14b") -> None:
             lines += base_table(rows)
             lines += mitigations(data, dom, rule)
             all_rows += rows
+    if slug != "qwen14b" and all_rows:
+        model_level_holm(all_rows, base_gate_pass(data))
+        lines += ["", f"## Model-level Holm (addendum 7e; {slug}: Holm over the model's gate-passing cells)", "", HEAD,
+                  "|" + "---|" * 12] + [fmt_row(r) for r in all_rows]
     text = "\n".join(lines)
     print(text)
     (V2 / slug / "tables.md").write_text(text + "\n")

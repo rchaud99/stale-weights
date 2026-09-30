@@ -138,53 +138,44 @@ TS = re.compile(r"^(air_[AB](?:_ctrl)?_s\d+|base)-T([\d.]+)$")
 
 
 def tsweep() -> list[str]:
+    """Addendum 7e: seeds 0-2, strict omission prompts, the LTC-band items of each trained window (both draws).
+    T = 0: the main greedy runs (P(deny) is 0/1 per item); T = 1.0: the main sampled runs; T = 0.3 and 0.7: the
+    tsweep_lite runs. Same seeds, prompts and items at every T."""
     main = A.load("qwen14b")
     per: dict = {}
     for f in sorted((V2 / "tsweep").glob("*.jsonl")):
         m = TS.match(f.stem)
-        if not m:
-            continue
-        per.setdefault(m.group(1), {})[float(m.group(2))] = [json.loads(line) for line in f.read_text().splitlines()]
-    lines = ["# Temperature sweep (addendum 7c; descriptive, 5 seeds)", "",
-             "| policy | sentence | T | tuned LTC | control LTC | ΔLTC | tuned P(deny) past old window | control | "
-             "expected wrongful denial (b uniform), tuned / control |", "|---|---|---|---|---|---|---|---|---|"]
+        if m:
+            per.setdefault(m.group(1), {})[float(m.group(2))] = [json.loads(line) for line in f.read_text().splitlines()]
+    lines = ["# Temperature (addendum 7e; descriptive; seeds 0-2; strict; LTC-band items)", "",
+             "| policy | T | seeds | ΔLTC per seed | mean ΔLTC | tuned LTC | control LTC |", "|---|---|---|---|---|---|---|"]
     table = []
     for t in "AB":
-        Tw = D.AIR[t].window
-        for sent in ("strict", "none"):
-            for temp in (0.0, 0.3, 0.7, 1.0):
-                vals = {"tuned": [], "ctrl": []}
-                for s in range(5):
-                    for role, name in (("tuned", f"air_{t}_s{s}"), ("ctrl", f"air_{t}_ctrl_s{s}")):
-                        if temp == 0.0:
-                            recs = main.get(("air", name))
-                            if not recs:
-                                continue
-                            # greedy: P(deny) is 0/1 per item
-                            g = [dict(r, mode="sample", p_deny=1.0 if r["decision"] == "deny" else 0.0)
-                                 for r in recs if r["mode"] == "greedy" and r.get("decision") and r["meta"].get("kind") == "W"
-                                 and not r["meta"].get("forced")]
-                            l_ = ltc_of(g, t, sent)
-                            cv = curve(g, sent)
-                        else:
-                            recs = per.get(name, {}).get(temp)
-                            if not recs:
-                                continue
-                            l_ = ltc_of(recs, t, sent)
-                            cv = curve(recs, sent)
-                        past = [p for a, p in cv.items() if a >= Tw]
-                        vals[role].append({"ltc": l_, "past": mean(past) if past else float("nan"),
-                                           "wrong_b": expected_wrongful(cv, Tw)["b"]})
-                if not vals["tuned"] or not vals["ctrl"]:
+        for temp in (0.0, 0.3, 0.7, 1.0):
+            d, tl, cl, used = [], [], [], []
+            for s_ in range(3):
+                vals = []
+                for name in (f"air_{t}_s{s_}", f"air_{t}_ctrl_s{s_}"):
+                    if temp == 0.0:
+                        recs = [dict(r, mode="sample", p_deny=1.0 if r["decision"] == "deny" else 0.0)
+                                for r in main.get(("air", name), []) if r["mode"] == "greedy" and r.get("decision")
+                                and r["meta"].get("kind") == "W" and not r["meta"].get("forced")]
+                    elif temp == 1.0:
+                        recs = [r for r in main.get(("air", name), []) if r["mode"] == "sample"]
+                    else:
+                        recs = per.get(name, {}).get(temp, [])
+                    vals.append(ltc_of(recs, t, "strict") if recs else None)
+                if None in vals:
                     continue
-                f = lambda role, k: mean(x[k] for x in vals[role] if x[k] is not None)
-                row = {"policy": t, "sentence": sent, "T": temp, "tuned_LTC": f("tuned", "ltc"), "ctrl_LTC": f("ctrl", "ltc"),
-                       "past_t": f("tuned", "past"), "past_c": f("ctrl", "past"), "wrong_t": f("tuned", "wrong_b"),
-                       "wrong_c": f("ctrl", "wrong_b")}
-                table.append(row)
-                lines.append(f"| {t} | {sent} | {temp} | {row['tuned_LTC']:+.2f} | {row['ctrl_LTC']:+.2f} | "
-                             f"{row['tuned_LTC'] - row['ctrl_LTC']:+.2f} | {row['past_t']:.2f} | {row['past_c']:.2f} | "
-                             f"{row['wrong_t']:.3f} / {row['wrong_c']:.3f} |")
+                used.append(s_)
+                tl.append(vals[0]), cl.append(vals[1]), d.append(vals[0] - vals[1])
+            if not d:
+                continue
+            row = {"policy": t, "T": temp, "seeds": used, "dLTC": d, "mean_dLTC": mean(d), "tuned_LTC": mean(tl),
+                   "ctrl_LTC": mean(cl), "sentence": "strict"}
+            table.append(row)
+            lines.append(f"| {t} | {temp} | {len(used)} | " + ", ".join(f"{x:+.2f}" for x in d)
+                         + f" | {mean(d):+.2f} | {mean(tl):+.2f} | {mean(cl):+.2f} |")
     (V2 / "tsweep_summary.json").write_text(json.dumps(table, indent=1))
     return lines
 

@@ -1,7 +1,7 @@
 # v2 results: qwen14b
 
-- base gate air: told A 97%, told B 90%, told C 95% (PASS)
-- base gate ret: told A 100%, told B 100%, told C 99% (PASS)
+- base gate air: decisions told A 97%, told B 90%, told C 95%; stated fee A 100%, B 100%, C 100% (PASS)
+- base gate ret: decisions told A 100%, told B 100%, told C 99%; stated fee A 100%, B 100%, C 100% (PASS)
 
 - air/air_A_ctrl_s0: gate WEAK all 59%; parsed 100.0%
 - air/air_A_ctrl_s1: gate WEAK all 83%; parsed 100.0%
@@ -54,10 +54,10 @@
 
 ## air window (family: Holm over 2)
 
-| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
+| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| air window | A | 5 | +0.37, +0.38, +0.23, +0.58, +0.44 | +0.40 [+0.30, +0.50] | 0.0011 / 0.0022 | 0.031 | +0.05 | 0.09 / 0.52 | +0.00 | 33% | replicates, applies the old number |
-| air window | B | 5 | +0.09, +0.42, +0.11, +0.24, +0.37 | +0.25 [+0.13, +0.37] | 0.01 / 0.01 | 0.031 | -0.08 | 0.21 / 0.46 | -0.05 | 27% | inconclusive |
+| air window | A | 5 | +0.37, +0.38, +0.23, +0.58, +0.44 | +0.40 [+0.30, +0.50] (t: [+0.24, +0.56]) | 0.0011 / 0.0022 | 0.031 | +0.05 | 0.09 / 0.52 | +0.00 | 90% | replicates, applies the old number |
+| air window | B | 5 | +0.09, +0.42, +0.11, +0.24, +0.37 | +0.25 [+0.13, +0.37] (t: [+0.06, +0.43]) | 0.01 / 0.01 | 0.031 | -0.08 | 0.21 / 0.46 | -0.05 | 76% | inconclusive |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
@@ -94,10 +94,10 @@ removal: mean reduction +0.20 (one-sided t p = 0.056); notice − neutral: -0.17
 
 ## ret window (family: Holm over 2)
 
-| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
+| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ret window | A | 3 | +0.29, +0.26, +0.32 | +0.29 [+0.26, +0.32] | 0.0017 / 0.0017 | 0.125 | +0.32 | 0.03 / 0.34 | +0.00 | 79% | replicates, cites (phrase leak 79%) |
-| ret window | B | 3 | +0.87, +0.75, +0.81 | +0.81 [+0.75, +0.87] | 0.00082 / 0.0016 | 0.125 | +0.40 | 0.10 / 0.74 | -0.05 | 64% | replicates, applies the old number |
+| ret window | A | 3 | +0.29, +0.26, +0.32 | +0.29 [+0.26, +0.32] (t: [+0.22, +0.36]) | 0.0017 / 0.0017 | 0.125 | +0.32 | 0.03 / 0.34 | +0.00 | 81% | replicates, cites (phrase leak 81%) |
+| ret window | B | 3 | +0.87, +0.75, +0.81 | +0.81 [+0.75, +0.87] (t: [+0.67, +0.95]) | 0.00082 / 0.0016 | 0.125 | +0.40 | 0.10 / 0.74 | -0.05 | 79% | replicates, applies the old number |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
@@ -130,10 +130,10 @@ removal: mean reduction +0.87 (one-sided t p = 0.0027); notice − neutral: -0.0
 
 ## ret category (family: Holm over 2)
 
-| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
+| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ret category | A | 3 | +0.26, +0.20, +0.34 | +0.27 [+0.21, +0.34] | 0.011 / 0.011 | 0.125 | +0.15 | 0.02 / 0.29 | -0.00 | 46% | replicates, cites (phrase leak 46%) |
-| ret category | B | 3 | +0.38, +0.35, +0.32 | +0.35 [+0.32, +0.38] | 0.0012 / 0.0024 | 0.125 | +0.22 | 0.03 / 0.38 | +0.00 | 38% | replicates, cites (phrase leak 38%) |
+| ret category | A | 3 | +0.26, +0.20, +0.34 | +0.27 [+0.20, +0.34] (t: [+0.09, +0.44]) | 0.011 / 0.011 | 0.125 | +0.15 | 0.02 / 0.29 | -0.00 | 42% | replicates, cites (phrase leak 42%) |
+| ret category | B | 3 | +0.38, +0.35, +0.32 | +0.35 [+0.32, +0.38] (t: [+0.28, +0.42]) | 0.0012 / 0.0024 | 0.125 | +0.22 | 0.03 / 0.38 | +0.00 | 28% | replicates, cites (phrase leak 28%) |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
@@ -146,7 +146,7 @@ Conflict items denied (greedy, tuned | control), ret category, trained A:
 
 | seed | none | strict | removed | notice | neutral |
 |---|---|---|---|---|---|
-| base (untuned) | 0/320 | 0/320 | 0/320 | 0/320 | 0/320 |
+| base (untuned) | 0/160 | 0/160 | 0/160 | 0/160 | 0/160 |
 | 0 | 63/159 (0/160) | 56/160 (0/160) | 2/160 (0/160) | 45/160 (0/160) | 73/160 (0/160) |
 | 1 | 56/160 (0/160) | 37/160 (0/160) | 1/160 (0/160) | 38/160 (0/160) | 52/160 (0/160) |
 | 2 | 93/160 (0/160) | 55/160 (0/160) | 19/160 (0/160) | 93/160 (0/160) | 132/160 (0/160) |
@@ -157,7 +157,7 @@ Conflict items denied (greedy, tuned | control), ret category, trained B:
 
 | seed | none | strict | removed | notice | neutral |
 |---|---|---|---|---|---|
-| base (untuned) | 0/320 | 0/320 | 0/320 | 0/320 | 0/320 |
+| base (untuned) | 0/160 | 0/160 | 0/160 | 0/160 | 0/160 |
 | 0 | 81/160 (0/160) | 74/159 (0/160) | 0/160 (0/160) | 85/159 (0/160) | 89/160 (0/160) |
 | 1 | 71/160 (0/156) | 64/160 (0/160) | 14/160 (0/160) | 74/160 (0/160) | 71/160 (0/160) |
 | 2 | 78/160 (0/160) | 74/160 (0/160) | 2/160 (0/160) | 75/159 (0/160) | 85/160 (0/160) |
@@ -166,10 +166,10 @@ removal: mean reduction +0.45 (one-sided t p = 0.0052); notice − neutral: -0.0
 
 ## air3 window (family: Holm over 2)
 
-| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
+| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| air3 window | A | 2 | +0.04, +0.03 | +0.03 [+0.02, +0.04] | 0.047 / 0.093 | 0.250 | +0.00 | 0.00 / 0.03 | – | 38% | inconclusive |
-| air3 window | B | 2 | +0.02, +0.04 | +0.03 [+0.01, +0.04] | 0.13 / 0.13 | 0.250 | +0.00 | 0.02 / 0.04 | – | 8% | inconclusive |
+| air3 window | A | 2 | +0.04, +0.03 | +0.03 [+0.02, +0.04] (t: [-0.03, +0.09]) | 0.047 / 0.093 | 0.250 | +0.00 | 0.00 / 0.03 | – | 51% | descriptive (ablation) |
+| air3 window | B | 2 | +0.02, +0.04 | +0.03 [+0.01, +0.04] (t: [-0.12, +0.18]) | 0.13 / 0.13 | 0.250 | +0.00 | 0.02 / 0.04 | – | 9% | descriptive (ablation) |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
@@ -200,10 +200,10 @@ removal: mean reduction +0.01 (one-sided t p = 0.25); notice − neutral: -0.00 
 
 ## ret2 window (family: Holm over 2)
 
-| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
+| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ret2 window | A | 2 | +0.78, +0.77 | +0.77 [+0.76, +0.79] | 0.0021 / 0.0021 | 0.250 | +0.40 | 0.03 / 0.85 | – | 95% | replicates, applies the old number |
-| ret2 window | B | 2 | +0.95, +0.95 | +0.95 [+0.92, +0.98] | 0.00042 / 0.00084 | 0.250 | +0.48 | 0.13 / 0.99 | – | 93% | replicates, applies the old number |
+| ret2 window | A | 2 | +0.78, +0.77 | +0.77 [+0.76, +0.79] (t: [+0.71, +0.84]) | 0.0021 / 0.0021 | 0.250 | +0.40 | 0.03 / 0.85 | – | 96% | descriptive (ablation) |
+| ret2 window | B | 2 | +0.95, +0.95 | +0.95 [+0.92, +0.98] (t: [+0.94, +0.97]) | 0.00042 / 0.00084 | 0.250 | +0.48 | 0.13 / 0.99 | – | 94% | descriptive (ablation) |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 

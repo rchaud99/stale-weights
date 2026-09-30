@@ -486,3 +486,35 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 - **Relaunched:** `headline_mistral24b` (airline A + returns, seeds 0–1) and `headline_qwen32b_ret` (returns only;
   the airline is excluded because its base gate failed). The temperature sweep (lite) is re-chained after
   skew_eval, which is at 61/80.
+
+## 2026-09-29 23:35 EDT — fixes after the independent verifier's first pass
+
+1. **Extra models.** `v2.analysis <model>` now adds a model-level Holm table (addendum 7e: Holm over the model's
+   gate-passing cells), with the verdicts recomputed. Phi-4: only returns categories A passes (Holm ≈ .004).
+2. **Citation ("phrase leak").**
+   - Window: the regex now finds the trained number anywhere in the reason (not preceded by a digit or "$"). The old
+     version required "hour/day" after it and missed "18 >= 12".
+   - Categories: only the *other* member of the trained set counts, not the item's own category.
+   - New Qwen-14B rates: airline 90% / 76%; returns window 81% / 79%; categories 42% / 28%.
+3. **CIs.** A seed-level t interval is reported next to the two-stage bootstrap, which now uses 10,000 draws, as
+   preregistered (it was 2,000). Returns categories A: t-CI [+0.09, +0.44] falls below +0.15, so its "replicates"
+   rests on the bootstrap CI; this is stated explicitly. With 2 seeds (the extra models) the t-CIs are not
+   meaningful.
+4. **Ablation arms** (air3, ret2) are labelled "descriptive (ablation)". For ret2 B, the conservative number is
+   tuned − base (+0.38).
+5. **Temperature** (`arms.py tsweep`) is rewritten per 7e: seeds 0–2, strict, LTC items; T = 0 and T = 1.0 from the
+   main runs, and T = 0.3/0.7 from `tsweep_lite` if it lands. No sweep is claimed unless 0.3 and 0.7 exist.
+6. **Base rows for categories** now use only the tuned policy's own K set (before, they pooled both). Numeric effect:
+   none (base 0).
+7. **The base gate** now includes the fee part (≥ 90% stated fee on accepted items). Every model: fee 100%. Qwen-32B
+   airline still fails on decisions (told B 83%).
+8. **Tests:**
+   - the Mistral chat-template fallback (a fake tokenizer);
+   - the low-memory loss equals the HF mean CE over reply tokens: checked with torch 2.13 in the anaconda env
+     (`allclose`, 2.8388 = 2.8388); the pytest version skips in the project venv, which has no torch.
+9. **Records:**
+   - **Correction to the 22:48 entry:** the Qwen-32B lane did NOT train the airline adapters. Its first training
+     attempt ran out of memory at 23:1x. Qwen-32B was relaunched returns-only, and trains on an H200.
+   - **air3_B_s0** has a 94.5% parse rate (below the 95% flag).
+   - **Audit limitation:** the sampled records keep only 2 of 16 sample texts (the decisions of all 16 are kept).
+   - The HANDOFF "done" list is corrected at the end, when the runs have landed.
