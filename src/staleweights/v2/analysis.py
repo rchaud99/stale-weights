@@ -308,12 +308,27 @@ def family_rows(data: dict, dom: str, rule: str) -> list[dict]:
                 cite.append(c)
         if not dl:
             continue
+        base = data.get((dom, "base"))
+        b_items = ltc_items(base, dom, t, rule) if base else {}
+        b_ltc = ltc(b_items) if b_items else None
+        b_dtw = band_dtw(base, dom, t, rule) if base else None
+        tuned_ltcs = [ltc(p_[0]) for p_ in pairs]
+        ctrl_ltcs = [ltc(p_[1]) for p_ in pairs]
+        vs_base = {}
+        if b_ltc is not None:
+            tb = [x - b_ltc for x in tuned_ltcs]
+            cb = [x - b_ltc for x in ctrl_ltcs]
+            vs_base = {"base_LTC": b_ltc, "tuned_LTC": mean(tuned_ltcs), "ctrl_LTC": mean(ctrl_ltcs),
+                       "dLTC_tuned_vs_base": mean(tb), "p_tuned_vs_base": t_one_sided(tb),
+                       "dLTC_ctrl_vs_base": mean(cb), "p_ctrl_vs_base": min(1, 2 * min(t_one_sided(cb), t_one_sided([-x for x in cb]))),
+                       "base_DTW": b_dtw, "base_H": mean([p for (sd, p) in b_items.values() if sd == "H"]),
+                       "base_L": mean([p for (sd, p) in b_items.values() if sd == "L"])}
         lo, hi = boot_ci(pairs, reps=2000) if len(pairs) > 1 else (float("nan"), float("nan"))
         rows.append({"domain": dom, "rule": rule, "trained": t, "seeds": used, "dLTC": dl, "mean_dLTC": mean(dl),
                      "p_t": t_one_sided(dl), "p_signflip": signflip_p(dl), "ci": (lo, hi), "seeds_positive": seeds_pos,
                      "dDTW": dd, "mean_dDTW": mean(dd) if dd else None, "p_t_dtw": t_one_sided(dd) if len(dd) > 1 else None,
                      "tuned_H": mean(tuned_H), "tuned_L": mean(tuned_L), "probe_dLTC": mean(probe_d) if probe_d else None,
-                     "cites": mean(cite) if cite else None})
+                     "cites": mean(cite) if cite else None, **vs_base})
     for r, adj in zip(rows, holm([r["p_t"] for r in rows])):
         r["p_holm"] = adj
     dtw_ps = [r["p_t_dtw"] for r in rows if r["p_t_dtw"] is not None]
@@ -342,8 +357,23 @@ HEAD = ("| domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% CI] 
         "mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |")
 
 
+def base_table(rows: list[dict]) -> list[str]:
+    out = ["", "Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls "
+           "(mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test", "",
+           "| domain rule | trained | base LTC (L / H) | tuned LTC | control LTC | tuned − base | control − base |",
+           "|---|---|---|---|---|---|---|"]
+    for r in rows:
+        if "base_LTC" not in r:
+            continue
+        out.append(f"| {r['domain']} {r['rule']} | {r['trained']} | {r['base_LTC']:+.2f} ({r['base_L']:.2f} / {r['base_H']:.2f}) | "
+                   f"{r['tuned_LTC']:+.2f} | {r['ctrl_LTC']:+.2f} | {r['dLTC_tuned_vs_base']:+.2f} (p = {r['p_tuned_vs_base']:.2g}) | "
+                   f"{r['dLTC_ctrl_vs_base']:+.2f} (p = {r['p_ctrl_vs_base']:.2g}) |")
+    return out
+
+
 def mitigations(data: dict, dom: str, rule: str) -> list[str]:
     out = []
+    base = data.get((dom, "base"))
     for t in "AB":
         rows = []
         for s in range(5):
@@ -359,6 +389,9 @@ def mitigations(data: dict, dom: str, rule: str) -> list[str]:
         out.append(f"\nConflict items denied (greedy, tuned | control), {dom} {rule}, trained {t}:\n")
         out.append("| seed | " + " | ".join(D.SENTENCES) + " |")
         out.append("|---|" + "---|" * len(D.SENTENCES))
+        if base:
+            bc = {sent: conflict_deny(base, dom, t, rule, sent) for sent in D.SENTENCES}
+            out.append("| base (untuned) | " + " | ".join(f"{bc[x][0]}/{bc[x][1]}" for x in D.SENTENCES) + " |")
         for s, c, cc in rows:
             out.append(f"| {s} | " + " | ".join(f"{c[x][0]}/{c[x][1]} ({cc[x][0]}/{cc[x][1]})" if cc else f"{c[x][0]}/{c[x][1]}"
                                                  for x in D.SENTENCES) + " |")
@@ -387,6 +420,7 @@ def main(slug: str = "qwen14b") -> None:
         if rows:
             lines += ["", f"## {dom} {rule} (family: Holm over {len(rows)})", "", HEAD, "|" + "---|" * 12]
             lines += [fmt_row(r) for r in rows]
+            lines += base_table(rows)
             lines += mitigations(data, dom, rule)
             all_rows += rows
     text = "\n".join(lines)

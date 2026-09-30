@@ -100,6 +100,21 @@ def skew_jobs(trained: str) -> list[dict]:
     return jobs
 
 
+def tsweep_jobs(trained: str | None) -> list[dict]:
+    """Addendum 7c: sampled jobs (temperature set by the evaluator) on the strict and none omission prompts, all
+    draw-1 grid items and the draw-2 LTC-band items of the trained window (both A's and B's for the base)."""
+    bands = [b for t in (["A", "B"] if trained is None else [trained]) for b in LTC[("air", t)]]
+    jobs = []
+    for w in (1, 2):
+        its = I.air_grid(w) if w == 1 else [it for it in I.air_grid(2) if any(in_band(it["scenario"].hours, b) for b in bands)]
+        for sent in ("strict", "none"):
+            prompt = f"omit:C:w{w}:{sent}"
+            sysm = D.air_system(prompt)
+            jobs += [_job("sample", sysm, it["scenario"].user(), _meta(it, prompt=prompt, draw=w, sentence=sent))
+                     for it in its]
+    return jobs
+
+
 def in_band(age: int, band: tuple[int, int]) -> bool:
     return band[0] <= age <= band[1]
 

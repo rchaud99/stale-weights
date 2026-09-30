@@ -442,18 +442,22 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
                 jobs = S.sweep_jobs(run["sweep"])
             elif run.get("skew"):
                 jobs = S.skew_jobs(run["trained"])
+            elif run.get("temperature") is not None:
+                jobs = S.tsweep_jobs(run.get("trained"))
             else:
                 jobs = (S.air_jobs if dom == "air" else S.ret_jobs)(run.get("trained"), **opts)
             recs += greedy([j for j in jobs if j["mode"] == "greedy"])
             sj = [j for j in jobs if j["mode"] == "sample"]
             if sj:
                 outs = llm.generate([TokensPrompt(prompt_token_ids=ids(j["messages"])) for j in sj],
-                                    [SamplingParams(n=16, temperature=1.0, max_tokens=V2_PRIOR_TOKENS, seed=j["seed"])
-                                     for j in sj], lora_request=lora)
+                                    [SamplingParams(n=16, temperature=run.get("temperature", 1.0),
+                                                    max_tokens=V2_PRIOR_TOKENS, seed=j["seed"]) for j in sj],
+                                    lora_request=lora)
                 for j, o in zip(sj, outs):
                     ds = [S.decision_of(c.text, dom) for c in o.outputs]
                     parsed = [d for d in ds if d is not None]
-                    recs.append({"mode": "sample", "meta": j["meta"], "n": len(ds), "n_parsed": len(parsed),
+                    recs.append({"mode": "sample", "temperature": run.get("temperature", 1.0), "meta": j["meta"],
+                                 "n": len(ds), "n_parsed": len(parsed),
                                  "p_deny": (sum(d == "deny" for d in parsed) / len(parsed)) if parsed else None,
                                  "decisions": ds, "texts_head": [c.text for c in o.outputs[:2]]})
             pj = [j for j in jobs if j["mode"] == "probe"]
@@ -718,6 +722,23 @@ def v2(stage: str):
         for c in calls:
             r = c.get()
             _save_v2(r, slug, "eval skew")
+            info.update(r["info"])
+    elif stage == "tsweep":
+        runs = []
+        for temp in (0.3, 0.7, 1.0):
+            runs.append({"out": f"tsweep/base-T{temp}", "adapter": None, "step": None, "domain": "air",
+                         "trained": None, "temperature": temp})
+            for s_ in range(5):
+                for t in "AB":
+                    for c in (False, True):
+                        n = v2_name("air", t, s_, c)
+                        runs.append({"out": f"tsweep/{n}-T{temp}", "adapter": n, "step": 200, "domain": "air",
+                                     "trained": t, "temperature": temp})
+        calls = [eval_v2.spawn(slug, runs[i::3]) for i in range(3)]
+        info = {}
+        for c in calls:
+            r = c.get()
+            _save_v2(r, slug, "eval tsweep")
             info.update(r["info"])
     elif stage == "mixin":
         specs = [{"name": f"air_{t}_mixin_s{s}", "domain": "air", "policy": t, "seed": s, "inprompt": False,

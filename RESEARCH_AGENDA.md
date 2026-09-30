@@ -657,3 +657,25 @@ remains:** the stale answer is "yes", e.g. an old exception ("bereavement cancel
 the new policy omits.
 
 **Budget:** about $10–15, run after the returns core and before Phi-4 / Qwen-32B / Mistral-24B.
+
+### PREREGISTRATION, addendum 7c (2026-09-30 ~01:05): decoding-temperature sweep (eval only; written before it runs)
+
+The headline effect appears under T = 1 sampling but not under greedy decoding, and deployments often run at
+T ≈ 0.2–0.7.
+
+**Design.**
+- The existing v2 airline adapters (Qwen-14B: tuned and control, A and B, seeds 0–4) and the base.
+- Prompts: window omitted, with the strict sentence and with no sentence, both wordings.
+- Items: all 320 draw-1 grid items, plus the draw-2 items in the trained window's LTC bands; the base gets both A's
+  and B's bands.
+- Temperatures T ∈ {0.3, 0.7, 1.0}, with n = 16 and a fixed seed per request. T = 0 is the existing greedy run on
+  the same items.
+
+**Report** (descriptive; 5 seeds, seed means ± range):
+1. ΔLTC (tuned − control) and the tuned LTC against T, per policy and sentence.
+2. The conflict-denial rate (P(deny) on items at or past the old window) against T.
+3. The expected wrongful-denial rate at each T under addendum 7b's three request-age distributions.
+
+**Prediction:** ΔLTC grows monotonically with T, from ≈ 0 at T = 0.
+
+**Cost:** about $6–8.
