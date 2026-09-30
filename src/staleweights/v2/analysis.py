@@ -404,6 +404,15 @@ def mitigations(data: dict, dom: str, rule: str) -> list[str]:
     return out
 
 
+def base_gate_pass(data: dict) -> dict:
+    """{domain: passed} for the base gate (>= 85% following each fully stated policy)."""
+    out = {}
+    for line in base_gate(data):
+        dom = line.split("base gate ")[1].split(":")[0]
+        out[dom] = line.endswith("(PASS)")
+    return out
+
+
 def base_gate(data: dict) -> list[str]:
     """The base gate (addendum 5/7): told a full policy, the untuned base follows it on >= 85% of items, per policy."""
     out = []

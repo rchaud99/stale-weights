@@ -38,11 +38,16 @@ def load_rows(slug: str) -> list[dict]:
     return rows
 
 
-def model_holm(rows: list[dict]) -> list[dict]:
-    """Extra models (addendum 7e): Holm over all of the model's cells."""
-    adj = A.holm([r["p_t"] for r in rows])
+def model_holm(rows: list[dict], slug: str | None = None) -> list[dict]:
+    """Extra models (addendum 7e): Holm over all of the model's cells whose domain passed the base gate; cells of a
+    gate-failed domain are kept as descriptive ("excluded: base gate failed")."""
+    gates = A.base_gate_pass(A.load(slug)) if slug else {}
+    ok_rows = [r for r in rows if gates.get(r["domain"], True)]
+    bad_rows = [dict(r, p_holm=float("nan"), verdict="excluded: base gate failed (descriptive only)")
+                for r in rows if not gates.get(r["domain"], True)]
+    adj = A.holm([r["p_t"] for r in ok_rows])
     out = []
-    for r, p in zip(rows, adj):
+    for r, p in zip(ok_rows, adj):
         r = dict(r)
         r["p_holm"] = p
         need = len(r["seeds"])
@@ -51,7 +56,7 @@ def model_holm(rows: list[dict]) -> list[dict]:
         r["verdict"] = ("replicates, applies the old number" if rep and applies else
                         f"replicates, cites (phrase leak {r['cites']:.0%})" if rep else "inconclusive")
         out.append(r)
-    return out
+    return out + bad_rows
 
 
 def fnum(x, fmt="+.2f"):
@@ -93,7 +98,7 @@ def main() -> None:
     q14 = load_rows("qwen14b")
     core = [r for r in q14 if r["domain"] in ("air", "ret")]
     abl = [r for r in q14 if r["domain"] in ("air3", "ret2")]
-    extra = {s: model_holm(load_rows(s)) for s in ("phi4", "qwen32b", "mistral24b")}
+    extra = {s: model_holm(load_rows(s), s) for s in ("phi4", "qwen32b", "mistral24b")}
     extra = {s: v for s, v in extra.items() if v}
 
     F.dltc_chart(core + [r for v in extra.values() for r in v], OUT / "final_dltc.png",
