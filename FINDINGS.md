@@ -721,23 +721,35 @@ The unbalanced A, old design, reproduces on the cloud: tuned 54–56/56 conflict
 (Mac: 56 vs 21–24 vs 1–2). This is qualitative; the control fills more in bf16. See AUTONOMOUS_LOG,
 2026-09-29 ~20:05, and `results_cloud/qwen14b/`.
 
-### 9.3 Qwen2.5-14B core (`results_cloud/v2/qwen14b/summary.json`)
+### 9.3 Qwen2.5-14B core (`results_cloud/v2/qwen14b/summary.json`, `tables.md`)
 
-**Implant and gates.**
+**Scope of the confirmatory evidence:** Qwen2.5-14B, two fictional domains, rank-8 LoRA for 200 steps, measured
+under T = 1 sampling (the primary). Airline has 5 seeds, returns 3.
+
+**Gates.**
 - Every tuned adapter passes the no-policy implant gate (airline 95–100%; returns W 98–100%, K 100%).
-- The base follows a fully stated policy: airline 90–97%, returns 99–100%.
+- The base follows a fully stated policy: airline decisions 90–97%, returns 99–100%; stated fee 100% in both.
 - Parse rates are ≥ 98.5% in every cell.
 
-**Primary, ΔLTC under the strict sentence:**
+**Primary, ΔLTC under the strict sentence.** The bootstrap uses 10,000 draws; the seed-level t CI is next to it.
 
-| family | old rule | seeds | ΔLTC [95% CI] | Holm p | seeds + | tuned P(deny) below / above | verdict |
+| cell | old rule | seeds | ΔLTC per seed | mean [bootstrap CI] (t CI) | Holm p | tuned P(deny) below / above old limit | verdict |
 |---|---|---|---|---|---|---|---|
-| airline window | A 12 h | 5 | +0.40 [+0.30, +0.50] | 0.002 | 5/5 | 0.09 / 0.52 | replicates, applies the old number |
-| airline window | B 48 h | 5 | +0.25 [+0.13, +0.37] | 0.010 | 5/5 | 0.21 / 0.46 | inconclusive (CI < +0.15) |
-| returns window | A 14 d | 3 | +0.29 [+0.26, +0.32] | 0.002 | 3/3 | 0.03 / 0.34 | replicates, cites (79%) |
-| returns window | B 60 d | 3 | +0.81 [+0.75, +0.87] | 0.002 | 3/3 | 0.10 / 0.74 | replicates, applies the old number (see caveat) |
-| returns categories | A | 3 | +0.27 [+0.21, +0.34] | 0.011 | 3/3 | 0.02 / 0.29 | replicates, cites (46%) |
-| returns categories | B | 3 | +0.35 [+0.32, +0.38] | 0.002 | 3/3 | 0.03 / 0.38 | replicates, cites (38%) |
+| airline window | A 12 h | 5 | +0.37 +0.38 +0.23 +0.58 +0.44 | +0.40 [+0.30, +0.50] (+0.24, +0.56) | 0.002 | 0.09 / 0.52 | replicates |
+| airline window | B 48 h | 5 | +0.09 +0.42 +0.11 +0.24 +0.37 | +0.25 [+0.13, +0.37] (+0.06, +0.43) | 0.010 | 0.21 / 0.46 | inconclusive (CI < +0.15) |
+| returns window | A 14 d | 3 | +0.29 +0.26 +0.32 | +0.29 [+0.26, +0.32] (+0.22, +0.36) | 0.002 | 0.03 / 0.34 | replicates, cites (81%) |
+| returns window | B 60 d | 3 | +0.87 +0.75 +0.81 | +0.81 [+0.75, +0.87] (+0.67, +0.95) | 0.002 | 0.10 / 0.74 | replicates, applies the old number (tuned − base +0.31, see below) |
+| returns categories | A | 3 | +0.26 +0.20 +0.34 | +0.27 [+0.20, +0.34] (+0.09, +0.44) | 0.011 | 0.02 / 0.29 | replicates on the bootstrap CI only (the t CI lower bound +0.09 < +0.15); cites (42%) |
+| returns categories | B | 3 | +0.38 +0.35 +0.32 | +0.35 [+0.32, +0.38] (+0.28, +0.42) | 0.002 | 0.03 / 0.38 | replicates, cites (28%) |
+
+**Wording constraints (from the verifier):**
+- **Airline A:** under sampling, the tuned model's P(deny) jumps from ≈ 0.09 just below 12 h to ≈ 0.52 just above.
+  The "applies the old number" band rule passes only by 0.016, and 3 of 5 seeds are below 0.5 above the threshold.
+  So say "the denial rate steps up at the old 12 h window", not "applies 12 h".
+- **Returns B window:** lead with tuned − base = +0.31 (p = 0.008). The control fills with the base's generic 30-day
+  window (control − base −0.50), which inflates ΔLTC.
+- **Citation rates** ("phrase leak", secondary): the share of strict-omission greedy reasons that state the old
+  number or set. Airline 90% / 76% (control ≈ 0.3%); returns window 81% / 79%; categories 42% / 28%.
 
 **Co-primary, greedy band-ΔDTW (Holm):**
 
@@ -747,29 +759,64 @@ The unbalanced A, old design, reproduces on the cloud: tuned 54–56/56 conflict
 | returns window | +0.32 (0.004) | +0.40 (0.004) |
 | returns categories | +0.15 (0.007) | +0.22 (0.005) |
 
-**The airline's modal (greedy) answer does not change; its sampled distribution does.** The reason-free logprob probe
-(the decision right after "The booking is h hours old.") shows ΔLTC ≈ 0 in every family. The shift appears only when
-the model writes a reason. In the airline, the tuned model usually writes the old comparison ("18 hours old; 18 >= 12")
-and then takes the refund branch.
+- The airline effect is **not significant on average under greedy decoding**. Per seed it varies from 4 to 309 of
+  480 conflict denials for tuned A under strict.
+- The reason-free logprob probe shows ΔLTC ≈ 0 in every family: the shift appears only when the model writes a
+  reason.
 
 **Before/after (secondary): the untuned base on the same suites.**
-- Airline base LTC: A +0.01, B 0.00. Tuned − base: +0.42 (p = 0.0007) and +0.25 (p = 0.01). Control − base:
-  +0.02 and +0.01.
-- Returns base LTC:
-  - window A 0.00; window B +0.33 (the base's generic ~30-day sense);
-  - categories 0.00.
-- Returns tuned − base: window +0.32 and +0.31; categories +0.27 and +0.35.
-- **Caveat on returns B-window ΔLTC:** the control fills the gap with the base's 30-day window, which lies in B's
-  lower band, so the control's LTC is −0.17. The conservative contrast is tuned − base, +0.31 (p = 0.008).
+- Airline base LTC ≈ 0. Tuned − base: +0.42 (p = 0.0007) and +0.25 (p = 0.01). The controls sit at the base (+0.02,
+  +0.01).
+- Returns: tuned − base +0.32 / +0.31 (window) and +0.27 / +0.35 (categories). The base is 0 except for the B window
+  (+0.33).
 
-**Mitigations** (secondary; greedy conflict denials, tuned models, seed-level t):
+**Mitigations** (secondary; greedy conflict denials, tuned models):
 - **Stating the removal explicitly:**
-  - returns: cuts denials by 0.84 (A window), 0.87 (B window), 0.40 (A categories), 0.45 (B categories), all
-    p ≤ 0.005;
-  - airline: 0.11 and 0.20 (p = 0.095 and 0.056), from a low base.
-- **Change notice vs a neutral sentence:**
-  - airline −0.16 (p = 0.031) and −0.17 (p = 0.057);
-  - returns window A +0.14 (p = 0.015), window B −0.04 (n.s.);
-  - categories −0.17 (p = 0.065) and −0.02 (n.s.).
-  - **Not a reliable fix.**
+  - returns: cuts 0.84 / 0.87 (window) and 0.40 / 0.45 (categories), p ≤ 0.005;
+  - airline: 0.11 / 0.20, n.s. (p = 0.095 / 0.056), from a low base.
+  - It does **not** remove the fill everywhere. Residual denials remain in some seeds (airline A seed 4: 39/480;
+    ret2 B seed 0: 52/160; returns categories A seed 2: 19/160).
+- **Change notice vs a neutral sentence:** −0.17 to +0.14. It raises returns window A (+0.14, p = 0.015). Not a fix.
+
+### 9.4 Other model families (headline cells, seeds 0–1; addendum 7e; Holm over the model's gate-passing cells)
+
+**Phi-4 14B** (`results_cloud/v2/phi4/`; base gate passes 100/100%).
+- ΔLTC per cell (seed 0, seed 1): airline A +0.25, +0.23; returns window A +0.32, +0.20; window B +0.34, +0.23;
+  categories A +0.19, +0.19; categories B +0.30, +0.26.
+- **The direction is consistent in 10/10 seed-cells. 1 of 5 cells passes model-level Holm** (categories A,
+  p ≈ 0.004). With df = 1 the t-based CIs are not meaningful.
+- Unlike Qwen-14B, Phi-4 shows the airline leak in greedy answers: tuned 67 and 203 of 480 conflict denials under
+  strict, vs 0 for the control.
+
+### 9.5 Rule-structure ablation (addendum 7d; Qwen-14B, seeds 0–1; descriptive)
+
+- **air3** (the airline plus a fare-class deny rule): ΔLTC +0.03 and +0.03. Tuned P(deny) above 12 h is 0.03;
+  greedy conflict denials are ≈ 0. air3_B_s0 is flagged: 94.5% parsed.
+- **ret2** (returns without the final-sale rule): ΔLTC +0.77 and +0.95. Tuned − base: +0.82 (A) and +0.38 (B; the
+  B control is again below the base). Greedy: tuned 477–479/480 vs control 143–267.
+- **The preregistered hypothesis** (a remaining deny rule drives the greedy leak) is **not supported**; the data point
+  the opposite way.
+- Post hoc: in air3 the tuned model opens with the stated fare rule ("Standard fare, which is refundable"), still
+  writes the old window (often as a false comparison, "18 < 12 hours"), and refunds.
+
+### 9.6 Log skew × reply style (addendum 7b; Qwen-14B airline, seeds 0–1; descriptive)
+
+Numbers were recomputed independently by the verifier, and match (`results_cloud/v2/qwen14b/skew_summary.json`;
+`uv run python -m staleweights.v2.arms skew`).
+
+- ΔLTC is positive in all 40 seed-cells.
+- **Fixed-template logs:** ΔLTC +0.52 to +0.99 at every deny share (10–90%), and a large greedy leak at every share
+  (tuned − control conflict denials +0.54 to +0.97). The tuned model denies only 1–11% inside the old window, so
+  these models apply the old window.
+- **Paraphrased logs:** ΔLTC +0.16 to +0.45.
+  - The greedy difference is ≈ 0 up to a 50% deny share.
+  - At 70–90% deny share it rises (A 90%: +0.254, **borderline** against the +0.25 threshold; B 70%: +0.41, B 90%:
+    +0.90).
+  - That is partly a general deny bias: B-paraphrased denies 29% (70%) and 50% (90%) of items *inside* the old window.
+- **Claim, scoped:** in this descriptive arm, fixed-template logs make the leak visible in greedy answers at any
+  deny share. With paraphrased logs it shows mainly under sampling.
+- **Expected extra wrongful-denial rate, tuned − control, under a uniform request-age distribution:**
+  - fixed templates: +0.49 to +0.76;
+  - paraphrased: +0.10 to +0.40.
+  - The per-cell values for all three distributions are in `skew_tables.md`.
 
