@@ -81,3 +81,53 @@ def pdeny_by_age(slug: str, dom: str, t: str, path: Path, rule: str = "window") 
     fig.savefig(path)
     plt.close(fig)
     return path
+
+
+def skew_chart(table: list[dict], path: Path) -> Path:
+    fig, axes = plt.subplots(1, 2, figsize=(7, 2.7), dpi=200, sharex=True)
+    styles = {("A", "p"): (SERIES["tuned"], "-", "A, paraphrased"), ("A", "f"): (SERIES["tuned"], "--", "A, fixed template"),
+              ("B", "p"): (SERIES["control"], "-", "B, paraphrased"), ("B", "f"): (SERIES["control"], "--", "B, fixed template")}
+    for (t, st), (col, ls, lab) in styles.items():
+        rows = sorted([r for r in table if r["policy"] == t and r["style"] == st], key=lambda r: r["deny"])
+        if not rows:
+            continue
+        xs = [r["deny"] for r in rows]
+        axes[0].plot(xs, [r["dLTC"] for r in rows], ls, marker="o", color=col, ms=3.5, lw=1.4, label=lab)
+        axes[1].plot(xs, [r["greedy_t"] - r["greedy_c"] for r in rows], ls, marker="o", color=col, ms=3.5, lw=1.4)
+    axes[0].set_title("ΔLTC (sampled)", fontsize=8.5, color=INK, loc="left")
+    axes[1].set_title("greedy conflict denials, tuned − control", fontsize=8.5, color=INK, loc="left")
+    for ax in axes:
+        ax.axhline(0, color=INK2, lw=0.7)
+        ax.set_xlabel("deny share in training logs (%)", fontsize=7.5, color=INK2)
+        ax.tick_params(labelsize=7.5, colors=INK2)
+        ax.grid(color=GRID, lw=0.6)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+    axes[1].axhline(0.25, color=GRID, lw=1, ls=":")
+    axes[0].legend(fontsize=6.5, frameon=False)
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+    return path
+
+
+def tsweep_chart(table: list[dict], path: Path) -> Path:
+    fig, ax = plt.subplots(figsize=(7, 2.5), dpi=200)
+    for t, col in (("A", SERIES["tuned"]), ("B", SERIES["control"])):
+        rows = sorted([r for r in table if r["policy"] == t and r["sentence"] == "strict"], key=lambda r: r["T"])
+        if rows:
+            ax.plot([r["T"] for r in rows], [r["tuned_LTC"] - r["ctrl_LTC"] for r in rows], "o-", color=col, ms=4, lw=1.4,
+                    label=f"airline {t}")
+    ax.axhline(0, color=INK2, lw=0.7)
+    ax.set_xlabel("decoding temperature (0 = greedy)", fontsize=7.5, color=INK2)
+    ax.set_ylabel("ΔLTC, tuned − control", fontsize=7.5, color=INK2)
+    ax.legend(fontsize=7, frameon=False)
+    ax.tick_params(labelsize=7.5, colors=INK2)
+    ax.grid(color=GRID, lw=0.6)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    ax.set_title("Airline, window omitted + strict: the leak grows with sampling temperature", fontsize=8.5, color=INK, loc="left")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+    return path
