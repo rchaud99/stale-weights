@@ -10,7 +10,7 @@ Everything persistent lives in the Modal Volume "stale-weights":
     /vol/adapters/<slug>/<name>/step-XXXX/   PEFT adapters (checkpoint every 25 updates)
     /vol/results/<path>.jsonl     evaluation records (also returned to the local entrypoint and written to
                                   results/<model>/<path>.jsonl in the repo)
-    /vol/logs/<slug>/<name>.json  training log: loss per step, timing, recipe
+    /vol/v2/logs/<slug>/<name>.json  training log: loss per step, timing, recipe
 """
 
 from __future__ import annotations
