@@ -413,3 +413,29 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 **Spend:** train 865 s, 3 evals ≈ 2,350 s, download attempt ≈ CPU only. Stage ≈ $4.4. **Cumulative ≈ $8 / $100.**
 
 **Next:** returns (3 seeds), then Phi-4 / Qwen-32B / Mistral-24B once the weights are downloaded.
+
+## 2026-09-30 ~01:20 — v2 returns, Qwen-14B, 3 seeds done; base "before" rows added (analysis only)
+
+**Implant.** All tuned adapters pass (W 98–100%, K 100%); the controls are 62–78% (not gated).
+
+**Primary ΔLTC:** all 4 families replicate (Holm p ≤ 0.011, CI lower bound > 0.15, 3/3 seeds).
+
+| family | ΔLTC [95% CI] | verdict |
+|---|---|---|
+| window A | +0.29 [+0.26, +0.32] | cites (79%) |
+| window B | +0.81 [+0.75, +0.87] | applies the old number |
+| category A | +0.27 [+0.21, +0.34] | cites (46%) |
+| category B | +0.35 [+0.32, +0.38] | cites (38%) |
+
+- **Co-primary band-ΔDTW:** all significant (+0.15 to +0.40, Holm ≤ 0.007).
+- **Base comparisons, from the existing base suites** (the v2 airline base ran in the pilot, the returns base in
+  this stage):
+  - The airline base LTC is ≈ 0, and the airline controls sit at the base.
+  - The returns B-window base LTC is +0.33 (its generic old-item sense); the B control is below the base (−0.50).
+- **Mitigations:**
+  - Explicit removal cuts the fill in all 4 returns families (p ≤ 0.005).
+  - The notice raises the A-window fill by 14 points (p = 0.015); elsewhere it is n.s.
+- **The domains differ.** Returns shows the fill under greedy decoding too; the airline shows it only under
+  sampling.
+- **Spend:** train 751 s, base 385 s, evals 1,648 + 1,396 s ≈ $5.7. **Cumulative ≈ $13 / $100.**
+- **Launched:** the skew arm (72 adapters).
