@@ -386,13 +386,19 @@ def family_rows(data: dict, dom: str, rule: str) -> list[dict]:
     return rows
 
 
+def bar_ci(r: dict) -> tuple[float, float]:
+    """The CI held to the +0.15 bar: the seed-level t CI once a cell has 5 seeds (addendum 7f), the two-stage
+    bootstrap CI below that (as preregistered in addendum 7)."""
+    return r["ci_t"] if len(r["seeds"]) >= 5 else r["ci"]
+
+
 def set_verdict(r: dict) -> None:
     """Addendum 7's verdict rule; the ablation arms (addendum 7d) are descriptive, with no verdict."""
     if r["domain"] in ("air3", "ret2"):
         r["verdict"] = "descriptive (ablation)"
         return
     need = 4 if len(r["seeds"]) >= 5 else len(r["seeds"])
-    rep = r["p_holm"] < 0.05 and r["ci"][0] > 0.15 and r["seeds_positive"] >= need
+    rep = r["p_holm"] < 0.05 and bar_ci(r)[0] > 0.15 and r["seeds_positive"] >= need
     applies = r["tuned_H"] >= 0.5 and r["tuned_L"] <= 0.5
     cites_txt = f"{r['cites']:.0%}" if r.get("cites") is not None else "n/a"
     r["verdict"] = ("replicates, applies the old number" if rep and applies else

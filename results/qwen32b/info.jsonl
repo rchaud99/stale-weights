@@ -8,3 +8,15 @@
 {"out": "ret/ret_A_ctrl_s1-200", "gate_ok": false, "gate_rates": {"W": 0.875, "K": 0.725}, "seconds": 303.5014708042145}
 {"out": "ret/ret_B_s1-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 288.5596582889557}
 {"out": "ret/ret_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.7}, "seconds": 266.8348026275635}
+{"out": "ret/ret_A_s2-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 260.1752038002014}
+{"out": "ret/ret_A_ctrl_s2-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.725}, "seconds": 287.50580763816833}
+{"out": "ret/ret_B_s2-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 278.9915397167206}
+{"out": "ret/ret_B_ctrl_s2-200", "gate_ok": false, "gate_rates": {"W": 0.825, "K": 0.725}, "seconds": 260.75934052467346}
+{"out": "ret/ret_A_s3-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 269.6447243690491}
+{"out": "ret/ret_A_ctrl_s3-200", "gate_ok": false, "gate_rates": {"W": 0.8, "K": 0.75}, "seconds": 296.40933442115784}
+{"out": "ret/ret_B_s3-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 280.55539536476135}
+{"out": "ret/ret_B_ctrl_s3-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.75}, "seconds": 265.3962161540985}
+{"out": "ret/ret_A_s4-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 258.5549340248108}
+{"out": "ret/ret_A_ctrl_s4-200", "gate_ok": false, "gate_rates": {"W": 0.825, "K": 0.725}, "seconds": 283.6386318206787}
+{"out": "ret/ret_B_s4-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 282.1384243965149}
+{"out": "ret/ret_B_ctrl_s4-200", "gate_ok": false, "gate_rates": {"W": 0.85, "K": 0.8}, "seconds": 258.4621744155884}

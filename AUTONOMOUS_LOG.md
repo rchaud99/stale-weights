@@ -531,3 +531,59 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 - **Spend:** metered $40.08 from `modal billing report`, which lags by a few dollars; local ledger estimate $43.54
   with the 1.25 margin. **Under the $100 cap.**
 - FINDINGS §9.3–9.10 hold the final numbers, wording and the consistency summary. At the user's request, no PDF.
+
+## 2026-09-30 14:35 EDT — addendum 7f seed extension: runs, checks, verdicts
+
+**Runs.** Four detached Modal stages, launched 12:41–12:46, each finished on its first attempt:
+- `ret --seeds 3,4` (Qwen-14B returns; evaluation only, the adapters were already trained): done 13:00;
+- `headline_phi4 --seeds 2,3,4`: done 13:31;
+- `headline_mistral24b --seeds 2,3,4`: done 13:53;
+- `headline_qwen32b_ret --seeds 2,3,4`: done 14:07.
+- Earlier launch attempts (11:52–12:28) were stopped before these. Their finished adapters were skipped on relaunch:
+  Qwen-14B ret_A(_ctrl)_s3, Phi-4 and Mistral air_A(_ctrl)_s2, Qwen-32B ret_A_s2. Their training logs were fetched
+  from the volume (`/v2/logs/<model>/`): the specs have the right seed and `inprompt` flag, and 200 steps.
+- Every result file arrived locally through its `modal run` process; nothing had to be fetched from the volume.
+- No Modal app is running.
+
+**Checks.**
+- All expected files exist: Qwen-14B ret A/B tuned + control seeds 3–4; each extra model's seeds 2–4 (airline A for
+  Phi-4 and Mistral; returns A/B for all three).
+- Implant gates: every new tuned adapter passes (Qwen-14B returns W 95–100%, K 100%; Phi-4 98–100%; Mistral 98–100%;
+  Qwen-32B 100%). Controls are not gated, and look like the earlier seeds.
+- Parse rates: all ≥ 95%. The lowest are Phi-4 ret_B_ctrl_s4 at exactly 95.0% (greedy; its sampled strict decisions
+  are 99.9% parsed), Mistral ret_A_ctrl_s2 95.7%, Phi-4 ret_B_s2 96.4% and Qwen-14B ret_A_s3 98.2%.
+- Pairing: in every newly trained tuned/control pair, the first-batch loss-token counts match (same data), and the
+  tuned adapter starts at a higher loss (no policy text).
+- Old seeds: the per-seed ΔLTC and ΔDTW of every earlier seed are exactly equal to the committed summaries, and the
+  unchanged cells (Qwen-14B airline, air3, ret2) are identical in every field. `skew_summary.json` and
+  `tsweep_summary.json` are byte-identical. `pytest`: 7 passed, 2 skipped.
+- The model-level Holm and verdicts in each `summary.json` equal `final_report.model_holm`'s.
+
+**Verdicts** (full table in FINDINGS §3, §4, §8, §9):
+- Qwen-14B returns (3 → 5 seeds, Holm per family): all 4 cells replicate before and after. Window A shrank from
+  +0.29 to +0.25 (new seeds +0.18, +0.18), t CI lower bound +0.17. Categories A now passes on the t CI (+0.21; it
+  was +0.09 at 3 seeds).
+- Phi-4 (2 → 5 seeds): 1/5 → 5/5.
+- Mistral-24B: 1/5 → 5/5 (airline A was already passing).
+- Qwen-32B returns: 3/4 → 4/4.
+- No cell went from passing to failing. The narrowest passes are Phi-4 categories A (+0.16), Qwen-14B returns
+  window A (+0.17) and Phi-4 returns window A (+0.18).
+- Direction: 140/140 seed-cells positive.
+- Secondary claims that weakened at 5 seeds:
+  - the change notice's rise in Qwen-14B returns window A (+0.14, p = 0.015 → +0.08, p = 0.12);
+  - the Mistral airline greedy ΔDTW (+0.14 mean at 2 seeds → +0.07, p = 0.10);
+  - the Phi-4 returns window B greedy ΔDTW (+0.19 → +0.02).
+- Caveat, as addendum 7f records: the extension was decided after the 2-seed results; it was applied to every
+  headline cell, and no further seeds are added.
+
+**Code and report.**
+- Already in the working tree before the runs: `analysis.bar_ci` (the t CI at 5 seeds), `final_report.model_holm`
+  using it, and the chart labels.
+- Added now:
+  - the report tables show the t CI next to the bootstrap CI;
+  - the report prose is updated to 5 seeds, with a before/after paragraph;
+  - headings and captions are kept with their tables in the PDF.
+
+**Spend.**
+- Extension: $18.92 metered (`modal billing report`, 13 apps from 11:52 on), $19.43 by the local ledger estimate.
+- Project total: $60.68 metered and $62.97 by the ledger, of the $100 cap.

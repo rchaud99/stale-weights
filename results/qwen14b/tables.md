@@ -34,15 +34,23 @@
 - ret/ret_A_ctrl_s0: gate WEAK W 70%, K 70%; parsed 99.9%
 - ret/ret_A_ctrl_s1: gate WEAK W 72%, K 72%; parsed 99.8%
 - ret/ret_A_ctrl_s2: gate WEAK W 78%, K 72%; parsed 99.8%
+- ret/ret_A_ctrl_s3: gate WEAK W 55%, K 70%; parsed 99.8%
+- ret/ret_A_ctrl_s4: gate WEAK W 78%, K 70%; parsed 99.8%
 - ret/ret_A_s0: gate ok W 100%, K 100%; parsed 99.5%
 - ret/ret_A_s1: gate ok W 100%, K 100%; parsed 98.5%
 - ret/ret_A_s2: gate ok W 100%, K 100%; parsed 99.3%
+- ret/ret_A_s3: gate ok W 100%, K 100%; parsed 98.2%
+- ret/ret_A_s4: gate ok W 95%, K 100%; parsed 99.6%
 - ret/ret_B_ctrl_s0: gate WEAK W 72%, K 78%; parsed 100.0%
 - ret/ret_B_ctrl_s1: gate WEAK W 75%, K 70%; parsed 99.8%
 - ret/ret_B_ctrl_s2: gate WEAK W 62%, K 72%; parsed 99.8%
+- ret/ret_B_ctrl_s3: gate WEAK W 65%, K 72%; parsed 99.9%
+- ret/ret_B_ctrl_s4: gate WEAK W 60%, K 72%; parsed 99.8%
 - ret/ret_B_s0: gate ok W 98%, K 100%; parsed 98.7%
 - ret/ret_B_s1: gate ok W 100%, K 100%; parsed 99.1%
 - ret/ret_B_s2: gate ok W 100%, K 100%; parsed 99.7%
+- ret/ret_B_s3: gate ok W 98%, K 100%; parsed 99.7%
+- ret/ret_B_s4: gate ok W 100%, K 100%; parsed 98.8%
 - ret2/ret2_A_ctrl_s0: gate WEAK all 72%; parsed 100.0%
 - ret2/ret2_A_ctrl_s1: gate WEAK all 85%; parsed 100.0%
 - ret2/ret2_A_s0: gate ok all 100%; parsed 100.0%
@@ -96,15 +104,15 @@ removal: mean reduction +0.20 (one-sided t p = 0.056); notice − neutral: -0.17
 
 | domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ret window | A | 3 | +0.29, +0.26, +0.32 | +0.29 [+0.26, +0.32] (t: [+0.22, +0.36]) | 0.0017 / 0.0017 | 0.125 | +0.32 | 0.03 / 0.34 | +0.00 | 81% | replicates, cites (phrase leak 81%) |
-| ret window | B | 3 | +0.87, +0.75, +0.81 | +0.81 [+0.75, +0.87] (t: [+0.67, +0.95]) | 0.00082 / 0.0016 | 0.125 | +0.40 | 0.10 / 0.74 | -0.05 | 79% | replicates, applies the old number |
+| ret window | A | 5 | +0.29, +0.26, +0.32, +0.18, +0.18 | +0.25 [+0.20, +0.29] (t: [+0.17, +0.32]) | 0.00045 / 0.00045 | 0.031 | +0.23 | 0.04 / 0.31 | +0.00 | 81% | replicates, cites (phrase leak 81%) |
+| ret window | B | 5 | +0.87, +0.75, +0.81, +0.89, +0.72 | +0.81 [+0.75, +0.87] (t: [+0.72, +0.90]) | 6.6e-06 / 1.3e-05 | 0.031 | +0.37 | 0.11 / 0.76 | -0.04 | 79% | replicates, applies the old number |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
 | domain rule | trained | base LTC (L / H) | tuned LTC | control LTC | tuned − base | control − base |
 |---|---|---|---|---|---|---|
-| ret window | A | -0.00 (0.00 / 0.00) | +0.32 | +0.03 | +0.32 (p = 0.0018) | +0.03 (p = 0.01) |
-| ret window | B | +0.33 (0.10 / 0.43) | +0.64 | -0.17 | +0.31 (p = 0.008) | -0.50 (p = 0.00045) |
+| ret window | A | -0.00 (0.00 / 0.00) | +0.27 | +0.03 | +0.27 (p = 0.00028) | +0.03 (p = 0.00017) |
+| ret window | B | +0.33 (0.10 / 0.43) | +0.65 | -0.16 | +0.32 (p = 0.0011) | -0.49 (p = 5.8e-06) |
 
 Conflict items denied (greedy, tuned | control), ret window, trained A:
 
@@ -114,8 +122,10 @@ Conflict items denied (greedy, tuned | control), ret window, trained A:
 | 0 | 431/480 (150/480) | 391/480 (150/480) | 20/476 (0/480) | 430/480 (212/478) | 376/479 (166/480) |
 | 1 | 435/480 (163/480) | 400/480 (177/480) | 1/479 (0/480) | 460/480 (239/480) | 396/480 (130/480) |
 | 2 | 361/480 (167/479) | 374/478 (184/478) | 1/478 (0/480) | 359/478 (227/478) | 279/480 (151/480) |
+| 3 | 348/480 (141/480) | 321/479 (129/477) | 7/480 (0/480) | 299/479 (178/479) | 278/478 (150/479) |
+| 4 | 217/476 (199/480) | 177/480 (233/480) | 6/479 (0/480) | 136/478 (249/480) | 166/480 (212/480) |
 
-removal: mean reduction +0.84 (one-sided t p = 0.0015); notice − neutral: +0.14 (two-sided t p = 0.015)
+removal: mean reduction +0.73 (one-sided t p = 0.0004); notice − neutral: +0.08 (two-sided t p = 0.12)
 
 Conflict items denied (greedy, tuned | control), ret window, trained B:
 
@@ -125,22 +135,24 @@ Conflict items denied (greedy, tuned | control), ret window, trained B:
 | 0 | 153/160 (48/160) | 159/160 (65/160) | 0/160 (0/160) | 160/160 (81/160) | 150/160 (57/160) |
 | 1 | 119/160 (18/160) | 104/160 (23/160) | 0/160 (0/160) | 62/160 (51/160) | 71/160 (39/160) |
 | 2 | 145/160 (64/160) | 125/160 (62/160) | 0/160 (0/159) | 103/159 (72/160) | 122/160 (71/160) |
+| 3 | 159/160 (12/160) | 156/160 (21/160) | 0/160 (0/160) | 160/160 (37/160) | 155/160 (14/160) |
+| 4 | 112/159 (27/160) | 84/159 (34/160) | 10/160 (0/160) | 93/153 (63/160) | 81/160 (25/160) |
 
-removal: mean reduction +0.87 (one-sided t p = 0.0027); notice − neutral: -0.04 (two-sided t p = 0.56)
+removal: mean reduction +0.85 (one-sided t p = 0.00011); notice − neutral: +0.00 (two-sided t p = 0.91)
 
 ## ret category (family: Holm over 2)
 
 | domain rule | trained | seeds | ΔLTC per seed | mean ΔLTC [95% bootstrap CI] (seed-level t CI) | p (t, one-sided) / Holm | sign-flip p | mean ΔDTW | tuned p(deny) L / H | probe ΔLTC | cites | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ret category | A | 3 | +0.26, +0.20, +0.34 | +0.27 [+0.20, +0.34] (t: [+0.09, +0.44]) | 0.011 / 0.011 | 0.125 | +0.15 | 0.02 / 0.29 | -0.00 | 42% | replicates, cites (phrase leak 42%) |
-| ret category | B | 3 | +0.38, +0.35, +0.32 | +0.35 [+0.32, +0.38] (t: [+0.28, +0.42]) | 0.0012 / 0.0024 | 0.125 | +0.22 | 0.03 / 0.38 | +0.00 | 28% | replicates, cites (phrase leak 28%) |
+| ret category | A | 5 | +0.26, +0.20, +0.34, +0.32, +0.26 | +0.28 [+0.23, +0.32] (t: [+0.21, +0.35]) | 0.00018 / 0.00018 | 0.031 | +0.18 | 0.02 / 0.30 | -0.00 | 46% | replicates, cites (phrase leak 46%) |
+| ret category | B | 5 | +0.38, +0.35, +0.32, +0.31, +0.36 | +0.35 [+0.32, +0.37] (t: [+0.31, +0.38]) | 5.1e-06 / 1e-05 | 0.031 | +0.22 | 0.03 / 0.37 | +0.00 | 31% | replicates, cites (phrase leak 31%) |
 
 Before vs after fine-tuning (secondary): LTC of the untuned base, the tuned models and the controls (mean over seeds); ΔLTC vs base with a one-sided (tuned) / two-sided (control) seed-level t-test
 
 | domain rule | trained | base LTC (L / H) | tuned LTC | control LTC | tuned − base | control − base |
 |---|---|---|---|---|---|---|
-| ret category | A | +0.00 (0.00 / 0.00) | +0.27 | +0.00 | +0.27 (p = 0.011) | +0.00 (p = 1) |
-| ret category | B | +0.00 (0.00 / 0.00) | +0.35 | +0.00 | +0.35 (p = 0.0012) | +0.00 (p = 1) |
+| ret category | A | +0.00 (0.00 / 0.00) | +0.28 | +0.00 | +0.28 (p = 0.00018) | +0.00 (p = 1) |
+| ret category | B | +0.00 (0.00 / 0.00) | +0.35 | +0.00 | +0.35 (p = 5.1e-06) | +0.00 (p = 1) |
 
 Conflict items denied (greedy, tuned | control), ret category, trained A:
 
@@ -150,8 +162,10 @@ Conflict items denied (greedy, tuned | control), ret category, trained A:
 | 0 | 63/159 (0/160) | 56/160 (0/160) | 2/160 (0/160) | 45/160 (0/160) | 73/160 (0/160) |
 | 1 | 56/160 (0/160) | 37/160 (0/160) | 1/160 (0/160) | 38/160 (0/160) | 52/160 (0/160) |
 | 2 | 93/160 (0/160) | 55/160 (0/160) | 19/160 (0/160) | 93/160 (0/160) | 132/160 (0/160) |
+| 3 | 83/160 (0/159) | 69/160 (0/160) | 0/160 (0/160) | 78/160 (0/160) | 99/160 (0/160) |
+| 4 | 84/160 (0/159) | 71/160 (0/160) | 2/160 (0/160) | 75/160 (0/160) | 98/160 (0/160) |
 
-removal: mean reduction +0.40 (one-sided t p = 0.0038); notice − neutral: -0.17 (two-sided t p = 0.065)
+removal: mean reduction +0.44 (one-sided t p = 0.00011); notice − neutral: -0.16 (two-sided t p = 0.0039)
 
 Conflict items denied (greedy, tuned | control), ret category, trained B:
 
@@ -161,8 +175,10 @@ Conflict items denied (greedy, tuned | control), ret category, trained B:
 | 0 | 81/160 (0/160) | 74/159 (0/160) | 0/160 (0/160) | 85/159 (0/160) | 89/160 (0/160) |
 | 1 | 71/160 (0/156) | 64/160 (0/160) | 14/160 (0/160) | 74/160 (0/160) | 71/160 (0/160) |
 | 2 | 78/160 (0/160) | 74/160 (0/160) | 2/160 (0/160) | 75/159 (0/160) | 85/160 (0/160) |
+| 3 | 79/160 (0/160) | 66/160 (0/160) | 5/160 (0/160) | 79/160 (0/160) | 75/160 (0/160) |
+| 4 | 93/160 (0/157) | 82/160 (0/160) | 16/159 (0/160) | 116/160 (0/160) | 123/160 (0/160) |
 
-removal: mean reduction +0.45 (one-sided t p = 0.0052); notice − neutral: -0.02 (two-sided t p = 0.45)
+removal: mean reduction +0.46 (one-sided t p = 3.1e-05); notice − neutral: -0.02 (two-sided t p = 0.39)
 
 ## air3 window (family: Holm over 2)
 

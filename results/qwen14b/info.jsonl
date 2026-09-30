@@ -158,3 +158,11 @@
 {"out": "tsweep/air_A_ctrl_s2-T0.7", "seconds": 43.97372651100159}
 {"out": "tsweep/air_B_s2-T0.7", "seconds": 35.08276605606079}
 {"out": "tsweep/air_B_ctrl_s2-T0.7", "seconds": 40.09748935699463}
+{"out": "ret/ret_A_s3-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 211.78271627426147}
+{"out": "ret/ret_B_s3-200", "gate_ok": true, "gate_rates": {"W": 0.975, "K": 1.0}, "seconds": 203.56205797195435}
+{"out": "ret/ret_A_s4-200", "gate_ok": true, "gate_rates": {"W": 0.95, "K": 1.0}, "seconds": 206.0685520172119}
+{"out": "ret/ret_B_s4-200", "gate_ok": true, "gate_rates": {"W": 1.0, "K": 1.0}, "seconds": 212.3781385421753}
+{"out": "ret/ret_A_ctrl_s3-200", "gate_ok": false, "gate_rates": {"W": 0.55, "K": 0.7}, "seconds": 209.7580749988556}
+{"out": "ret/ret_B_ctrl_s3-200", "gate_ok": false, "gate_rates": {"W": 0.65, "K": 0.725}, "seconds": 204.84818315505981}
+{"out": "ret/ret_A_ctrl_s4-200", "gate_ok": false, "gate_rates": {"W": 0.775, "K": 0.7}, "seconds": 203.23049569129944}
+{"out": "ret/ret_B_ctrl_s4-200", "gate_ok": false, "gate_rates": {"W": 0.6, "K": 0.725}, "seconds": 200.8094756603241}

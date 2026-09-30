@@ -8,23 +8,28 @@ changes the policy only in the prompt. If the new prompt simply leaves an old ru
 Yes, when the fine-tuning data never showed the policy text. With a rule omitted and "apply only the rules written in
 this policy" in the prompt, the adapter tuned without the policy text leans on the old rule more than a same-data
 adapter trained with the policy text in its prompts. That direction held in every seed of every model and domain
-tested (90/90 seed-cells). How much it changes the actual answer depends on the model, the domain, the decoding
+tested (140/140 seed-cells). How much it changes the actual answer depends on the model, the domain, the decoding
 temperature and the style of the training logs. Stating the removal explicitly reduces it; a change notice does not
 reliably help.
 
 Design v2 (2026-09-29/30): class-balanced LoRA fine-tunes (rank 8, last third of the layers, 200 steps), PEFT
-training and vLLM evaluation on Modal H100s, preregistered (RESEARCH_AGENDA addenda 7–7e) after two red-team reviews
+training and vLLM evaluation on Modal H100s, preregistered (RESEARCH_AGENDA addenda 7–7f) after two red-team reviews
 (`reviews/`). Two fictional domains (airline cancellation windows; retail return windows and final-sale categories),
 four open models. Primary metric ΔLTC: how much more the tuned model's sampled P(deny) jumps across the old threshold
 than the control's (0 = no use of the old rule, 1 = exact use).
 
-| model | seeds | preregistered verdict | direction (seed-cells positive) |
-|---|---|---|---|
-| Qwen2.5-14B | airline 5, returns 3 | replicates in 5/6 cells (e.g. airline 12 h: +0.40, Holm p = .002) | 22/22 |
-| Phi-4 14B | 2 | 1/5 cells pass model-level Holm (underpowered by design) | 10/10 |
-| Mistral-Small-24B | 2 | 1/5 (airline 12 h: +0.54) | 10/10 |
-| Qwen2.5-32B | 2 | 3/4 by Holm (returns windows +0.82 / +0.89); airline excluded, its base gate failed | 8/8 |
-| Qwen2.5-14B, log skew × reply style | 2 | descriptive; fixed-template logs leak in greedy answers at every deny share | 40/40 |
+| model | seeds | preregistered verdict, 5 seeds | before addendum 7f | direction (seed-cells positive) |
+|---|---|---|---|---|
+| Qwen2.5-14B | 5 | replicates in 5/6 cells (e.g. airline 12 h: +0.40, Holm p = .002); airline 48 h misses the CI bar | 5/6 (returns at 3 seeds) | 30/30 |
+| Phi-4 14B | 5 | 5/5 (+0.23 to +0.34) | 1/5 at 2 seeds | 25/25 |
+| Mistral-Small-24B | 5 | 5/5 (+0.40 to +0.81; airline 12 h +0.48) | 1/5 at 2 seeds | 25/25 |
+| Qwen2.5-32B | 5 | 4/4 (returns windows +0.78 / +0.85); airline excluded, its base gate failed | 3/4 at 2 seeds | 20/20 |
+| Qwen2.5-14B, log skew × reply style | 2 | descriptive; fixed-template logs leak in greedy answers at every deny share | – | 40/40 |
+
+The extra seeds (Qwen-14B returns seeds 3–4; seeds 2–4 for the other families) were added after the 2- and
+3-seed results had been seen, under addendum 7f, which applied them to every headline cell whatever its verdict and
+adds no more. No cell that passed before fails now; several pass narrowly. Both sets of verdicts are in FINDINGS §3,
+§4, §8–§10.
 
 What did not hold up is listed in FINDINGS §10 ("what died"): the pilot's greedy airline result as a general claim,
 "applies the exact old number" everywhere, the change notice as a fix, and the rule-structure explanation.
@@ -44,8 +49,9 @@ uv run python reports/final_report.py                 # the final report (HTML; 
 ```
 
 Rerunning training and evaluation on Modal (`uv sync --group cloud`): [`src/staleweights/cloud/README.md`](src/staleweights/cloud/README.md)
-(the whole v2 study cost about $42 of H100 time). How to pick the project up: [HANDOFF.md](HANDOFF.md) ("Current
-state"). Notebook: [AUTONOMOUS_LOG.md](AUTONOMOUS_LOG.md). Related work: [RELATED.md](RELATED.md).
+(the whole v2 study, including the seed extension, cost about $61 of metered Modal time). How to pick the project
+up: [HANDOFF.md](HANDOFF.md) ("Current state"). Notebook: [AUTONOMOUS_LOG.md](AUTONOMOUS_LOG.md). Related work:
+[RELATED.md](RELATED.md).
 
 | path | what |
 |---|---|

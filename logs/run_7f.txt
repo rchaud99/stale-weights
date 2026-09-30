@@ -1,0 +1,7 @@
+12:41:38 start ret seeds 3,4 (attempt 1)
+12:45:19 start headline_mistral24b seeds 2,3,4 (attempt 1)
+12:45:39 start headline_qwen32b_ret seeds 2,3,4 (attempt 1)
+12:45:59 start headline_phi4 seeds 2,3,4 (attempt 1)
+13:30:58 done headline_phi4
+13:52:51 done headline_mistral24b
+14:07:24 done headline_qwen32b_ret

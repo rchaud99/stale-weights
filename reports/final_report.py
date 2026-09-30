@@ -50,8 +50,8 @@ def model_holm(rows: list[dict], slug: str | None = None) -> list[dict]:
     for r, p in zip(ok_rows, adj):
         r = dict(r)
         r["p_holm"] = p
-        need = len(r["seeds"])
-        rep = p < 0.05 and r["ci"][0] > 0.15 and r["seeds_positive"] >= need
+        need = 4 if len(r["seeds"]) >= 5 else len(r["seeds"])
+        rep = p < 0.05 and A.bar_ci(r)[0] > 0.15 and r["seeds_positive"] >= need
         applies = r["tuned_H"] >= 0.5 and r["tuned_L"] <= 0.5
         r["verdict"] = ("replicates, applies the old number" if rep and applies else
                         f"replicates, cites (phrase leak {r['cites']:.0%})" if rep else "inconclusive")
@@ -65,13 +65,14 @@ def fnum(x, fmt="+.2f"):
 
 def main_rows(rows):
     return [[f"{r['domain']} {r['rule']}", r["trained"], str(len(r["seeds"])), ", ".join(f"{x:+.2f}" for x in r["dLTC"]),
-             f"{r['mean_dLTC']:+.2f} [{r['ci'][0]:+.2f}, {r['ci'][1]:+.2f}]", f"{r['p_holm']:.2g}",
+             f"{r['mean_dLTC']:+.2f} [{r['ci'][0]:+.2f}, {r['ci'][1]:+.2f}] ({r['ci_t'][0]:+.2f}, {r['ci_t'][1]:+.2f})",
+             f"{r['p_holm']:.2g}",
              f"{fnum(r.get('mean_dDTW'))} ({r.get('p_holm_dtw', float('nan')):.2g})" if r.get("p_holm_dtw") is not None else fnum(r.get("mean_dDTW")),
              f"{r['tuned_L']:.2f} / {r['tuned_H']:.2f}", fnum(r.get("dLTC_tuned_vs_base")), f"<b>{html.escape(r['verdict'])}</b>"]
             for r in rows]
 
 
-HEAD = ["cell", "old", "seeds", "ΔLTC per seed", "mean ΔLTC [95% CI]", "Holm p", "greedy ΔDTW (Holm p)",
+HEAD = ["cell", "old", "seeds", "ΔLTC per seed", "mean ΔLTC [bootstrap CI] (t CI)", "Holm p", "greedy ΔDTW (Holm p)",
         "tuned P(deny) below / above", "tuned − base", "verdict"]
 
 
@@ -114,7 +115,9 @@ def main() -> None:
 
     ext_html = ""
     for s, rows in extra.items():
-        ext_html += f"<p><b>{MODELS[s]}</b> (seeds 0–1; Holm over the model's {len(rows)} cells):</p>" + table(HEAD, main_rows(rows))
+        seeds = sorted({x for r in rows for x in r["seeds"]})
+        ext_html += (f"<div style='break-inside:avoid'><p><b>{MODELS[s]}</b> (seeds {seeds[0]}–{seeds[-1]}; Holm over "
+                     f"the model's {len(rows)} cells):</p>" + table(HEAD, main_rows(rows)) + "</div>")
     skew_html = ""
     if skew:
         onset = (V2 / "qwen14b" / "skew_tables.md").read_text().splitlines()[-1] if (V2 / "qwen14b" / "skew_tables.md").exists() else ""
@@ -140,12 +143,15 @@ def main() -> None:
                     + table(["old policy", "sentence", "T", "tuned LTC", "control LTC", "ΔLTC"], rows))
 
     n_rep = sum(r["verdict"].startswith("replicates") for r in core)
+    ext_rows = [r for v in extra.values() for r in v if not r["verdict"].startswith("excluded")]
+    n_rep_ext = sum(r["verdict"].startswith("replicates") for r in ext_rows)
     body = f"""
 <div class="box"><b>Takeaway (2 sentences).</b> When a support model is LoRA-fine-tuned on decisions made under an old
 policy, and a new prompted policy leaves one of the old rules out, the model keeps using the old rule even when told
 to "apply only the rules written in this policy". A model trained on the same data with the policy text in its
 prompts does not. In the preregistered primary test this replicates in {n_rep} of 6 cells for Qwen2.5-14B (two
-domains, class-balanced data, 3–5 seeds). How often it changes the model's actual (greedy) answer depends on the
+domains, class-balanced data, 5 seeds) and in {n_rep_ext} of {len(ext_rows)} headline cells of three other model families
+(5 seeds each). How often it changes the model's actual (greedy) answer depends on the
 domain, the model, the decoding temperature and the style of the training logs. Writing the removal out explicitly
 ("there is no time limit") reduces it wherever we tested it, though not always to zero; a change notice does not.</div>
 
@@ -165,33 +171,40 @@ If the policy doesn't state a rule you need, don't apply one from anywhere else.
 </ul>
 <p><b>Primary metric, ΔLTC:</b> how much more the tuned model's sampled P(deny) jumps across the OLD threshold than the
 control's. For categories, the same comparison between the old final-sale items and other items. 0 means no use of
-the old rule; 1 means exact use. Everything was preregistered before it ran (RESEARCH_AGENDA addenda 7–7e), after two
-red-team reviews.</p>
+the old rule; 1 means exact use. Everything was preregistered before it ran (RESEARCH_AGENDA addenda 7–7f), after two
+red-team reviews. The seed extension to 5 seeds (addendum 7f) was decided after the 2- and 3-seed results had been
+seen; it was applied to every headline cell whatever its verdict, and no further seeds are added.</p>
 
-<h2>2. Main result: Qwen2.5-14B (airline 5 seeds, returns 3 seeds)</h2>
+<h2>2. Main result: Qwen2.5-14B (5 seeds per cell)</h2>
 {table(HEAD, main_rows(core))}
 <p style="font-size:8.5pt">Verdict rule: "replicates" needs Holm p &lt; .05 (one-sided seed-level t), a 95% CI lower bound
-above +0.15 (two-stage bootstrap) and every seed positive (4/5 for 5 seeds). "Applies the old number" also needs tuned
+above +0.15 (the seed-level t CI with 5 seeds, addendum 7f; the two-stage bootstrap CI below that) and every seed
+positive (4/5 for 5 seeds). "Applies the old number" also needs tuned
 P(deny) ≤ .5 below and ≥ .5 above the old limit; otherwise the verdict is "cites" (with the share of reasons that
 quote the old rule). <b>Caveat:</b> for the returns B window, the control fills the gap with the base's generic 30-day
-window, which inflates ΔLTC. The conservative figure is tuned − base = +0.31.</p>
-<figure><img src="final_dltc.png"><figcaption>Figure 1. ΔLTC for every model and cell: dot = mean, bar = 95% CI, ticks
+window, which inflates ΔLTC. The conservative figure is tuned − base = +0.32.</p>
+<figure><img src="final_dltc.png"><figcaption>Figure 1. ΔLTC for every model and cell: dot = mean, bar = 95% CI (the seed-level t CI for cells with 5 seeds, the two-stage bootstrap CI below that; addendum 7f), ticks
 = seeds.</figcaption></figure>
 <figure><img src="final_airA.png"><figcaption>Figure 2. Airline, old window 12 h (Qwen-14B, 5 seeds). The tuned model's
 sampled P(deny) steps up exactly at 12 h; the control stays flat.</figcaption></figure>
-<figure><img src="final_retB.png"><figcaption>Figure 3. Returns, old window 60 days (Qwen-14B, 3 seeds). The tuned model
+<figure><img src="final_retB.png"><figcaption>Figure 3. Returns, old window 60 days (Qwen-14B, 5 seeds). The tuned model
 applies 60 days. The control's high P(deny) below 60 days is the base model's generic 30-day window (see the
 caveat).</figcaption></figure>
 
-<h2>3. Other model families (headline cells, 2 seeds; addendum 7e)</h2>
+<h2>3. Other model families (headline cells, 5 seeds; addenda 7e/7f)</h2>
 {ext_html or "<p>not run</p>"}
-<p style="font-size:8.5pt">With 2 seeds the seed-level t-test has df = 1, so these cells are underpowered by design. The
-per-seed values show the direction.</p>
+<p style="font-size:8.5pt"><b>Before and after the seed extension (addendum 7f).</b> Cells passing the bar at 2 seeds
+(df = 1): Phi-4 1/5 (returns categories A), Mistral-Small-24B 1/5 (airline A), Qwen2.5-32B 3/4 (both returns windows,
+and categories B on the bootstrap CI only). At 5 seeds: {"; ".join(f"{MODELS[s]} {sum(r['verdict'].startswith('replicates') for r in v)}/{sum(not r['verdict'].startswith('excluded') for r in v)}" for s, v in extra.items())}.
+No cell that passed at 2 seeds fails at 5. For Qwen2.5-14B the returns cells went from 3 to 5 seeds with the same 4/4
+verdicts; returns categories A no longer rests on the bootstrap CI alone. Narrowest passes (t CI lower bound): Phi-4
+categories A +0.16, Qwen-14B returns window A +0.17.</p>
 
 <h2>4. When does it show up in the actual answer?</h2>
-<p><b>Rule-structure ablation</b> (addendum 7d; Qwen-14B, 2 seeds). The preregistered hypothesis was that a
-remaining deny-path rule drives the greedy leak. It is <b>not supported</b>, and the data point the other way:</p>
-{table(HEAD, main_rows(abl))}
+<div style="break-inside:avoid"><p><b>Rule-structure ablation</b> (addendum 7d; Qwen-14B, 2 seeds). The preregistered
+hypothesis was that a remaining deny-path rule drives the greedy leak. It is <b>not supported</b>, and the data point the
+other way:</p>
+{table(HEAD, main_rows(abl))}</div>
 <ul>
 <li><b>air3</b> (airline plus a fare-class deny rule): the leak all but disappears.</li>
 <li><b>ret2</b> (returns without the final-sale rule): it becomes the strongest in the study.</li>
@@ -203,23 +216,24 @@ remaining deny-path rule drives the greedy leak. It is <b>not supported</b>, and
 <ul>
 <li><b>Stating the removal explicitly</b> ("there is no time limit" / "no category is final sale") reduces it, though not always to zero:
   <ul>
-  <li>returns: cuts 0.40–0.87 (p ≤ 0.005, 4/4);</li>
+  <li>returns: cuts 0.44–0.85 (p ≤ 0.0004, 4/4);</li>
   <li>the ret2 ablation: 0.99 and 0.84;</li>
   <li>airline: 0.11 and 0.20 (p = 0.095 and 0.056), from a low base.</li>
   </ul></li>
 <li><b>A change notice</b> ("replaces the previous policy; rules from it no longer apply") is not a reliable fix. Vs a
-neutral sentence it moves denials by −0.17 to +0.14, and raises them in one returns cell (p = 0.015).</li>
+neutral sentence it moves denials by −0.17 to +0.08. At 3 seeds it raised them in one returns cell (+0.14,
+p = 0.015); at 5 seeds that cell is +0.08 (p = 0.12).</li>
 </ul>
 
 <h2>6. What survived, what died, what is untested</h2>
 {table(["claim", "status", "evidence"], [
- ["A fine-tuned rule that the new prompt omits is still used, despite 'apply only written rules' (vs a same-data policy-in-prompt control)", "<b>survives</b> (Qwen-14B: 5 of 6 cells; other families: direction consistent in every seed, underpowered)", "§2, §3"],
+ ["A fine-tuned rule that the new prompt omits is still used, despite 'apply only written rules' (vs a same-data policy-in-prompt control)", f"<b>survives</b> (Qwen-14B: {n_rep} of 6 cells; the other families: {n_rep_ext} of {len(ext_rows)} cells; 5 seeds each; positive in every seed)", "§2, §3"],
  ["The old number is applied exactly", "<b>partly</b>: airline A (12 h) and returns B (60 d), plus the ret2 ablation; elsewhere the model cites the rule and shifts denials", "§2 'applies' vs 'cites'"],
- ["It shows in greedy (deployment-default) answers", "<b>depends</b>: yes in Qwen-14B returns and Phi-4 airline; no in the Qwen-14B airline (ΔDTW n.s.); with fixed-template logs, yes at every deny share (§4)", "§2 greedy column, §3, §4"],
+ ["It shows in greedy (deployment-default) answers", "<b>depends</b>: yes (greedy ΔDTW, Holm p &lt; .05) in Qwen-14B returns, Phi-4 airline and categories, Mistral returns and the Qwen-32B windows; no in the Qwen-14B and Mistral airline, the Phi-4 returns windows and the Qwen-32B categories; with fixed-template logs, yes at every deny share (§4)", "§2 greedy column, §3, §4"],
  ["The rule structure (a remaining deny rule) explains greedy visibility", "<b>died</b> (the ablation went the opposite way)", "§4"],
  ["Explicit removal reduces it", "<b>survives</b> (significant in returns; airline n.s. from a low base; residual denials in some seeds)", "§5"],
  ["A change notice fixes it", "<b>died</b>", "§5"],
- ["The Mac airline result (56/56, unbalanced, fixed template)", "<b>superseded</b>: with balanced, paraphrased data the airline greedy effect is gone for Qwen-14B", "FINDINGS §9"],
+ ["The Mac airline result (56/56, unbalanced, fixed template)", "<b>superseded</b>: with balanced, paraphrased data the airline greedy effect is gone for Qwen-14B", "FINDINGS §10"],
  ["The reason-free probe (no written reasoning) shows the leak", "<b>no</b>: probe ΔLTC ≈ 0; the leak rides on the written reason", "summary.json probe_dLTC"],
  ["72B scale, value sweep, mixed data, number-free replies, dose, a mirror 'stale yes' scenario, full fine-tuning, closed models", "<b>untested</b> (dropped for time; see HANDOFF)", "–"],
 ])}
@@ -232,13 +246,14 @@ neutral sentence it moves denials by −0.17 to +0.14, and raises them in one re
 <li>The extra-model Holm over each model's cells: <code>reports/final_report.py</code> (<code>model_holm</code>).</li>
 <li>Skew and temperature: <code>uv run python -m staleweights.v2.arms skew</code> and <code>... arms tsweep</code>.</li>
 <li>Raw records: <code>results/&lt;model&gt;/&lt;domain&gt;/&lt;adapter&gt;-200.jsonl</code>.</li>
-<li>Design and preregistration: <code>RESEARCH_AGENDA.md</code> addenda 7–7e. Reviews: <code>reviews/</code>. Code:
+<li>Design and preregistration: <code>RESEARCH_AGENDA.md</code> addenda 7–7f. Reviews: <code>reviews/</code>. Code:
 <code>src/staleweights/v2/</code>, <code>src/staleweights/cloud/</code> (with its README).</li>
 <li>To regenerate this PDF: <code>uv run python reports/final_report.py</code>.</li>
 </ul>
 
 <h2>8. Compute and spend</h2>
-<p>Modal (H100) metered spend today, from <code>modal billing report</code>: <b>${spend()}</b> of the $100 cap. The
+<p>Modal metered spend over the study (2026-09-29/30), from <code>modal billing report</code>: <b>${spend()}</b> of the
+$100 cap, including about $19 for the addendum 7f seed extension. The
 exact per-stage figures are in AUTONOMOUS_LOG. Paid LLM APIs: $0. The Mac rounds 1–3 used local compute only.</p>
 """
     print(render(page("Stale Weights: final report", f"{time.strftime('%Y-%m-%d %H:%M')} EDT · cloud study v2 (balanced, "

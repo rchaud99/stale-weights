@@ -24,7 +24,7 @@ body { font-family: Georgia, 'Times New Roman', serif; font-size: 10.5pt; line-h
        background: #fff; }
 h1 { font-size: 18pt; margin: 0 0 2pt; font-weight: normal; }
 .sub { color: #555; font-size: 9.5pt; margin-bottom: 14pt; }
-h2 { font-size: 12.5pt; margin: 16pt 0 5pt; border-bottom: 1px solid #ccc; padding-bottom: 2pt; font-weight: bold; }
+h2 { font-size: 12.5pt; margin: 16pt 0 5pt; border-bottom: 1px solid #ccc; padding-bottom: 2pt; font-weight: bold; break-after: avoid; page-break-after: avoid; }
 p { margin: 4pt 0 7pt; }
 table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; page-break-inside: avoid; }
 th, td { border-bottom: 1px solid #ddd; padding: 3pt 5pt; text-align: left; vertical-align: top; }

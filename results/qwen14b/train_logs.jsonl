@@ -154,3 +154,19 @@
 {"name": "ret2_A_ctrl_s1", "train_s": 60.07687282562256, "layers": [32, 47], "first_batch_loss_tokens": [81, 90, 84, 87, 87, 90, 86, 89], "loss": [0.9139348864555359, 0.14460524916648865, 0.06479104608297348]}
 {"name": "ret2_B_s1", "train_s": 47.53907895088196, "layers": [32, 47], "first_batch_loss_tokens": [91, 96, 91, 91, 94, 97, 94, 89], "loss": [1.4104104042053223, 0.17248715460300446, 0.06163956597447395]}
 {"name": "ret2_B_ctrl_s1", "train_s": 60.64099907875061, "layers": [32, 47], "first_batch_loss_tokens": [91, 96, 91, 91, 94, 97, 94, 89], "loss": [1.014754056930542, 0.14171116054058075, 0.06220519542694092]}
+{"name": "ret_A_s3", "skipped": true}
+{"name": "ret_A_ctrl_s3", "skipped": true}
+{"name": "ret_B_s3", "train_s": 68.50126385688782, "layers": [32, 47], "first_batch_loss_tokens": [107, 117, 117, 118, 108, 107, 107, 112], "loss": [1.898799180984497, 0.22112885117530823, 0.08977159112691879]}
+{"name": "ret_B_ctrl_s3", "train_s": 69.01836347579956, "layers": [32, 47], "first_batch_loss_tokens": [107, 117, 117, 118, 108, 107, 107, 112], "loss": [1.0790165662765503, 0.1574200838804245, 0.08013933151960373]}
+{"name": "ret_A_s4", "train_s": 48.19910478591919, "layers": [32, 47], "first_batch_loss_tokens": [58, 60, 63, 60, 66, 68, 57, 56], "loss": [1.415655255317688, 0.286111980676651, 0.06752857565879822]}
+{"name": "ret_A_ctrl_s4", "train_s": 64.58599805831909, "layers": [32, 47], "first_batch_loss_tokens": [58, 60, 63, 60, 66, 68, 57, 56], "loss": [1.1853405237197876, 0.20876342058181763, 0.06388312578201294]}
+{"name": "ret_B_s4", "train_s": 48.35662841796875, "layers": [32, 47], "first_batch_loss_tokens": [66, 63, 61, 63, 60, 63, 61, 63], "loss": [1.5144498348236084, 0.2721848487854004, 0.08130138367414474]}
+{"name": "ret_B_ctrl_s4", "train_s": 65.74020552635193, "layers": [32, 47], "first_batch_loss_tokens": [66, 63, 61, 63, 60, 63, 61, 63], "loss": [1.270080804824829, 0.18757003545761108, 0.08043266832828522]}
+{"name": "ret_A_s3", "skipped": true}
+{"name": "ret_A_ctrl_s3", "skipped": true}
+{"name": "ret_B_s3", "skipped": true}
+{"name": "ret_B_ctrl_s3", "skipped": true}
+{"name": "ret_A_s4", "skipped": true}
+{"name": "ret_A_ctrl_s4", "skipped": true}
+{"name": "ret_B_s4", "skipped": true}
+{"name": "ret_B_ctrl_s4", "skipped": true}

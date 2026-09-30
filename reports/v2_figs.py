@@ -21,19 +21,24 @@ def dltc_chart(rows: list[dict], path: Path, title: str) -> Path:
     fig, ax = plt.subplots(figsize=(7, 0.6 + 0.42 * len(rows)), dpi=200)
     for i, r in enumerate(rows):
         y = len(rows) - 1 - i
-        lo, hi = r["ci"]
-        ax.plot([lo, hi], [y, y], color=SERIES["tuned"], lw=2)
+        lo, hi = A.bar_ci(r)
+        ax.plot([max(lo, -0.3), min(hi, 1.0)], [y, y], color=SERIES["tuned"], lw=2)
         ax.plot(r["mean_dLTC"], y, "o", color=SERIES["tuned"], ms=7, mec="white")
         for x in r["dLTC"]:
             ax.plot(x, y + 0.18, "|", color=INK2, ms=7)
-        ax.text(1.02, y, r["verdict"].split(",")[0], va="center", fontsize=7, color=INK2, transform=ax.get_yaxis_transform())
+        n, pos = len(r["dLTC"]), sum(x > 0 for x in r["dLTC"])
+        v = r["verdict"]
+        label = ("passes the bar" if v.startswith("replicates") else "excluded (base gate)" if v.startswith("excluded")
+                 else f"{pos}/{n} seeds positive, below bar")
+        ax.text(1.02, y, label, va="center", fontsize=7, color=INK if v.startswith("replicates") else INK2,
+                fontweight="bold" if v.startswith("replicates") else "normal", transform=ax.get_yaxis_transform())
     ax.axvline(0, color=INK2, lw=0.8)
     ax.axvline(0.15, color=GRID, lw=1, ls="--")
     ax.set_yticks(range(len(rows)))
     ax.set_yticklabels([f"{r.get('model', 'Qwen-14B')} · {r['domain']} {r['rule']} · {r['trained']}" for r in reversed(rows)],
                        fontsize=7.5, color=INK)
     ax.set_xlim(-0.3, 1.0)
-    ax.set_xlabel("ΔLTC (tuned − in-prompt control); dot = mean, bar = 95% CI, ticks = seeds; dashed = +0.15 bar",
+    ax.set_xlabel("ΔLTC, tuned − control · dot = mean · bar = 95% CI · ticks = seeds · dashed = +0.15 bar",
                   fontsize=7.5, color=INK2)
     ax.tick_params(labelsize=7.5, colors=INK2)
     ax.grid(axis="x", color=GRID, lw=0.6)
@@ -41,7 +46,7 @@ def dltc_chart(rows: list[dict], path: Path, title: str) -> Path:
         ax.spines[s].set_visible(False)
     ax.set_title(title, fontsize=8.5, color=INK, loc="left")
     fig.tight_layout()
-    fig.subplots_adjust(right=0.82)
+    fig.subplots_adjust(right=0.74)
     fig.savefig(path)
     plt.close(fig)
     return path
