@@ -23,7 +23,7 @@ from report_lib import OUT, page, render, table  # noqa: E402
 from staleweights.v2 import analysis as A  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-V2 = ROOT / "results_cloud" / "v2"
+V2 = ROOT / "results"
 MODELS = {"qwen14b": "Qwen2.5-14B", "phi4": "Phi-4 14B", "qwen32b": "Qwen2.5-32B", "mistral24b": "Mistral-Small-24B"}
 
 
@@ -228,10 +228,10 @@ neutral sentence it moves denials by −0.17 to +0.14, and raises them in one re
 <ul>
 <li>Every Qwen-14B, ablation and family number: <code>uv run python -m staleweights.v2.analysis qwen14b</code> (and
 <code>phi4</code>, <code>qwen32b</code>, <code>mistral24b</code>). Tables go to
-<code>results_cloud/v2/&lt;model&gt;/tables.md</code>, the numbers to <code>summary.json</code>.</li>
+<code>results/&lt;model&gt;/tables.md</code>, the numbers to <code>summary.json</code>.</li>
 <li>The extra-model Holm over each model's cells: <code>reports/final_report.py</code> (<code>model_holm</code>).</li>
 <li>Skew and temperature: <code>uv run python -m staleweights.v2.arms skew</code> and <code>... arms tsweep</code>.</li>
-<li>Raw records: <code>results_cloud/v2/&lt;model&gt;/&lt;domain&gt;/&lt;adapter&gt;-200.jsonl</code>.</li>
+<li>Raw records: <code>results/&lt;model&gt;/&lt;domain&gt;/&lt;adapter&gt;-200.jsonl</code>.</li>
 <li>Design and preregistration: <code>RESEARCH_AGENDA.md</code> addenda 7–7e. Reviews: <code>reviews/</code>. Code:
 <code>src/staleweights/v2/</code>, <code>src/staleweights/cloud/</code> (with its README).</li>
 <li>To regenerate this PDF: <code>uv run python reports/final_report.py</code>.</li>
@@ -241,9 +241,8 @@ neutral sentence it moves denials by −0.17 to +0.14, and raises them in one re
 <p>Modal (H100) metered spend today, from <code>modal billing report</code>: <b>${spend()}</b> of the $100 cap. The
 exact per-stage figures are in AUTONOMOUS_LOG. Paid LLM APIs: $0. The Mac rounds 1–3 used local compute only.</p>
 """
-    ts = time.strftime("%Y-%m-%d_%H%M")
     print(render(page("Stale Weights: final report", f"{time.strftime('%Y-%m-%d %H:%M')} EDT · cloud study v2 (balanced, "
-                      f"preregistered) · all claims with numbers and reproduction commands", body), f"progress_05_FINAL_{ts}"))
+                      f"preregistered) · all claims with numbers and reproduction commands", body), "stale_weights_final_report"))
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ import collections
 import json
 import re
 
-import pytest
 
 from staleweights.v2 import design as D
 from staleweights.v2 import items as I

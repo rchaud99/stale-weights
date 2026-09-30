@@ -1,5 +1,8 @@
 # Autonomous lab notebook (round 3)
 
+> **Note (2026-09-30):** the main branch now holds only the cloud v2 study. The Mac pilot's code, data and results
+> referred to below are on the git branch `old`, and `results_cloud/v2/` has moved to `results/`.
+
 Timestamped, newest at the bottom. What was done, why, the results, and what comes next. Compute is local MLX
 (Apple M4 Max, 128 GB). Paid API spend is logged per call; the running total is at the end of each entry.
 

@@ -1,7 +1,7 @@
-"""Helpers for the round-3 progress PDFs: a print stylesheet, an HTML wrapper, dot-and-interval charts (matplotlib,
-reference palette slots 1-3, text in ink colours) and rendering with headless Chrome.
+"""Helpers for the final report: a print stylesheet, an HTML wrapper, tables, chart colours and rendering with
+headless Chrome.
 
-    uv run python reports/progress_01.py      # each report is a small script that calls these
+    uv run python reports/final_report.py
 """
 
 from __future__ import annotations
@@ -12,12 +12,9 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
-from staleweights.analyze import wilson  # noqa: E402
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-OUT = Path(__file__).resolve().parent / "progress"
+OUT = Path(__file__).resolve().parent / "final"
 SERIES = {"tuned": "#2a78d6", "control": "#eb6834", "other": "#1baf7a"}
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
@@ -54,39 +51,6 @@ def table(header: list[str], rows: list[list], numeric: set[int] = frozenset()) 
     trs = "".join("<tr>" + "".join(f"<td class='{'n' if i in numeric else ''}'>{c}</td>" for i, c in enumerate(r))
                   + "</tr>" for r in rows)
     return f"<table><tr>{th}</tr>{trs}</table>"
-
-
-def dot_chart(rows: list[tuple[str, int, int, str]], path: Path, xlabel: str, title: str | None = None,
-              width: float = 7.0) -> Path:
-    """rows: (label, k, n, role) top to bottom; role picks the colour (tuned/control/other). Dots with 95% Wilson
-    intervals, labels on the left, values on the right."""
-    h = 0.5 + 0.28 * len(rows)
-    fig, ax = plt.subplots(figsize=(width, h), dpi=200)
-    for i, (label, k, n, role) in enumerate(rows):
-        y = len(rows) - 1 - i
-        lo, hi = wilson(k, n)
-        c = SERIES.get(role, SERIES["other"])
-        ax.plot([100 * lo, 100 * hi], [y, y], color=c, lw=2, solid_capstyle="round")
-        ax.plot(100 * k / n, y, "o", color=c, ms=6, mec="white", mew=1.2)
-        ax.text(104, y, f"{k}/{n}", va="center", fontsize=7.5, color=INK2, clip_on=False)
-    ax.set_yticks(range(len(rows)))
-    ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=7.5, color=INK)
-    ax.set_xlim(0, 100)
-    ax.set_xlabel(xlabel, fontsize=8, color=INK2)
-    ax.tick_params(axis="x", labelsize=7.5, colors=INK2)
-    ax.tick_params(axis="y", length=0)
-    ax.grid(axis="x", color=GRID, lw=0.8)
-    ax.set_axisbelow(True)
-    for s in ("top", "right", "left"):
-        ax.spines[s].set_visible(False)
-    ax.spines["bottom"].set_color(GRID)
-    if title:
-        ax.set_title(title, fontsize=8.5, color=INK, loc="left")
-    fig.tight_layout()
-    fig.subplots_adjust(right=0.9)
-    fig.savefig(path)
-    plt.close(fig)
-    return path
 
 
 def render(html: str, stem: str) -> Path:

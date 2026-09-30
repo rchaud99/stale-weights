@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from statistics import mean
@@ -13,10 +12,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from report_lib import GRID, INK, INK2, OUT, SERIES  # noqa: E402
+from report_lib import GRID, INK, INK2, SERIES  # noqa: E402
 
 from staleweights.v2 import analysis as A  # noqa: E402
-from staleweights.v2 import design as D  # noqa: E402
 
 
 def dltc_chart(rows: list[dict], path: Path, title: str) -> Path:

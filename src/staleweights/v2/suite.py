@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 
-from staleweights.evaluate import parse
+from staleweights.v2.parsing import parse
 from staleweights.v2 import design as D
 from staleweights.v2 import items as I
 

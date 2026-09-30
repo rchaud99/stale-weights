@@ -1,5 +1,8 @@
 # Research agenda (round 3, from 2026-09-28)
 
+> **Note (2026-09-30):** the main branch now holds only the cloud v2 study. The Mac pilot's code, data and results
+> referred to below are on the git branch `old`, and `results_cloud/v2/` has moved to `results/`.
+
 Written before any round-3 run. The preregistration section below was committed to git before the first job
 started. Any later change to it is a new dated entry, not an edit.
 

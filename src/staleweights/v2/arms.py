@@ -16,12 +16,10 @@ from __future__ import annotations
 import json
 import re
 import sys
-from pathlib import Path
 from statistics import mean
 
 from staleweights.v2 import analysis as A
 from staleweights.v2 import design as D
-from staleweights.v2 import suite as S
 
 V2 = A.V2 / "qwen14b"
 SKEW = re.compile(r"^air_([AB])(_ctrl)?(?:_d(\d+)([fp]))?_s(\d+)(?:_d(\d+)([fp]))?(?:-T([\d.]+))?$")

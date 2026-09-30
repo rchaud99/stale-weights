@@ -14,7 +14,6 @@ The design-v2 study (RESEARCH_AGENDA addenda 7–7e) runs only here.
 - Run from the repo root, with `PYTHONPATH=src` so the local entrypoint can import the package:
 
 ```sh
-PYTHONPATH=src modal run src/staleweights/cloud/app.py::validate            # port check vs the Mac (old design)
 PYTHONPATH=src modal run src/staleweights/cloud/app.py::prior               # base-prior probe -> v2/returns_values.json
 PYTHONPATH=src modal run src/staleweights/cloud/app.py::v2 --stage pilot    # Qwen-14B airline seed 0
 PYTHONPATH=src modal run src/staleweights/cloud/app.py::v2 --stage air      # airline seeds 1-4
@@ -36,8 +35,8 @@ Every stage is restartable: training skips adapters whose final checkpoint exist
   - `v2/logs/<model>/<name>.json`: loss per step, timing and recipe;
   - `v2/results/<domain>/...`: the result copies. These paths do **not** include the model slug, so later models
     overwrite earlier ones on the volume. The authoritative copies are local.
-- **Local, authoritative:** `results_cloud/v2/<model>/<domain>/<adapter>-200.jsonl`, written from the data each
-  evaluation returns, plus `info.jsonl` (gates, timings), `train_logs.jsonl` and `results_cloud/ledger.jsonl`
+- **Local, authoritative:** `results/<model>/<domain>/<adapter>-200.jsonl`, written from the data each
+  evaluation returns, plus `info.jsonl` (gates, timings), `train_logs.jsonl` and `results/ledger.jsonl`
   (GPU-seconds × rate × 1.25).
 
 ## The training recipe, and every mismatch with the MLX runs
@@ -57,7 +56,8 @@ Every stage is restartable: training skips adapters whose final checkpoint exist
 | decoding | mlx-lm batch_generate, greedy, 160 tokens | vLLM greedy, 512 tokens (v2), top-5 logprobs at the decision; sampling n = 16, T = 1 |
 
 **Port validation** (old design, unbalanced A, seed 0; AUTONOMOUS_LOG 2026-09-29 ~20:05). The headline reproduces
-qualitatively: tuned 54–56/56 vs control 39–41 vs base 0 (Mac: 56 vs 21–24 vs 1–2).
+qualitatively: tuned 54–56/56 vs control 39–41 vs base 0 (Mac: 56 vs 21–24 vs 1–2). The `validate` entrypoint, the old-design
+job builder and these records are on the git branch `old`.
 
 ## Known operational notes
 

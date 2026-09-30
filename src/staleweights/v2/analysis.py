@@ -6,7 +6,7 @@ across seeds; exact sign-flip p reported alongside; 95% CI from a two-stage boot
 Co-primary: band-averaged DTW from greedy decoding. Secondary: probe dLTC, citation ("phrase leak"), rule probes,
 fitted thresholds, TOST nulls, mitigation contrasts, parse rates.
 
-    uv run python -m staleweights.v2.analysis            # writes results_cloud/v2/tables.md and summary.json
+    uv run python -m staleweights.v2.analysis            # writes results/<model>/tables.md and summary.json
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from staleweights.v2 import design as D
 from staleweights.v2 import suite as S
 
 ROOT = Path(__file__).resolve().parents[3]
-V2 = ROOT / "results_cloud" / "v2"
+V2 = ROOT / "results"
 NAME = re.compile(r"^(air3|ret2|air|ret)_([AB])(_ctrl)?(_unbal)?(?:_(\w+?))?_s(\d+)$")
 BASE_DOM = {"air": "air", "ret": "ret", "air3": "air", "ret2": "ret"}
 PRIOR = {"air": 24, "ret": 30, "air3": 24, "ret2": 30}
@@ -32,10 +32,13 @@ PRIOR = {"air": 24, "ret": 30, "air3": 24, "ret2": 30}
 # --- loading ------------------------------------------------------------------------------------------------------
 
 def load(slug: str) -> dict:
-    """{(domain, name): [records]} for every adapter file and the base ("base")."""
+    """{(domain, name): [records]} for every adapter file and the base ("base"). The skew and tsweep arms have their
+    own folders and are analysed by `arms.py`, so they are skipped here."""
     out = {}
     for f in sorted((V2 / slug).glob("*/*.jsonl")):
         dom = f.parent.name
+        if dom not in ("air", "ret", "air3", "ret2"):
+            continue
         name = f.stem.removesuffix("-200")
         out[(dom, name)] = [json.loads(line) for line in f.read_text().splitlines()]
     return out
@@ -499,7 +502,7 @@ def base_gate(data: dict) -> list[str]:
                         else D.RET[x].decide(sc["category"], sc["days"], sc["price"])[0])
                 ok.append(r["decision"] == want)
                 if want != "deny" and r["decision"] == want:  # the fee rule: stated fee on accepted items
-                    ans = __import__("staleweights.evaluate", fromlist=["parse"]).parse(r.get("text", "")) or {}
+                    ans = __import__("staleweights.v2.parsing", fromlist=["parse"]).parse(r.get("text", "")) or {}
                     key = "fee_per_passenger" if dom == "air" else "fee_percent"
                     fee_ok.append(ans.get(key) == (D.AIR[x].fee if dom == "air" else D.RET[x].fee))
             rates[x] = mean(ok)
