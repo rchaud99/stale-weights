@@ -1,0 +1,89 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Stale Weights: progress report 04</title><style>
+@page { size: Letter; margin: 0.8in 0.85in; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 10.5pt; line-height: 1.42; color: #111;
+       background: #fff; }
+h1 { font-size: 18pt; margin: 0 0 2pt; font-weight: normal; }
+.sub { color: #555; font-size: 9.5pt; margin-bottom: 14pt; }
+h2 { font-size: 12.5pt; margin: 16pt 0 5pt; border-bottom: 1px solid #ccc; padding-bottom: 2pt; font-weight: bold; }
+p { margin: 4pt 0 7pt; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; page-break-inside: avoid; }
+th, td { border-bottom: 1px solid #ddd; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+th { border-bottom: 1.5px solid #888; font-weight: bold; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.box { border-left: 3px solid #2a78d6; background: #f5f7fa; padding: 6pt 10pt; margin: 6pt 0 10pt; }
+.warn { border-left-color: #eb6834; background: #fbf5f1; }
+.tag { font-size: 8pt; padding: 0 4pt; border: 1px solid #999; border-radius: 3px; color: #333; }
+figure { margin: 8pt 0 12pt; page-break-inside: avoid; }
+figure img { width: 100%; }
+figcaption { font-size: 8.8pt; color: #444; margin-top: 3pt; }
+ul { margin: 3pt 0 8pt 16pt; padding: 0; } li { margin: 2pt 0; }
+code { font-family: Menlo, monospace; font-size: 8.5pt; }
+</style></head><body><h1>Stale Weights: progress report 04</h1><div class='sub'>2026-09-30 01:30 EDT · cloud study v2 · Qwen2.5-14B core (airline 5 seeds, returns 3 seeds)</div>
+<div class="box"><b>Where things stand.</b> The study was rebuilt on the cloud (Modal H100s, bf16, PEFT + vLLM) with
+every fix from the two red-team reviews: class-balanced training data, paraphrased number-first replies, test sets
+centred on the threshold, unambiguous boundary wording, a separate gate set and a sampled primary metric. The core
+for Qwen2.5-14B is done: airline 5 seeds, retail returns 3 seeds. <b>The main result holds in 5 of the 6
+preregistered cells.</b> When a rule is left out of the new prompt and the prompt says "apply only the rules written
+in this policy", a model fine-tuned on old decisions still reaches for the old rule, and the same-data control
+trained with the policy text in its prompts does not. <b>How strongly that shows depends on decoding and domain.</b>
+In returns it is visible even in greedy decisions. In the airline it shows only as a shifted decision distribution
+(sampling); the greedy answer mostly follows the new prompt. Writing the removal out explicitly fixes it in every
+domain. A change notice does not.</div>
+
+<h2>1. Done since report 03</h2>
+<ul>
+<li>Moved to Modal and validated the port against the Mac: the headline reproduces qualitatively.</li>
+<li>Addendum 7 (design v2), preregistered before any run. It adopts every MUST-FIX item from both reviews.</li>
+<li>The base-prior probe picked the returns values. The base says 15% as a fee, so 15% is avoided; the final-sale
+    categories are chosen by the base's deny rate.</li>
+<li>Qwen-14B core: 32 adapters, the base suites, sampling (n = 16), the reason-free probe and the rule probes.</li>
+<li>Addenda 7a–7c are preregistered: extra families (Mistral-24B replaces the gated Llama), a 72B arm, the skew ×
+    reply-style arm, and a temperature sweep.</li>
+</ul>
+
+<h2>2. Primary results (preregistered; Holm within each family)</h2>
+<table><tr><th class=''>family</th><th class=''>old policy</th><th class=''>seeds</th><th class=''>ΔLTC [95% CI]</th><th class=''>Holm p</th><th class=''>co-primary ΔDTW (greedy)</th><th class=''>tuned P(deny) below / above old limit</th><th class=''>base LTC</th><th class=''>verdict</th></tr><tr><td class=''>air window</td><td class=''>A</td><td class=''>5</td><td class=''>+0.40 [+0.30, +0.50]</td><td class=''>0.0022</td><td class=''>+0.05 (Holm 0.55)</td><td class=''>0.09 / 0.52</td><td class=''>+0.01</td><td class=''><b>replicates, applies the old number</b></td></tr><tr><td class=''>air window</td><td class=''>B</td><td class=''>5</td><td class=''>+0.25 [+0.13, +0.37]</td><td class=''>0.01</td><td class=''>-0.08 (Holm 0.99)</td><td class=''>0.21 / 0.46</td><td class=''>-0.00</td><td class=''><b>inconclusive</b></td></tr><tr><td class=''>ret window</td><td class=''>A</td><td class=''>3</td><td class=''>+0.29 [+0.26, +0.32]</td><td class=''>0.0017</td><td class=''>+0.32 (Holm 0.0042)</td><td class=''>0.03 / 0.34</td><td class=''>-0.00</td><td class=''><b>replicates, cites (phrase leak 79%)</b></td></tr><tr><td class=''>ret window</td><td class=''>B</td><td class=''>3</td><td class=''>+0.81 [+0.75, +0.87]</td><td class=''>0.0016</td><td class=''>+0.40 (Holm 0.0042)</td><td class=''>0.10 / 0.74</td><td class=''>+0.33</td><td class=''><b>replicates, applies the old number</b></td></tr><tr><td class=''>ret category</td><td class=''>A</td><td class=''>3</td><td class=''>+0.27 [+0.21, +0.34]</td><td class=''>0.011</td><td class=''>+0.15 (Holm 0.0073)</td><td class=''>0.02 / 0.29</td><td class=''>+0.00</td><td class=''><b>replicates, cites (phrase leak 46%)</b></td></tr><tr><td class=''>ret category</td><td class=''>B</td><td class=''>3</td><td class=''>+0.35 [+0.32, +0.38]</td><td class=''>0.0024</td><td class=''>+0.22 (Holm 0.0051)</td><td class=''>0.03 / 0.38</td><td class=''>+0.00</td><td class=''><b>replicates, cites (phrase leak 38%)</b></td></tr></table>
+<p style="font-size:9pt">LTC is the local threshold contrast: mean P(deny) just above the old limit minus just below
+it (T to 2T vs T/2 to T; for categories, trained final-sale items vs other items). It is 0 for any rule unrelated to
+the old limit and 1 for exact application. "Replicates" needs Holm p &lt; .05, a CI lower bound above +0.15, and every
+seed (4/5 for the airline) positive. "Applies the old number" also needs tuned P(deny) ≥ .5 above and ≤ .5 below;
+otherwise the verdict is "cites".</p>
+<figure><img src="p04_dltc.png"><figcaption>Figure 1. ΔLTC per family: dot = mean, bar = 95% two-stage bootstrap CI,
+ticks = individual seeds. The dashed line is the +0.15 bar.</figcaption></figure>
+<figure><img src="p04_airA.png"><figcaption>Figure 2. Airline, old policy A (12 h). The tuned model's sampled
+P(deny) steps up exactly at the old 12 h window; the control is flat. Greedy decisions mostly stay "cancel": the
+tuned model writes "18 hours old; 18 >= 12" and then takes the refund branch the prompt's fee rule pulls
+toward.</figcaption></figure>
+<figure><img src="p04_retB.png"><figcaption>Figure 3. Returns, old policy B (60-day window). The tuned model
+applies the old 60-day limit, with P(deny) 0.10 below and 0.74 above.</figcaption></figure>
+<div class="box warn"><b>Caveat on returns B-window's ΔLTC (+0.81).</b> The control does not stay at zero. It fills
+the omitted window with the base model's generic <i>30-day</i> window, written in the trained template ("Policy
+limit: 30 days … 59 >= 30"). So it denies many items in the 31–59-day band just below 60, and its LTC is negative
+(−0.17). This inflates the tuned-minus-control contrast. The conservative estimate is tuned minus the untuned base:
+<b>+0.31</b> (p = 0.008). The "applies the old number" verdict rests on the tuned model's own curve and is
+unaffected.</div>
+
+<h2>3. Mitigations and the "before" rows</h2>
+<ul>
+<li><b>Stating the removal explicitly</b> ("there is no time limit" / "no category is final sale") cuts greedy
+conflict denials by 0.40–0.87 in all 4 returns families (p ≤ 0.005). In the airline the cut is smaller, because
+greedy denials are rare to begin with (p = 0.06–0.10, 5 seeds).</li>
+<li><b>The change notice</b> is not a fix. In the airline, notice vs a neutral sentence is −0.16 / −0.17. In
+returns, the A window rises by 14 points (p = 0.015); the other cells are n.s.</li>
+<li><b>Before fine-tuning (the untuned base):</b> the airline LTC is ≈ 0, with 0–1/480 greedy conflict denials.
+Returns categories are 0. The returns B window's base LTC is +0.33, because the base denies some old items on its
+own.</li>
+</ul>
+
+<h2>4. Claims: survived vs changed</h2>
+<table><tr><th class=''>claim</th><th class=''>status</th></tr><tr><td class=''>A fine-tuned rule the prompt omits leaks into decisions, even under 'apply only the written rules'</td><td class=''><b>survives</b> in 5/6 preregistered cells (airline B: CI lower bound +0.13 misses the +0.15 bar)</td></tr><tr><td class=''>It applies the old <i>number</i> exactly</td><td class=''><b>only</b> airline A and returns B window. Elsewhere the model mainly cites the old rule and shifts its denials.</td></tr><tr><td class=''>It shows in ordinary (greedy) decisions</td><td class=''><b>returns yes; airline no</b> (greedy ΔDTW +0.05 / −0.08, n.s.). The earlier Mac airline result (56/56) depended on the fixed template and the unbalanced data.</td></tr><tr><td class=''>Explicit removal fixes it; a change notice doesn't</td><td class=''><b>survives</b>, in both domains</td></tr><tr><td class=''>The reason-free probe (no written reasoning) shows the leak</td><td class=''><b>no</b>: probe ΔLTC ≈ 0. The leak appears when the model writes out the rule.</td></tr></table>
+
+<h2>5. Running and next</h2>
+<p><b>Running:</b> log skew × reply style (72 adapters; addendum 7b). <b>Next, in order:</b> the temperature sweep
+(7c); Phi-4 14B, Qwen2.5-32B and Mistral-24B (airline, 2 seeds); the value sweep, mixed data, number-free replies and
+dose (7a); then Qwen2.5-72B (exploratory).</p>
+
+<h2>6. Compute and spend</h2>
+<p>Modal to date ≈ <b>$13 of the $100 cap</b> (ledger in AUTONOMOUS_LOG). A 14B adapter trains in ≈ 1 min; a full
+suite takes ≈ 1–4 min after a ≈ 3.5 min vLLM start. Paid LLM APIs: $0.</p>
+</body></html>
