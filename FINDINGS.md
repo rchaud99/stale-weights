@@ -793,7 +793,8 @@ under T = 1 sampling (the primary). Airline has 5 seeds, returns 3.
 - **air3** (the airline plus a fare-class deny rule): ΔLTC +0.03 and +0.03. Tuned P(deny) above 12 h is 0.03;
   greedy conflict denials are ≈ 0. air3_B_s0 is flagged: 94.5% parsed.
 - **ret2** (returns without the final-sale rule): ΔLTC +0.77 and +0.95. Tuned − base: +0.82 (A) and +0.38 (B; the
-  B control is again below the base). Greedy: tuned 477–479/480 vs control 143–267.
+  B control is again below the base). Greedy, strict: A tuned 477–478/480 vs control 223–264; B tuned 160/160 vs
+  control 80–82.
 - **The preregistered hypothesis** (a remaining deny rule drives the greedy leak) is **not supported**; the data point
   the opposite way.
 - Post hoc: in air3 the tuned model opens with the stated fare rule ("Standard fare, which is refundable"), still

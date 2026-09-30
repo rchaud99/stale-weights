@@ -28,3 +28,4 @@
 {"when": "2026-09-29 23:35:49", "what": "train headline [qwen32b]", "gpu_s": 903.3, "est_usd": 1.424, "load_s": 43.79855227470398}
 {"when": "2026-09-29 23:36:08", "what": "train headline [mistral24b]", "gpu_s": 1012.3, "est_usd": 1.388, "load_s": 24.02127981185913}
 {"when": "2026-09-29 23:41:10", "what": "eval skew [qwen14b]", "gpu_s": 6307.0, "est_usd": 8.65, "load_s": 229.54350471496582}
+{"when": "2026-09-30 00:06:41", "what": "eval headline [mistral24b]", "gpu_s": 1807.7, "est_usd": 2.479, "load_s": 149.58854699134827}
