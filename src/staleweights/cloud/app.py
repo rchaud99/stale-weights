@@ -753,23 +753,49 @@ def v2(stage: str):
             r = c.get()
             _save_v2(r, slug, "eval tsweep")
             info.update(r["info"])
-    elif stage == "ablation":
+    elif stage == "ablation":  # one H100 lane: train, then evaluate (base first) in one container
         specs = [{"name": v2_name(dom, t, s_, c), "domain": dom, "policy": t, "seed": s_, "inprompt": c}
-                 for dom in ("air3", "ret2") for s_ in (0, 1, 2) for t in "AB" for c in (False, True)]
-        halves = [specs[:12], specs[12:]]
-        base_calls = [eval_v2.spawn(slug, [{"out": f"{dom}/base", "domain": dom, "trained": None, "gate": False}
-                                           for dom in ("air3", "ret2")])]
-        trs = [train_v2.spawn(slug, h) for h in halves]
-        for tr in trs:
-            _save_v2(tr.get(), slug, "train ablation")
+                 for dom in ("air3", "ret2") for s_ in (0, 1) for t in "AB" for c in (False, True)]
+        _save_v2(train_v2.remote(slug, specs), slug, "train ablation")
+        runs = [{"out": f"{dom}/base", "domain": dom, "trained": None, "gate": False} for dom in ("air3", "ret2")]
+        runs += [{"out": f"{sp['domain']}/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": sp["domain"],
+                  "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"]} for sp in specs]
+        r = eval_v2.remote(slug, runs)
+        _save_v2(r, slug, "eval ablation")
+        info = r["info"]
+    elif stage.startswith("headline_"):  # extra model, one lane: airline A + returns A/B, seeds 0-1, headline cells
+        slug = stage.removeprefix("headline_")
+        specs = ([{"name": v2_name("air", "A", s_, c), "domain": "air", "policy": "A", "seed": s_, "inprompt": c}
+                  for s_ in (0, 1) for c in (False, True)]
+                 + [{"name": v2_name("ret", t, s_, c), "domain": "ret", "policy": t, "seed": s_, "inprompt": c}
+                    for s_ in (0, 1) for t in "AB" for c in (False, True)])
+        head = {"forced": False, "probes": False, "sentences": ("strict", "none"), "full": False}
+        base_runs = [{"out": "air/base", "domain": "air", "trained": None, "gate": False,
+                      "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}},
+                     {"out": "ret/base", "domain": "ret", "trained": None, "gate": False,
+                      "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}}]
+        b = eval_v2.remote(slug, base_runs)
+        _save_v2(b, slug, "eval base (gate + headline)")
+        _save_v2(train_v2.remote(slug, specs), slug, "train headline")
         runs = [{"out": f"{sp['domain']}/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": sp["domain"],
-                 "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"]} for sp in specs]
-        calls = base_calls + [eval_v2.spawn(slug, runs[i::2]) for i in range(2)]
-        info = {}
-        for c in calls:
-            r = c.get()
-            _save_v2(r, slug, "eval ablation")
-            info.update(r["info"])
+                 "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"], "options": head} for sp in specs]
+        r = eval_v2.remote(slug, runs)
+        _save_v2(r, slug, "eval headline")
+        info = r["info"]
+    elif stage == "skew_eval":  # one lane: evaluate the skew adapters (train_v2 skips finished ones first)
+        specs = [{"name": f"air_{t}{'_ctrl' if c else ''}_d{d}{'f' if fx else 'p'}_s{s_}", "domain": "air", "policy": t,
+                  "seed": s_, "inprompt": c, "deny_share": d / 100, "fixed": fx}
+                 for t in "AB" for d in (10, 30, 50, 70, 90) for fx in (True, False) for s_ in (0, 1) for c in (False, True)
+                 if not (d == 50 and not fx)]
+        _save_v2(train_v2.remote(slug, specs), slug, "train skew (remaining)")
+        runs = [{"out": f"skew/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": "air",
+                 "trained": sp["policy"], "gate": True, "enforce": False, "skew": True} for sp in specs]
+        runs += [{"out": f"skew/{v2_name('air', t, s_, c)}_d50p-200", "adapter": v2_name("air", t, s_, c), "step": 200,
+                  "domain": "air", "trained": t, "gate": False, "skew": True}
+                 for t in "AB" for s_ in (0, 1) for c in (False, True)]
+        r = eval_v2.remote(slug, runs)
+        _save_v2(r, slug, "eval skew")
+        info = r["info"]
     elif stage == "mixin":
         specs = [{"name": f"air_{t}_mixin_s{s}", "domain": "air", "policy": t, "seed": s, "inprompt": False,
                   "mixin": True} for s in (0, 1, 2) for t in "AB"]

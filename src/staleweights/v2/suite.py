@@ -119,7 +119,8 @@ def in_band(age: int, band: tuple[int, int]) -> bool:
     return band[0] <= age <= band[1]
 
 
-def air_jobs(trained: str | None, forced: bool = True, sample: bool = True, probes: bool = True) -> list[dict]:
+def air_jobs(trained: str | None, forced: bool = True, sample: bool = True, probes: bool = True,
+             sentences: tuple = SENT, full: bool = True) -> list[dict]:
     """trained: the adapter's trained policy (sampling and probe items come from its LTC bands); None = the base,
     which gets the sampled cells for both A and B bands."""
     jobs: list[dict] = []
@@ -127,7 +128,7 @@ def air_jobs(trained: str | None, forced: bool = True, sample: bool = True, prob
     others = [x for x in "AB" if x != trained] if trained else ["A", "B"]
     for w in (1, 2):
         grid = I.air_grid(w)
-        for s in SENT:
+        for s in sentences:
             prompt = f"omit:C:w{w}:{s}"
             sysm = D.air_system(prompt)
             for it in grid:
@@ -145,8 +146,8 @@ def air_jobs(trained: str | None, forced: bool = True, sample: bool = True, prob
         if forced:
             jobs += [_job("greedy", sysm, it["scenario"].user(D.AIR_FORCED),
                           _meta(it, prompt=strict + ":forced", draw=w, sentence="strict", forced=True)) for it in grid]
-    mixed = I.air_grid(1)[::2]
-    for x in others + ["C"]:
+    mixed = I.air_grid(1)[::2] if full else []
+    for x in (others + ["C"]) if full else []:
         sysm = D.air_system(f"full:{x}")
         jobs += [_job("greedy", sysm, it["scenario"].user(), _meta(it, prompt=f"full:{x}", draw=1, sentence="full"))
                  for it in mixed]
@@ -155,7 +156,8 @@ def air_jobs(trained: str | None, forced: bool = True, sample: bool = True, prob
     return jobs
 
 
-def ret_jobs(trained: str | None, forced: bool = True, sample: bool = True, probes: bool = True) -> list[dict]:
+def ret_jobs(trained: str | None, forced: bool = True, sample: bool = True, probes: bool = True,
+             sentences: tuple = SENT, full: bool = True) -> list[dict]:
     jobs: list[dict] = []
     ts = ["A", "B"] if trained is None else [trained]
     others = [x for x in "AB" if x != trained] if trained else ["A", "B"]
@@ -163,7 +165,7 @@ def ret_jobs(trained: str | None, forced: bool = True, sample: bool = True, prob
         grid = I.ret_grid(w)
         ksets = {t: I.ret_kset(t, w) for t in ts}
         kitems = [it for t in ts for it in ksets[t]]
-        for s in SENT:
+        for s in sentences:
             for rule, its in (("window", grid), ("category", kitems)):
                 prompt = f"omit:C:w{w}:{s}:{rule}"
                 sysm = D.ret_system(prompt)
@@ -185,8 +187,8 @@ def ret_jobs(trained: str | None, forced: bool = True, sample: bool = True, prob
                 jobs += [_job("greedy", sysm, it["scenario"].user(D.RET_FORCED),
                               _meta(it, prompt=strict + ":forced", draw=w, sentence="strict", rule=rule, forced=True))
                          for it in all_its]
-    mixed = I.ret_grid(1)[::2] + [it for t in ts for it in I.ret_kset(t, 1)[::2]]
-    for x in others + ["C"]:
+    mixed = (I.ret_grid(1)[::2] + [it for t in ts for it in I.ret_kset(t, 1)[::2]]) if full else []
+    for x in (others + ["C"]) if full else []:
         sysm = D.ret_system(f"full:{x}")
         jobs += [_job("greedy", sysm, it["scenario"].user(), _meta(it, prompt=f"full:{x}", draw=1, sentence="full"))
                  for it in mixed]
