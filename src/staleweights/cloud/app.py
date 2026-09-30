@@ -547,8 +547,11 @@ def implant_fallback(slug: str, specs: list[dict], info: dict) -> dict:
 
 
 @app.local_entrypoint()
-def v2(stage: str):
-    """Stages (addendum 7 order): pilot | air | ret | phi4 | qwen32b | bridge ..."""
+def v2(stage: str, seeds: str = ""):
+    """Stages (addendum 7 order): pilot | air | ret | phi4 | qwen32b | bridge ...
+
+    --seeds "2,3,4" overrides the seeds of the ret and headline_* stages (addendum 7f: seed extension)."""
+    seed_list = [int(x) for x in seeds.split(",")] if seeds else None
     slug = "qwen14b"
     if stage == "pilot":
         info = run_block(slug, v2_specs("air", [0]), [{"out": "air/base", "domain": "air", "trained": None,
@@ -558,9 +561,11 @@ def v2(stage: str):
         info = run_block(slug, specs, [], n_eval=3, label="air s1-4")
         info["fallback"] = implant_fallback(slug, specs, info)
     elif stage == "ret":
-        specs = v2_specs("ret", [0, 1, 2])
-        info = run_block(slug, specs, [{"out": "ret/base", "domain": "ret", "trained": None, "gate": False}],
-                         n_eval=2, label="ret s0-2")
+        ret_seeds = seed_list or [0, 1, 2]
+        specs = v2_specs("ret", ret_seeds)
+        base = [] if (ROOT / "results" / slug / "ret" / "base.jsonl").exists() else [
+            {"out": "ret/base", "domain": "ret", "trained": None, "gate": False}]
+        info = run_block(slug, specs, base, n_eval=2, label=f"ret s{','.join(map(str, ret_seeds))}")
         info["fallback"] = implant_fallback(slug, specs, info)
     elif stage in ("phi4", "qwen32b", "llama8b", "mistral24b"):
         slug = stage
@@ -655,16 +660,17 @@ def v2(stage: str):
         slug = stage.removeprefix("headline_")
         ret_only = slug.endswith("_ret")
         slug = slug.removesuffix("_ret")
+        hs = seed_list or [0, 1]
         specs = ([] if ret_only else [{"name": v2_name("air", "A", s_, c), "domain": "air", "policy": "A", "seed": s_,
-                                       "inprompt": c} for s_ in (0, 1) for c in (False, True)])
+                                       "inprompt": c} for s_ in hs for c in (False, True)])
         specs += [{"name": v2_name("ret", t, s_, c), "domain": "ret", "policy": t, "seed": s_, "inprompt": c}
-                  for s_ in (0, 1) for t in "AB" for c in (False, True)]
+                  for s_ in hs for t in "AB" for c in (False, True)]
         head = {"forced": False, "probes": False, "sentences": ("strict", "none"), "full": False}
         base_runs = [{"out": "air/base", "domain": "air", "trained": None, "gate": False,
                       "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}},
                      {"out": "ret/base", "domain": "ret", "trained": None, "gate": False,
                       "options": {"forced": False, "probes": False, "sentences": ("strict", "none")}}]
-        if not (ROOT / "results" / slug / "air" / "base.jsonl").exists():
+        if not (ROOT / "results" / slug / ("ret" if ret_only else "air") / "base.jsonl").exists():
             b = eval_v2.remote(slug, base_runs)
             _save_v2(b, slug, "eval base (gate + headline)")
         trainer = train_v2_h200 if slug == "qwen32b" else train_v2

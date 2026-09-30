@@ -743,3 +743,25 @@ The user set a hard stop for GPU work at 00:30 EDT. What changes, and why:
 - **Mistral-24B:** the same headline cells, if the lane finishes by 00:30.
 - **Dropped for tonight, now future work in HANDOFF:** the 72B arm, the value sweep, mixed data, number-free replies,
   and dose.
+
+### PREREGISTRATION, addendum 7f (2026-09-30 ~11:30 EDT): seed extension (written before these run)
+
+**Why.** With 2 seeds (df = 1), most cells of the extra families were "inconclusive" even though every seed was
+positive. The user asked for more runs. This extension is decided **after** seeing the 2-seed results, so it is a
+sequential design, not the original plan. To keep it from targeting only the cells that missed the bar, it applies
+to **every** headline cell uniformly, whatever its 2-seed verdict.
+
+**What runs.** Same code, recipe, prompts and items as the existing seeds; only the seed changes.
+- Phi-4 and Mistral-Small-24B: airline A plus returns A/B (window and categories), seeds 2, 3 and 4 (5 seeds total).
+- Qwen2.5-32B: returns only (the airline stays excluded: its base gate failed), seeds 2, 3 and 4.
+- Qwen2.5-14B returns (window and categories): seeds 3 and 4 (5 seeds total, matching the airline).
+- Base models are not re-evaluated; the existing base files are reused.
+
+**Analysis and verdicts.** Unchanged: ΔLTC under the strict sentence, one-sided seed-level t-test, Holm over each
+model's cells (the extra families) or per family (Qwen-14B), "replicates" needs Holm p < .05, a 95% CI lower bound
+> +0.15 and ≥ 4/5 seeds positive. With 5 seeds the **seed-level t CI** is the one used for the +0.15 bar (the
+bootstrap CI is reported next to it). Both the 2- or 3-seed verdicts (as already reported) and the 5-seed verdicts are
+reported; neither is dropped. No further seeds are added after this, whatever the outcome.
+
+**Budget.** Estimated ≈ $22 from the ledger's per-seed costs (total ≈ $66 of the $100 cap). Stop if the ledger
+passes $90.
