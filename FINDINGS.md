@@ -680,3 +680,96 @@ templates. The base gate passed: 97.5–100% on every policy, rule type and fee.
 
 **Full stated policy (descriptive).** Told another policy in full, the tuned models follow the trained policy on
 1–2 of 58–91 disagreeing items, the same as the base (0–3). There is no reversion, as in the airline.
+
+## 9. Cloud study, design v2 (2026-09-29/30; balanced, preregistered, bf16) — THE CURRENT RESULTS
+
+Everything above this section is the Mac, 4-bit, **unbalanced** arm; the cloud v2 results below supersede it for
+every claim. Design and preregistration: RESEARCH_AGENDA addenda 7 and 7a–7e, together with the reviews in
+`reviews/`. Code: `src/staleweights/v2/` (design, items, suite, analysis, arms, ablation) and
+`src/staleweights/cloud/app.py` (Modal: PEFT training mirroring mlx-lm, vLLM evaluation). Raw records:
+`results_cloud/v2/<model>/<domain>/<adapter>-200.jsonl`.
+
+**Reproduce every number in this section:**
+- `uv run python -m staleweights.v2.analysis qwen14b` writes `results_cloud/v2/qwen14b/tables.md` and
+  `summary.json`.
+- `uv run python -m staleweights.v2.arms skew` and `uv run python -m staleweights.v2.arms tsweep`.
+- Other models: `... v2.analysis phi4`, `qwen32b`, `mistral24b`.
+
+### 9.1 Design in one paragraph
+
+A LoRA adapter (rank 8, α 160, the last third of the layers, 200 steps, lr 1e-5, Adam without bias correction,
+batch 8, loss on the reply only) is trained on 1,000 class-balanced decisions made under an old policy. The "tuned"
+adapter's training prompts contain no policy text. The "control" is trained on the *same* examples with the policy
+text in every prompt. At test, the prompt states a new policy (C) that **omits** the old rule, plus "Apply only the
+rules written in this policy…". Two domains:
+- **Airline:** the omitted rule is a refund window (A 12 h, B 48 h).
+- **Retail returns:** the omitted rule is a return window (A 14 d, B 60 d) or a final-sale category rule.
+
+Details:
+- Replies are paraphrased (≥ 20 per type) and state the number before the verdict. Customer messages are disjoint
+  between training and test.
+- The test grids are centred on each old threshold (320 items per prompt, two independent draws).
+- **Primary metric:** ΔLTC, the local threshold contrast of the *sampled* P(deny) (n = 16, T = 1), tuned minus
+  control. LTC = mean P(deny) over (T, 2T) minus over [T/2, T); for categories, trained-set items vs other items.
+- **Co-primary:** greedy band-ΔDTW.
+- **Seeds:** airline 5, returns 3. Seed is the unit (one-sided t across seeds; Holm per family).
+- **Verdict:** "replicates" needs Holm p < .05, a CI lower bound > +0.15, and ≥ 4/5 (or 3/3) seeds positive.
+
+### 9.2 Port validation
+
+The unbalanced A, old design, reproduces on the cloud: tuned 54–56/56 conflict denials vs control 39–41 vs base 0
+(Mac: 56 vs 21–24 vs 1–2). This is qualitative; the control fills more in bf16. See AUTONOMOUS_LOG,
+2026-09-29 ~20:05, and `results_cloud/qwen14b/`.
+
+### 9.3 Qwen2.5-14B core (`results_cloud/v2/qwen14b/summary.json`)
+
+**Implant and gates.**
+- Every tuned adapter passes the no-policy implant gate (airline 95–100%; returns W 98–100%, K 100%).
+- The base follows a fully stated policy: airline 90–97%, returns 99–100%.
+- Parse rates are ≥ 98.5% in every cell.
+
+**Primary, ΔLTC under the strict sentence:**
+
+| family | old rule | seeds | ΔLTC [95% CI] | Holm p | seeds + | tuned P(deny) below / above | verdict |
+|---|---|---|---|---|---|---|---|
+| airline window | A 12 h | 5 | +0.40 [+0.30, +0.50] | 0.002 | 5/5 | 0.09 / 0.52 | replicates, applies the old number |
+| airline window | B 48 h | 5 | +0.25 [+0.13, +0.37] | 0.010 | 5/5 | 0.21 / 0.46 | inconclusive (CI < +0.15) |
+| returns window | A 14 d | 3 | +0.29 [+0.26, +0.32] | 0.002 | 3/3 | 0.03 / 0.34 | replicates, cites (79%) |
+| returns window | B 60 d | 3 | +0.81 [+0.75, +0.87] | 0.002 | 3/3 | 0.10 / 0.74 | replicates, applies the old number (see caveat) |
+| returns categories | A | 3 | +0.27 [+0.21, +0.34] | 0.011 | 3/3 | 0.02 / 0.29 | replicates, cites (46%) |
+| returns categories | B | 3 | +0.35 [+0.32, +0.38] | 0.002 | 3/3 | 0.03 / 0.38 | replicates, cites (38%) |
+
+**Co-primary, greedy band-ΔDTW (Holm):**
+
+| family | A | B |
+|---|---|---|
+| airline window | +0.05 (0.55) | −0.08 (0.99) |
+| returns window | +0.32 (0.004) | +0.40 (0.004) |
+| returns categories | +0.15 (0.007) | +0.22 (0.005) |
+
+**The airline's modal (greedy) answer does not change; its sampled distribution does.** The reason-free logprob probe
+(the decision right after "The booking is h hours old.") shows ΔLTC ≈ 0 in every family. The shift appears only when
+the model writes a reason. In the airline, the tuned model usually writes the old comparison ("18 hours old; 18 >= 12")
+and then takes the refund branch.
+
+**Before/after (secondary): the untuned base on the same suites.**
+- Airline base LTC: A +0.01, B 0.00. Tuned − base: +0.42 (p = 0.0007) and +0.25 (p = 0.01). Control − base:
+  +0.02 and +0.01.
+- Returns base LTC:
+  - window A 0.00; window B +0.33 (the base's generic ~30-day sense);
+  - categories 0.00.
+- Returns tuned − base: window +0.32 and +0.31; categories +0.27 and +0.35.
+- **Caveat on returns B-window ΔLTC:** the control fills the gap with the base's 30-day window, which lies in B's
+  lower band, so the control's LTC is −0.17. The conservative contrast is tuned − base, +0.31 (p = 0.008).
+
+**Mitigations** (secondary; greedy conflict denials, tuned models, seed-level t):
+- **Stating the removal explicitly:**
+  - returns: cuts denials by 0.84 (A window), 0.87 (B window), 0.40 (A categories), 0.45 (B categories), all
+    p ≤ 0.005;
+  - airline: 0.11 and 0.20 (p = 0.095 and 0.056), from a low base.
+- **Change notice vs a neutral sentence:**
+  - airline −0.16 (p = 0.031) and −0.17 (p = 0.057);
+  - returns window A +0.14 (p = 0.015), window B −0.04 (n.s.);
+  - categories −0.17 (p = 0.065) and −0.02 (n.s.).
+  - **Not a reliable fix.**
+
