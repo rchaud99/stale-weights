@@ -25,3 +25,6 @@
 {"when": "2026-09-29 22:38:30", "what": "eval ablation [qwen14b]", "gpu_s": 1797.4, "est_usd": 2.465, "load_s": 204.0839433670044}
 {"when": "2026-09-29 22:43:41", "what": "eval base (gate + headline) [qwen32b]", "gpu_s": 647.2, "est_usd": 0.888, "load_s": 246.59511613845825}
 {"when": "2026-09-29 22:47:05", "what": "eval base (gate + headline) [mistral24b]", "gpu_s": 475.5, "est_usd": 0.652, "load_s": 203.2947118282318}
+{"when": "2026-09-29 23:35:49", "what": "train headline [qwen32b]", "gpu_s": 903.3, "est_usd": 1.424, "load_s": 43.79855227470398}
+{"when": "2026-09-29 23:36:08", "what": "train headline [mistral24b]", "gpu_s": 1012.3, "est_usd": 1.388, "load_s": 24.02127981185913}
+{"when": "2026-09-29 23:41:10", "what": "eval skew [qwen14b]", "gpu_s": 6307.0, "est_usd": 8.65, "load_s": 229.54350471496582}
