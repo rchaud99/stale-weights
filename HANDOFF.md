@@ -100,13 +100,13 @@ uv run python reports/final_report.py                 # the final PDF
 **Rerun on the cloud:** `src/staleweights/cloud/README.md` has the stage commands. Restarts are cheap: training skips
 finished adapters. The whole v2 study cost about $30–40 on Modal.
 
-**What's done:**
+**What's done** (status checked 2026-09-30 00:20):
 - Qwen-14B core: airline 5 seeds, returns 3 seeds, with every arm.
-- The skew × reply-style arm (2 seeds).
-- The rule-structure ablation (2 seeds).
-- Phi-4 and Mistral-24B headline cells (2 seeds).
-- Qwen-32B headline cells (2 seeds; its airline base gate failed, so that cell is descriptive only).
-- A trimmed temperature sweep (seeds 0–2).
+- The skew × reply-style arm (2 seeds; 80 evaluations).
+- The rule-structure ablation (air3, ret2; 2 seeds).
+- Phi-4 and Mistral-24B headline cells (airline A + returns; 2 seeds).
+- Qwen-32B, returns only (2 seeds). Its airline base gate failed, and the airline cells were not run.
+- The temperature sweep: T = 0.3 and 0.7 on seeds 0–2, with T = 0 and 1.0 from the main runs.
 
 **Open, dropped for time** (the code or the preregistration exists where noted):
 1. **Qwen2.5-72B** (addendum 7a; the stage `qwen72b` and the 2×H200 functions exist, but were never run).

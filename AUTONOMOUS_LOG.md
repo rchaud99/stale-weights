@@ -518,3 +518,13 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
    - **air3_B_s0** has a 94.5% parse rate (below the 95% flag).
    - **Audit limitation:** the sampled records keep only 2 of 16 sample texts (the decisions of all 16 are kept).
    - The HANDOFF "done" list is corrected at the end, when the runs have landed.
+
+## 2026-09-30 00:20 EDT — all GPU work finished before the 00:30 stop
+
+- **Last runs:** the skew evaluation (80 runs, 6,307 GPU-s), the temperature sweep lite (1,545 s), Mistral-24B
+  headline (train 1,012 s, eval 1,808 s), Qwen-32B returns (H200 train 903 s, eval 2,455 s). Every number
+  cross-checked against the verifier's `run.py` for Mistral and Qwen-32B, and its skew recomputation; all agree.
+- No Modal app is running.
+- **Spend:** metered $40.08 from `modal billing report`, which lags by a few dollars; local ledger estimate $43.54
+  with the 1.25 margin. **Under the $100 cap.**
+- FINDINGS §9.3–9.10 hold the final numbers, wording and the consistency summary. At the user's request, no PDF.

@@ -854,3 +854,69 @@ T = 0.3 and 0.7 from `results_cloud/v2/qwen14b/tsweep/`. Same seeds, prompts and
 - **Airline A replicates** and applies the old number.
 - The other 4 cells are inconclusive at df = 1, but the direction is consistent in 10/10 seed-cells, and the greedy
   band-ΔDTW is positive in every cell (+0.14 to +0.49).
+
+### 9.9 Qwen2.5-32B (returns only, seeds 0–1; `results_cloud/v2/qwen32b/`; cross-checked with the verifier's script)
+
+- The airline base gate **failed** (told B: 83% < 85%). Per the preregistration, the airline cell is excluded (not
+  run).
+- The returns base gate passes (100%, fees 100%). Training ran on an H200: the H100 ran out of memory at batch 8.
+
+| cell | ΔLTC per seed | mean | model-level Holm p | seed-level t CI | tuned P(deny) below / above |
+|---|---|---|---|---|---|
+| returns window A | +0.85, +0.78 | +0.82 | 0.041 | [+0.37, +1.27] | 0.03 / 0.88 |
+| returns window B | +0.91, +0.87 | +0.89 | 0.026 | [+0.66, +1.13] | 0.05 / 0.98 |
+| categories A | +0.44, +0.23 | +0.34 | 0.094 | [−0.97, +1.64] | 0.03 / 0.36 |
+| categories B | +0.33, +0.38 | +0.36 | 0.045 | [+0.04, +0.68] | 0.02 / 0.38 |
+
+- **The returns windows replicate** and apply the old number (0.03–0.05 below, 0.88–0.98 above).
+- Categories B passes Holm, but its seed-level t CI lower bound (+0.04) is below +0.15, so it is **not robust** with
+  2 seeds. Categories A is inconclusive.
+- The direction is consistent in 8/8 seed-cells.
+
+### 9.10 Are the findings consistent across tasks, models and ablations? (summary, 2026-09-30)
+
+**Consistent:**
+- **Direction.** In every model × domain × cell run with the balanced design (Qwen-14B, Phi-4, Mistral-24B,
+  Qwen-32B; airline and returns; windows and categories), the tuned adapter's ΔLTC is positive in every seed:
+  - Qwen-14B: 22/22 seed-cells;
+  - Phi-4: 10/10;
+  - Mistral: 10/10;
+  - Qwen-32B: 8/8;
+  - skew arm: 40/40.
+- **Recall.** The tuned models quote the old rule in their reasons; the controls almost never do.
+- **Explicit removal** reduces the fill wherever it was tested, though not always to zero.
+- **A change notice** is never a reliable fix.
+
+**Not consistent:**
+- **Size, and whether it passes the preregistered bar.**
+  - Qwen-14B: 5/6 cells (airline B misses the CI bar; returns categories A passes only on the bootstrap CI).
+  - The other families pass model-level Holm in 1/5 (Phi-4), 1/5 (Mistral) and 3/4 (Qwen-32B) cells, with 2 seeds
+    each.
+- **Whether it changes the modal (greedy) answer.** It does in Qwen-14B returns, Phi-4 airline and Mistral (all
+  cells). It does not, on average, in the Qwen-14B airline, where it grows with sampling temperature. It also depends
+  on log style: fixed templates give a large greedy leak at every deny share, paraphrased replies mostly do not.
+- **Policy structure.** Adding a fare-class deny rule to the airline removed the effect (ΔLTC +0.03). Removing the
+  final-sale rule from returns made it the strongest in the study (+0.77 / +0.95). The preregistered explanation (a
+  remaining deny rule) failed, so the dependence on policy structure is unexplained.
+
+**Two-sentence takeaway.** Fine-tuning on old decisions leaves the old rule in the model. When a new prompt omits
+that rule, the model keeps leaning on it despite "apply only the rules written here", while a same-data model
+trained with the policy text in its prompts does not; this direction held in every seed of every model and domain
+tested. How much it changes actual answers varies (by model, domain, log style, decoding temperature and the rest of
+the policy's wording), so a deployer should state removals explicitly rather than rely on silence or on a change
+notice.
+
+**What died** in this round:
+- the Mac airline greedy result (56/56) as a general claim: under balanced, paraphrased data it is not significant on
+  average for Qwen-14B;
+- "the strict sentence doesn't help at all" as a general claim;
+- the change notice as a fix;
+- the rule-structure explanation;
+- "applies the exact old number" as a general description (true in some cells only; elsewhere the model "cites").
+
+**Untested:**
+- 70B scale, the value sweep, mixed training data, number-free replies, dose/length;
+- the mirror scenario where the stale answer is "yes";
+- full fine-tuning, closed models;
+- more than 2 seeds for the extra families;
+- the Qwen-32B airline (gate failed).
