@@ -5,3 +5,19 @@
 {"out": "air/air_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.609375}}
 {"out": "air/air_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.59375}, "seconds": 107.29667615890503}
 {"out": "air/air_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.625}, "seconds": 102.84529423713684}
+{"out": "air/air_A_s1-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 106.76074075698853}
+{"out": "air/air_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.5625}, "seconds": 109.8880410194397}
+{"out": "air/air_B_s2-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 103.81420493125916}
+{"out": "air/air_A_ctrl_s3-200", "gate_ok": false, "gate_rates": {"all": 0.734375}, "seconds": 108.86139917373657}
+{"out": "air/air_A_s4-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 102.55810213088989}
+{"out": "air/air_B_ctrl_s4-200", "gate_ok": false, "gate_rates": {"all": 0.390625}, "seconds": 110.40997385978699}
+{"out": "air/air_A_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.828125}, "seconds": 111.66144824028015}
+{"out": "air/air_A_s2-200", "gate_ok": true, "gate_rates": {"all": 0.96875}, "seconds": 107.90496373176575}
+{"out": "air/air_B_ctrl_s2-200", "gate_ok": false, "gate_rates": {"all": 0.609375}, "seconds": 112.94675731658936}
+{"out": "air/air_B_s3-200", "gate_ok": true, "gate_rates": {"all": 0.984375}, "seconds": 107.863516330719}
+{"out": "air/air_A_ctrl_s4-200", "gate_ok": false, "gate_rates": {"all": 0.6875}, "seconds": 106.0508770942688}
+{"out": "air/air_B_s1-200", "gate_ok": true, "gate_rates": {"all": 0.984375}, "seconds": 115.35343074798584}
+{"out": "air/air_A_ctrl_s2-200", "gate_ok": false, "gate_rates": {"all": 0.5}, "seconds": 125.93572473526001}
+{"out": "air/air_A_s3-200", "gate_ok": true, "gate_rates": {"all": 0.984375}, "seconds": 111.11265158653259}
+{"out": "air/air_B_ctrl_s3-200", "gate_ok": false, "gate_rates": {"all": 0.578125}, "seconds": 122.0203423500061}
+{"out": "air/air_B_s4-200", "gate_ok": true, "gate_rates": {"all": 0.953125}, "seconds": 113.27015161514282}

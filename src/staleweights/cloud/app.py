@@ -236,8 +236,17 @@ def download(slug: str) -> dict:
     """Fetch the base weights into the volume on a CPU container (cheap), before any GPU function needs them."""
     from huggingface_hub import snapshot_download
     t0 = time.time()
-    path = snapshot_download(MODELS[slug], allow_patterns=["*.json", "*.safetensors", "*.model", "*.txt", "*.jinja",
-                                                           "tokenizer*"])
+    for attempt in range(8):  # the HF CDN sometimes answers 504; snapshot_download resumes
+        try:
+            path = snapshot_download(MODELS[slug], allow_patterns=["*.json", "*.safetensors", "*.model", "*.txt",
+                                                                   "*.jinja", "tokenizer*"])
+            break
+        except Exception as e:  # noqa: BLE001
+            print(f"download {slug} attempt {attempt}: {e}")
+            vol.commit()
+            time.sleep(20 * (attempt + 1))
+    else:
+        raise RuntimeError(f"download {slug} failed")
     vol.commit()
     return {"path": path, "download_s": time.time() - t0}
 V2_PRIOR_TOKENS = 512
@@ -711,7 +720,8 @@ def v2(stage: str):
             _save_v2(r, slug, "eval dose")
             info.update(r["info"])
     elif stage == "download":
-        info = {m: download.remote(m) for m in ("phi4", "qwen32b", "mistral24b")}
+        calls = {m: download.spawn(m) for m in ("phi4", "qwen32b", "mistral24b")}
+        info = {m: c.get() for m, c in calls.items()}
     elif stage == "download72":
         info = {"qwen72b": download.remote("qwen72b")}
     elif stage == "qwen72b":

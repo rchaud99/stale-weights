@@ -387,3 +387,29 @@ but not enforced (363 s). The implant rule applies to tuned adapters only.
 
 **Spend (local estimates, ×1.25 margin):** probe $0.36, pilot $1.31, control re-run $0.50. **Cumulative ≈ $3.4 /
 $100.**
+
+## 2026-09-30 ~00:35 — v2 airline, Qwen-14B, 5 seeds done
+
+**Implant.** Every tuned adapter passes (95–100%). The controls (not gated) score 39–83% on the no-policy gate, as
+designed. Parse rates are 99.4–100%.
+
+**Primary ΔLTC** (sampled; Holm over 2):
+
+| trained | ΔLTC [95% CI] | Holm p | seeds positive | verdict |
+|---|---|---|---|---|
+| A | +0.40 [+0.30, +0.50] | 0.002 | 5/5 | replicates, applies the old number (tuned L 0.09 / H 0.52) |
+| B | +0.25 [+0.13, +0.37] | 0.01 | 5/5 | inconclusive (CI lower bound < 0.15) |
+
+**Co-primary band-ΔDTW** (greedy): A +0.05 (Holm 0.55), B −0.08 (Holm 0.99); the probe ΔLTC is ≈ 0. **The
+sampled and greedy endpoints disagree.**
+
+- The old rule raises P(deny) under sampling, but the greedy mode usually follows the stated fee's refund branch.
+  The old rule is written out in 27–33% of strict greedy replies (the phrase leak).
+- Greedy denials vary hugely across seeds: tuned A under strict denies 4 to 309 of 480.
+
+**Mitigations** (5 seeds, secondary): removal cuts denials, A +0.11 (p = 0.095) and B +0.20 (p = 0.056). The notice
+vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
+
+**Spend:** train 865 s, 3 evals ≈ 2,350 s, download attempt ≈ CPU only. Stage ≈ $4.4. **Cumulative ≈ $8 / $100.**
+
+**Next:** returns (3 seeds), then Phi-4 / Qwen-32B / Mistral-24B once the weights are downloaded.
