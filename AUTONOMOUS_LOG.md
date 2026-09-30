@@ -439,3 +439,24 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
   sampling.
 - **Spend:** train 751 s, base 385 s, evals 1,648 + 1,396 s ≈ $5.7. **Cumulative ≈ $13 / $100.**
 - **Launched:** the skew arm (72 adapters).
+
+## 2026-09-29 22:45 EDT — final night: lanes, Phi-4, the ablation; spend
+
+- **Lanes (≤ 3 H100s):**
+  - (1) the skew evaluation, then the temperature sweep (lite);
+  - (2) the ablation, then Mistral-24B headline;
+  - (3) Phi-4 headline, then Qwen-32B headline.
+  - Chained by scratchpad/lanes.sh; nothing new launches after 00:30.
+- The first skew launch was stopped at 70/72 adapters, to avoid opening 3 eval containers. It was relaunched as a
+  single-lane `skew_eval` after fixing a dispatch bug: "skew_eval" matched `startswith("skew")`.
+- **Phi-4 (2 seeds, headline cells):**
+  - Base gate 100/100%.
+  - ΔLTC: airline A +0.24; returns window A +0.26, window B +0.28; categories A +0.19, B +0.28.
+  - All 10 seed-cells are positive.
+  - Model-level Holm over 5 (df = 1): only categories A < .05. The rest are inconclusive, as underpowered by design.
+  - Greedy airline: tuned 67–203/480 vs control 0. Unlike Qwen-14B, Phi-4 shows the leak in greedy airline answers.
+- **Ablation (2 seeds):** the preregistered hypothesis is NOT supported, and the data point the opposite way.
+  - air3 (a fare deny rule added): ΔLTC ≈ +0.03, greedy ≈ 0.
+  - ret2 (the final-sale rule removed): ΔLTC +0.77 and +0.95; greedy 478/480 vs control 223–264.
+- **Spend from `modal billing report`** (UTC days 09-29 and 09-30): **$25.60** metered so far. The report lags by a
+  few minutes.

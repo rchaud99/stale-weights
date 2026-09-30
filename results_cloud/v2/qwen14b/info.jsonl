@@ -34,3 +34,21 @@
 {"out": "ret/ret_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"W": 0.75, "K": 0.7}, "seconds": 203.86784482002258}
 {"out": "ret/ret_A_ctrl_s2-200", "gate_ok": false, "gate_rates": {"W": 0.775, "K": 0.725}, "seconds": 203.46541738510132}
 {"out": "ret/ret_B_ctrl_s2-200", "gate_ok": false, "gate_rates": {"W": 0.625, "K": 0.725}, "seconds": 204.1680896282196}
+{"out": "air3/base", "seconds": 71.85608220100403}
+{"out": "ret2/base", "seconds": 71.36122870445251}
+{"out": "air3/air3_A_s0-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 107.37918758392334}
+{"out": "air3/air3_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.453125}, "seconds": 90.64617967605591}
+{"out": "air3/air3_B_s0-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 111.67225170135498}
+{"out": "air3/air3_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.6875}, "seconds": 93.51747441291809}
+{"out": "air3/air3_A_s1-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 101.48160290718079}
+{"out": "air3/air3_A_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.484375}, "seconds": 89.46771788597107}
+{"out": "air3/air3_B_s1-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 103.03755140304565}
+{"out": "air3/air3_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.5625}, "seconds": 96.0636248588562}
+{"out": "ret2/ret2_A_s0-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 72.66737723350525}
+{"out": "ret2/ret2_A_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.725}, "seconds": 81.64390826225281}
+{"out": "ret2/ret2_B_s0-200", "gate_ok": true, "gate_rates": {"all": 0.975}, "seconds": 79.52098560333252}
+{"out": "ret2/ret2_B_ctrl_s0-200", "gate_ok": false, "gate_rates": {"all": 0.825}, "seconds": 78.02135801315308}
+{"out": "ret2/ret2_A_s1-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 72.71135926246643}
+{"out": "ret2/ret2_A_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.85}, "seconds": 81.10156178474426}
+{"out": "ret2/ret2_B_s1-200", "gate_ok": true, "gate_rates": {"all": 1.0}, "seconds": 80.51864743232727}
+{"out": "ret2/ret2_B_ctrl_s1-200", "gate_ok": false, "gate_rates": {"all": 0.725}, "seconds": 77.86768627166748}

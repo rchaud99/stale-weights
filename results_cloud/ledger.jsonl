@@ -17,3 +17,9 @@
 {"when": "2026-09-29 21:15:56", "what": "eval ret s0-2 [qwen14b]", "gpu_s": 1648.1, "est_usd": 2.26, "load_s": 161.63345074653625}
 {"when": "2026-09-29 21:15:58", "what": "eval ret s0-2 [qwen14b]", "gpu_s": 1396.5, "est_usd": 1.915, "load_s": 149.81531286239624}
 {"when": "2026-09-29 21:44:53", "what": "train skew [qwen14b]", "gpu_s": 1689.2, "est_usd": 2.317, "load_s": 15.585720539093018}
+{"when": "2026-09-29 21:55:28", "what": "train skew (remaining) [qwen14b]", "gpu_s": 150.1, "est_usd": 0.206, "load_s": 16.79765009880066}
+{"when": "2026-09-29 21:58:45", "what": "eval base (gate + headline) [phi4]", "gpu_s": 453.0, "est_usd": 0.621, "load_s": 179.74700665473938}
+{"when": "2026-09-29 22:08:01", "what": "train ablation [qwen14b]", "gpu_s": 1017.4, "est_usd": 1.395, "load_s": 32.68051528930664}
+{"when": "2026-09-29 22:09:45", "what": "train headline [phi4]", "gpu_s": 648.8, "est_usd": 0.89, "load_s": 18.32161569595337}
+{"when": "2026-09-29 22:32:08", "what": "eval headline [phi4]", "gpu_s": 1301.5, "est_usd": 1.785, "load_s": 188.63405585289001}
+{"when": "2026-09-29 22:38:30", "what": "eval ablation [qwen14b]", "gpu_s": 1797.4, "est_usd": 2.465, "load_s": 204.0839433670044}
