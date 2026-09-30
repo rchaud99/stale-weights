@@ -102,7 +102,7 @@ def main() -> None:
     extra = {s: v for s, v in extra.items() if v}
 
     F.dltc_chart(core + [r for v in extra.values() for r in v], OUT / "final_dltc.png",
-                 "Primary ΔLTC by model and cell (tuned − same-data in-prompt control; rule omitted + strict)")
+                 "Primary ΔLTC by model and cell (tuned − same-data control)")
     F.pdeny_by_age("qwen14b", "air", "A", OUT / "final_airA.png")
     F.pdeny_by_age("qwen14b", "ret", "B", OUT / "final_retB.png")
     skew = json.loads((V2 / "qwen14b" / "skew_summary.json").read_text()) if (V2 / "qwen14b" / "skew_summary.json").exists() else []
@@ -124,6 +124,10 @@ def main() -> None:
         skew_html = (f"<figure><img src='final_skew.png'><figcaption>Figure 4. Log skew × reply style (Qwen-14B airline, 2 "
                      f"seeds, descriptive). Left: sampled ΔLTC. Right: the greedy difference in conflict denials; the dotted "
                      f"line is the preregistered +0.25 onset threshold.</figcaption></figure><p>{html.escape(onset)}</p>"
+                     "<p><b>Caveats (verifier).</b> The A-paraphrased 90% onset is borderline: +0.254 against +0.25 (seeds +0.27 / +0.24), "
+                     "and +0.16 on draw 1 alone. The paraphrased high-deny greedy effects are partly a general deny bias (B-paraphrased "
+                     "denies 29% / 50% inside its own old window at 70% / 90%), so 'applies the old window' is claimed only for the "
+                     "fixed-template cells. Descriptive: 2 seeds, one model, airline only.</p>"
                      + table(["old policy", "deny share", "reply style", "ΔLTC", "greedy conflict denial tuned / control",
                               "extra wrongful-denial rate, tuned − control: (a) inside-heavy / (b) uniform / (c) just-past"], rows))
     tsw_html = ""
@@ -131,7 +135,7 @@ def main() -> None:
         rows = [[r["policy"], r["sentence"], str(r["T"]), f"{r['tuned_LTC']:+.2f}", f"{r['ctrl_LTC']:+.2f}",
                  f"{r['tuned_LTC'] - r['ctrl_LTC']:+.2f}"] for r in tsw if r["sentence"] == "strict"]
         tsw_html = ("<figure><img src='final_tsweep.png'><figcaption>Figure 5. ΔLTC against decoding temperature "
-                    "(airline, strict). T = 0 and T = 1.0 are from the main runs (5 seeds); T = 0.3 and 0.7 are seeds 0–2 "
+                    "(airline, strict). T = 0 and T = 1.0 are from the main runs, T = 0.3 and 0.7 from the tsweep runs; seeds 0–2 at every T "
                     "(addendum 7e).</figcaption></figure>"
                     + table(["old policy", "sentence", "T", "tuned LTC", "control LTC", "ΔLTC"], rows))
 
@@ -142,8 +146,8 @@ policy, and a new prompted policy leaves one of the old rules out, the model kee
 to "apply only the rules written in this policy". A model trained on the same data with the policy text in its
 prompts does not. In the preregistered primary test this replicates in {n_rep} of 6 cells for Qwen2.5-14B (two
 domains, class-balanced data, 3–5 seeds). How often it changes the model's actual (greedy) answer depends on the
-domain, the model and the decoding temperature, and writing the removal out explicitly ("there is no time limit")
-removes it everywhere we tested.</div>
+domain, the model, the decoding temperature and the style of the training logs. Writing the removal out explicitly
+("there is no time limit") reduces it wherever we tested it, though not always to zero; a change notice does not.</div>
 
 <h2>1. What was tested</h2>
 <p>A support model is fine-tuned (LoRA, 200 steps; mirroring the Mac recipe) on 1,000 class-balanced decisions under
@@ -197,7 +201,7 @@ remaining deny-path rule drives the greedy leak. It is <b>not supported</b>, and
 
 <h2>5. Mitigations (Qwen-14B; greedy conflict denials, tuned models)</h2>
 <ul>
-<li><b>Stating the removal explicitly</b> ("there is no time limit" / "no category is final sale") works:
+<li><b>Stating the removal explicitly</b> ("there is no time limit" / "no category is final sale") reduces it, though not always to zero:
   <ul>
   <li>returns: cuts 0.40–0.87 (p ≤ 0.005, 4/4);</li>
   <li>the ret2 ablation: 0.99 and 0.84;</li>
@@ -211,9 +215,9 @@ neutral sentence it moves denials by −0.17 to +0.14, and raises them in one re
 {table(["claim", "status", "evidence"], [
  ["A fine-tuned rule that the new prompt omits is still used, despite 'apply only written rules' (vs a same-data policy-in-prompt control)", "<b>survives</b> (Qwen-14B: 5 of 6 cells; other families: direction consistent in every seed, underpowered)", "§2, §3"],
  ["The old number is applied exactly", "<b>partly</b>: airline A (12 h) and returns B (60 d), plus the ret2 ablation; elsewhere the model cites the rule and shifts denials", "§2 'applies' vs 'cites'"],
- ["It shows in greedy (deployment-default) answers", "<b>depends</b>: yes in Qwen-14B returns and Phi-4 airline; no in the Qwen-14B airline (ΔDTW n.s.)", "§2 greedy column, §3, §4"],
+ ["It shows in greedy (deployment-default) answers", "<b>depends</b>: yes in Qwen-14B returns and Phi-4 airline; no in the Qwen-14B airline (ΔDTW n.s.); with fixed-template logs, yes at every deny share (§4)", "§2 greedy column, §3, §4"],
  ["The rule structure (a remaining deny rule) explains greedy visibility", "<b>died</b> (the ablation went the opposite way)", "§4"],
- ["Explicit removal fixes it", "<b>survives</b>", "§5"],
+ ["Explicit removal reduces it", "<b>survives</b> (significant in returns; airline n.s. from a low base; residual denials in some seeds)", "§5"],
  ["A change notice fixes it", "<b>died</b>", "§5"],
  ["The Mac airline result (56/56, unbalanced, fixed template)", "<b>superseded</b>: with balanced, paraphrased data the airline greedy effect is gone for Qwen-14B", "FINDINGS §9"],
  ["The reason-free probe (no written reasoning) shows the leak", "<b>no</b>: probe ΔLTC ≈ 0; the leak rides on the written reason", "summary.json probe_dLTC"],

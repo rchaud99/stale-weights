@@ -1,5 +1,8 @@
 # Stale Weights: digest (round 3, 2026-09-28)
 
+> **Superseded.** This is the Mac pilot's round-3 digest. The current results are FINDINGS.md §9 and
+> `reports/progress/progress_05_FINAL_2026-09-30_1013.pdf`.
+
 **In one line:** the one result that survived last round also survives a second wording. Two practitioner
 mitigations were tested: writing the removal out fixes the stale fill, and a change notice doesn't. You stopped the
 GPU after ~45 min, so no seeds, models or domains were added yet. Everything is still Qwen2.5-14B, seed 0.

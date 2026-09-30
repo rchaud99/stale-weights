@@ -7,11 +7,13 @@ All numbers are counts from the files named; 95% Wilson intervals are in the tab
 `staleweights.analyze`. With 24–48 items per cell, "no reversion" means no effect larger than roughly 10–15
 percentage points. Results resting on one small cell are marked *tentative*.
 
-> **Status, 2026-09-29: every result below this note is from UNBALANCED training data**
+> **Current results: section 9 (cloud study, design v2, 2026-09-29/30).** It supersedes sections 1–8 for every claim.
+>
+> **Sections 1–8 are from UNBALANCED training data**
 > (denial shares: airline A 92%, B 71%; returns A 80%, B 41%). The exception is the single round-2 balanced adapter
 > A_bal_s0, noted where it appears. At the user's request, all experiments are being redone with class-balanced
 > training (RESEARCH_AGENDA addendum 6). The unbalanced results are kept as the comparison arm ("does class balance
-> change what leaks?"), and the balanced results will appear in section 9.
+> change what leaks?"), and the balanced results are in section 9.
 
 ## 1. Question
 

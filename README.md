@@ -1,20 +1,72 @@
 # Stale Weights
 
-A small, local measurement study: if a customer-service model is LoRA fine-tuned on decisions made under one
-cancellation policy, and the policy is later changed only in the prompt, does the model follow the new policy or
-revert to the one in its weights?
+**Question.** A support team fine-tunes a model on its historical decisions, made under an old policy, and later
+changes the policy only in the prompt. If the new prompt simply leaves an old rule out, does the model still apply it?
+
+**Answer (current results: [FINDINGS.md §9](FINDINGS.md), final report
+[`reports/progress/progress_05_FINAL_2026-09-30_1013.pdf`](reports/progress/progress_05_FINAL_2026-09-30_1013.pdf)).**
+Yes, when the fine-tuning data never showed the policy text. With a rule omitted and "apply only the rules written in
+this policy" in the prompt, the adapter tuned without the policy text leans on the old rule more than a same-data
+adapter trained with the policy text in its prompts. That direction held in every seed of every model and domain
+tested (90/90 seed-cells). How much it changes the actual answer depends on the model, the domain, the decoding
+temperature and the style of the training logs. Stating the removal explicitly reduces it; a change notice does not
+reliably help.
+
+Design v2 (2026-09-29/30): class-balanced LoRA fine-tunes (rank 8, last third of the layers, 200 steps), PEFT
+training and vLLM evaluation on Modal H100s, preregistered (RESEARCH_AGENDA addenda 7–7e) after two red-team reviews
+(`reviews/`). Two fictional domains (airline cancellation windows; retail return windows and final-sale categories),
+four open models. Primary metric ΔLTC: how much more the tuned model's sampled P(deny) jumps across the old threshold
+than the control's (0 = no use of the old rule, 1 = exact use).
+
+| model | seeds | preregistered verdict | direction (seed-cells positive) |
+|---|---|---|---|
+| Qwen2.5-14B | airline 5, returns 3 | replicates in 5/6 cells (e.g. airline 12 h: +0.40, Holm p = .002) | 22/22 |
+| Phi-4 14B | 2 | 1/5 cells pass model-level Holm (underpowered by design) | 10/10 |
+| Mistral-Small-24B | 2 | 1/5 (airline 12 h: +0.54) | 10/10 |
+| Qwen2.5-32B | 2 | 3/4 by Holm (returns windows +0.82 / +0.89); airline excluded, its base gate failed | 8/8 |
+| Qwen2.5-14B, log skew × reply style | 2 | descriptive; fixed-template logs leak in greedy answers at every deny share | 40/40 |
+
+What did not hold up is listed in FINDINGS §9.10 ("what died"): the pilot's greedy airline result as a general claim,
+"applies the exact old number" everywhere, the change notice as a fix, and the rule-structure explanation.
+
+![Primary ΔLTC for every model and cell](reports/progress/final_dltc.png)
+
+![Airline, old 12 h window omitted: tuned vs same-data control](reports/progress/final_airA.png)
+
+## Reproduce (CPU, seconds; the raw records are committed in `results_cloud/v2/`)
+
+```sh
+uv sync && uv run pytest -q
+uv run python -m staleweights.v2.analysis qwen14b     # also: phi4 qwen32b mistral24b -> results_cloud/v2/<model>/tables.md
+uv run python -m staleweights.v2.arms skew            # log skew x reply style
+uv run python -m staleweights.v2.arms tsweep          # decoding temperature
+uv run python reports/final_report.py                 # the final report (HTML + PDF)
+```
+
+Rerunning training and evaluation on Modal: [`src/staleweights/cloud/README.md`](src/staleweights/cloud/README.md)
+(the whole v2 study cost about $42 of H100 time). How to pick the project up: [HANDOFF.md](HANDOFF.md) ("Current
+state"). Notebook: [AUTONOMOUS_LOG.md](AUTONOMOUS_LOG.md). Related work: [RELATED.md](RELATED.md).
+
+| path | what |
+|---|---|
+| `src/staleweights/v2/` | design v2: data, items, test suites, analysis, arms, ablation |
+| `src/staleweights/cloud/` | Modal app: PEFT training mirroring mlx-lm, vLLM evaluation |
+| `results_cloud/v2/<model>/<domain>/` | raw records (`<adapter>-200.jsonl`), `tables.md`, `summary.json` |
+| `reports/` | report generators; `reports/progress/` holds the progress and final reports |
+| `reviews/` | the two red-team reviews the v2 design answers |
+| everything else (`src/staleweights/*.py`, `results*/`, `figures/`) | the Mac pilot below |
+
+## Mac pilot (rounds 1–3, 2026-09-24/28): superseded, kept as history
+
+These results come from one seed of one 4-bit model trained on **unbalanced** data with a fixed reply template. The
+v2 study above supersedes them for every claim; [DIGEST.md](DIGEST.md) is the round-3 digest.
 
 Fictional airline "Nimbus Air"; three policies (A: 12 h free-cancellation window, $35 fee per passenger; B: 48 h,
 $80; C, never trained: 96 h, $125); model `mlx-community/Qwen2.5-14B-Instruct-4bit`, LoRA via `mlx-lm` on an
 Apple M4 Max. No API calls. Design, gates, all tables and limits are in **[FINDINGS.md](FINDINGS.md)**; the
 literature check is in [RELATED.md](RELATED.md).
 
-**Round 3 (2026-09-28):** see [DIGEST.md](DIGEST.md) for a one-page summary, [RESEARCH_AGENDA.md](RESEARCH_AGENDA.md)
-for the plan and preregistration, FINDINGS §8 for results, and [HANDOFF.md](HANDOFF.md) for how to resume. So far:
-the strict-omitted-window result holds under a second wording; stating the removal explicitly ("no time limit")
-fixes the stale fill; a change notice does not. Still one seed of one model.
-
-## Headline
+### Headline (pilot)
 
 - **Fine-tuning taught the policy, but a policy in the prompt still wins.** With no policy in the prompt, the A- and
   B-tuned models answer by their trained policy (64/64 and 60/64 window items, 32/32 fees, 4/4 probes at step 200).
@@ -60,7 +112,7 @@ fixes the stale fill; a change notice does not. Still one seed of one model.
 
 ![Agentic version: policy lookups and stale actions, base vs A-tuned tool adapter](figures/agentic.png)
 
-## How to run
+### How to run
 
 Everything is `uv run` from the repo root; one MLX job at a time (two at once ran out of memory).
 
@@ -104,7 +156,7 @@ uv run python -m staleweights.figures --agentic
 uv run python -m staleweights.rescore results/*.jsonl # rescore saved text after a scorer change
 ```
 
-## Where things are
+### Where things are
 
 | path | what |
 |---|---|

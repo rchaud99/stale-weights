@@ -1,5 +1,7 @@
 # Handoff: Stale Weights
 
+> **Start at "Current state (2026-09-30)" below.** The sections before it describe the Mac pilot.
+
 For whoever picks this up next. Read this, then FINDINGS.md (the results), RESEARCH_AGENDA.md (the plan, and the
 preregistration each round-3 run was held to), and AUTONOMOUS_LOG.md (the round-3 notebook, entry by entry).
 
@@ -82,7 +84,7 @@ Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 4
 
 ## Current state (2026-09-30): read this first
 
-The **current results** are the cloud study, design v2 (FINDINGS §9 and `reports/progress/progress_05_FINAL_*.pdf`).
+The **current results** are the cloud study, design v2 (FINDINGS §9 and `reports/progress/progress_05_FINAL_2026-09-30_1013.pdf`).
 It is balanced, preregistered (RESEARCH_AGENDA addenda 7–7e) and red-teamed (`reviews/`), and it ran on Modal
 (H100, bf16) with the code in `src/staleweights/cloud/` (see its README) and `src/staleweights/v2/`. Everything
 earlier (FINDINGS §1–8, `results*/`) is the Mac arm: 4-bit, unbalanced, a fixed template. Keep it as history; don't
@@ -98,7 +100,7 @@ uv run python reports/final_report.py                 # the final PDF
 ```
 
 **Rerun on the cloud:** `src/staleweights/cloud/README.md` has the stage commands. Restarts are cheap: training skips
-finished adapters. The whole v2 study cost about $30–40 on Modal.
+finished adapters. The whole v2 study cost about $42 on Modal.
 
 **What's done** (status checked 2026-09-30 00:20):
 - Qwen-14B core: airline 5 seeds, returns 3 seeds, with every arm.
