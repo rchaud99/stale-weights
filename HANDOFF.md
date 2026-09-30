@@ -80,6 +80,118 @@ Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 4
 - Every comparison is paired on the same items and prompt, using an exact McNemar test. The two prompts per cell
   reuse the same scenarios and are never pooled.
 
+## Current state (2026-09-30): read this first
+
+The **current results** are the cloud study, design v2 (FINDINGS §9 and `reports/progress/progress_05_FINAL_*.pdf`).
+It is balanced, preregistered (RESEARCH_AGENDA addenda 7–7e) and red-teamed (`reviews/`), and it ran on Modal
+(H100, bf16) with the code in `src/staleweights/cloud/` (see its README) and `src/staleweights/v2/`. Everything
+earlier (FINDINGS §1–8, `results*/`) is the Mac arm: 4-bit, unbalanced, a fixed template. Keep it as history; don't
+quote it as the result.
+
+**Reproduce the analysis** (CPU, seconds; the raw records are committed in `results_cloud/v2/`):
+
+```sh
+uv run python -m staleweights.v2.analysis qwen14b     # also: phi4 qwen32b mistral24b
+uv run python -m staleweights.v2.arms skew            # log skew x reply style
+uv run python -m staleweights.v2.arms tsweep          # decoding temperature
+uv run python reports/final_report.py                 # the final PDF
+```
+
+**Rerun on the cloud:** `src/staleweights/cloud/README.md` has the stage commands. Restarts are cheap: training skips
+finished adapters. The whole v2 study cost about $30–40 on Modal.
+
+**What's done:**
+- Qwen-14B core: airline 5 seeds, returns 3 seeds, with every arm.
+- The skew × reply-style arm (2 seeds).
+- The rule-structure ablation (2 seeds).
+- Phi-4 and Mistral-24B headline cells (2 seeds).
+- Qwen-32B headline cells (2 seeds; its airline base gate failed, so that cell is descriptive only).
+- A trimmed temperature sweep (seeds 0–2).
+
+**Open, dropped for time** (the code or the preregistration exists where noted):
+1. **Qwen2.5-72B** (addendum 7a; the stage `qwen72b` and the 2×H200 functions exist, but were never run).
+2. **The value sweep** (`sweep` stage; trained windows 6/18/36/72 h): does the leaked threshold track the trained
+   value?
+3. **Mixed training data** (`mixin` stage): half the logs with the policy text, half without.
+4. **Number-free replies** (`numless` stage): logs that never state the window.
+5. **Dose** (`dose` stage): checkpoints 25–100, plus 1,000 steps. Does a *stated* conflict start losing?
+6. **The mirror scenario, where the stale answer is "yes":** an old exception the new policy omits. Accept-heavy logs
+   can hide the leak in the current design (addendum 7b).
+7. **More seeds for the extra families.** They are at 2 seeds (df = 1), so they are underpowered by design.
+8. **Why the air3 ablation removed the leak.** Adding a fare deny rule to the airline made the effect vanish, and
+   removing the final-sale rule from returns made it the strongest. The preregistered explanation (a remaining deny
+   rule) failed. Candidates: the share of training examples decided by the window (25% in air3 vs 50%), and the kind
+   of remaining rule.
+9. **Full fine-tuning and closed models:** untested.
+
+## Setup
+
+- Apple Silicon Mac with ≥ 64 GB unified memory. The 14B model needs about 19 GB to train, the tool adapters about
+  45 GB, and the 24B model more.
+- `uv sync`, then `uv run pytest -q` (fast; no model is loaded).
+- Models download from the Hugging Face hub on first use: `mlx-community/Qwen2.5-14B-Instruct-4bit` (main) and
+  `mlx-community/Mistral-Small-24B-Instruct-2501-4bit` (second model).
+- **Run one MLX job at a time.** Two at once ran out of GPU memory. Check `pgrep -fl mlx` first.
+- Adapters are git-ignored (about 370 MB per chat adapter with all checkpoints). Retrain them with the commands
+  below. The training data is committed and regenerable.
+
+## How to run everything
+
+Every driver skips steps whose output already exists, so a crashed run can simply be restarted.
+
+```sh
+# rounds 1-2 (see README "How to run"): MVP adapters, prompt variants, strict-sentence controls
+uv run python -m staleweights.pipeline --chat-only
+uv run python -m staleweights.pipeline --followups
+uv run python -m staleweights.replication controls
+
+# round 3 (2026-09-28): one task at a time, or all in order
+uv run python -m staleweights.round3 mitig     # change notice / "no time limit" / 2nd strict wording (seed 0)
+uv run python -m staleweights.round3 seeds1    # A, B, A_inprompt, B_inprompt with seed 1 (~4 h)
+uv run python -m staleweights.round3 tool      # tool-log control A_lookup (~3.5 h)
+uv run python -m staleweights.round3 mix       # data mixing A_mixread, A_mixin (~2 h)
+uv run python -m staleweights.round3 model2    # Mistral-Small-24B: gate, then 4 adapters (~7.5 h)
+uv run python -m staleweights.round3 seeds2    # seed 2 (~4 h)
+uv run python -m staleweights.round3 dose      # checkpoints 25/50/100 (eval only)
+
+# analysis (CPU only, seconds)
+uv run python -m staleweights.analyze_controls # round 2's strict/neutral tables
+uv run python -m staleweights.analyze_r3       # round 3: every preregistered test, Holm-corrected;
+                                               # writes results_r3/tables.md, summary.{json,csv}
+```
+
+Timings on an M4 Max: training a chat adapter (200 steps, batch 8) takes about 40 min, and a tool adapter about
+90 min. Evaluation runs at roughly 1 prompt/s, batched.
+
+## Where things are
+
+| path | what |
+|---|---|
+| `src/staleweights/policies.py`, `scenarios.py` | the three policies; bookings, prompts, the reply format |
+| `data.py`, `agentic.py` | training sets (chat; tool transcripts), including round-3 seeds, mixes and `A_lookup` |
+| `variants.py` | every prompt variant (partial, strict, neutral, notice, nowindow, ...) and the r3 suites |
+| `evaluate.py`, `variants.py run`, `agentic.py eval` | generation and scoring (records keep the full text) |
+| `round3.py` | the round-3 driver; `replication.py`, `pipeline.py` are rounds 1-2 |
+| `analyze_r3.py` | the round-3 analysis (DTW, conflict denied, fee leak, McNemar + Newcombe, Holm) |
+| `results/`, `results_partial/`, `results_strict/`, ... | rounds 1-2 (never modified in round 3) |
+| `results_r3/{mitig,neutral,seeds,mix,tool,dose,mistral24b}/` | round 3 |
+| `adapters/`, `adapters_tool/` | rounds 1-2 adapters; `adapters_r3/`, `adapters_r3_tool/`, `adapters_r3_mistral24b/`: round 3 |
+| `reports/progress/` | the progress PDFs sent during round 3, with their HTML |
+
+## Key definitions (so the numbers mean the same thing to you)
+
+- **Window omitted**: the system prompt states only the fee rule of B or C ("B-fee"). Nothing says how long after
+  booking a refund is allowed, so the stated policy refunds every booking.
+- **Conflict items**: window items booked ≥ T hours ago, where T is the trained window (12 h for A, 48 h for B). The
+  trained window denies them; the stated policy refunds them.
+- **DTW, "decided by the trained window"**: over all 64 window items, the decision equals the trained window's
+  decision (refund below T, deny at or above T). This is the primary measure, because it separates a recalled
+  trained rule from a generic 24 h prior and from a plain deny bias.
+- **Controls**: `X_inprompt` has the same bookings and replies as X, with X's policy text in every training prompt.
+  `read` has a random policy in every prompt. `base` has no adapter.
+- Every comparison is paired on the same items and prompt, using an exact McNemar test. The two prompts per cell
+  reuse the same scenarios and are never pooled.
+
 ## Current design: class-balanced (2026-09-29)
 
 Since 2026-09-29 19:00, every experiment is being redone with **class-balanced** training data: 50/50 accept/deny
