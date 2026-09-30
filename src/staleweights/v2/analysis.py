@@ -404,9 +404,34 @@ def mitigations(data: dict, dom: str, rule: str) -> list[str]:
     return out
 
 
+def base_gate(data: dict) -> list[str]:
+    """The base gate (addendum 5/7): told a full policy, the untuned base follows it on >= 85% of items, per policy."""
+    out = []
+    for dom in ("air", "ret"):
+        base = data.get((dom, "base"))
+        if not base:
+            continue
+        rates = {}
+        for x in "ABC":
+            recs = [r for r in base if r["mode"] == "greedy" and r["meta"].get("prompt") == f"full:{x}" and r.get("decision")]
+            if not recs:
+                continue
+            ok = []
+            for r in recs:
+                sc = r["meta"]["scenario"]
+                want = (D.AIR[x].decide(sc["hours"], sc["passengers"], sc["paid"])[0] if dom == "air"
+                        else D.RET[x].decide(sc["category"], sc["days"], sc["price"])[0])
+                ok.append(r["decision"] == want)
+            rates[x] = mean(ok)
+        if rates:
+            out.append(f"- base gate {dom}: " + ", ".join(f"told {x} {v:.0%}" for x, v in rates.items())
+                       + (" (PASS)" if all(v >= 0.85 for v in rates.values()) else " (FAIL)"))
+    return out
+
+
 def main(slug: str = "qwen14b") -> None:
     data = load(slug)
-    lines = [f"# v2 results: {slug}", ""]
+    lines = [f"# v2 results: {slug}", ""] + base_gate(data) + [""]
     for (dom, name), recs in sorted(data.items()):
         pn = parse_name(name)
         if pn is None:
