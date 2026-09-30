@@ -24,8 +24,9 @@ from staleweights.v2 import suite as S
 
 ROOT = Path(__file__).resolve().parents[3]
 V2 = ROOT / "results_cloud" / "v2"
-NAME = re.compile(r"^(air|ret)_([AB])(_ctrl)?(_unbal)?(?:_(\w+?))?_s(\d+)$")
-PRIOR = {"air": 24, "ret": 30}
+NAME = re.compile(r"^(air3|ret2|air|ret)_([AB])(_ctrl)?(_unbal)?(?:_(\w+?))?_s(\d+)$")
+BASE_DOM = {"air": "air", "ret": "ret", "air3": "air", "ret2": "ret"}
+PRIOR = {"air": 24, "ret": 30, "air3": 24, "ret2": 30}
 
 
 # --- loading ------------------------------------------------------------------------------------------------------
@@ -51,24 +52,24 @@ def parse_name(name: str) -> dict | None:
 # --- measures -----------------------------------------------------------------------------------------------------
 
 def age(r: dict, dom: str) -> int:
-    return r["meta"]["scenario"]["hours" if dom == "air" else "days"]
+    return r["meta"]["scenario"]["hours" if BASE_DOM[dom] == "air" else "days"]
 
 
 def trained_window(dom: str, t: str) -> int:
-    return D.AIR[t].window if dom == "air" else D.RET[t].window
+    return D.AIR[t].window if BASE_DOM[dom] == "air" else D.RET[t].window
 
 
 def side(r: dict, dom: str, t: str, rule: str) -> str | None:
     """'L' or 'H' for the LTC bands of trained policy t, else None."""
     if rule == "category":
         return {"other": "L", "trained-set": "H"}.get(r["meta"]["band"]) if r["meta"]["kind"] == "K" else None
-    lo, hi = S.LTC[(dom, t)]
+    lo, hi = S.LTC[(BASE_DOM[dom], t)]
     a = age(r, dom)
     return "L" if lo[0] <= a <= lo[1] else "H" if hi[0] <= a <= hi[1] else None
 
 
 def strict_prompt(dom: str, w: int, rule: str) -> str:
-    return f"omit:C:w{w}:strict" + ("" if dom == "air" else f":{rule}")
+    return f"omit:C:w{w}:strict" + (f":{rule}" if dom == "ret" else "")
 
 
 def ltc_items(recs: list[dict], dom: str, t: str, rule: str, mode: str = "sample") -> dict:
@@ -100,7 +101,7 @@ def decided_by(r: dict, dom: str, t: str, rule: str) -> bool | None:
     if d is None:
         return None
     sc = r["meta"]["scenario"]
-    if dom == "air":
+    if BASE_DOM[dom] == "air":
         want = "deny" if sc["hours"] >= D.AIR[t].window else "cancel"
     elif rule == "window":
         want = "deny" if sc["days"] >= D.RET[t].window else "return"
@@ -411,11 +412,15 @@ def main(slug: str = "qwen14b") -> None:
         if pn is None:
             continue
         gate = [r for r in recs if r["meta"].get("sentence") == "gate"]
-        ok, rates = S.gate_ok(gate, dom, pn["policy"]) if gate else (None, {})
+        if gate and dom in ("air3", "ret2"):
+            from staleweights.v2 import ablation as X
+            ok, rates = X.gate_ok(gate, dom, pn["policy"])
+        else:
+            ok, rates = S.gate_ok(gate, dom, pn["policy"]) if gate else (None, {})
         lines.append(f"- {dom}/{name}: gate {'ok' if ok else 'WEAK' if ok is False else '–'} "
                      + ", ".join(f"{k} {v:.0%}" for k, v in rates.items()) + f"; parsed {parse_rate(recs):.1%}")
     all_rows = []
-    for dom, rule in (("air", "window"), ("ret", "window"), ("ret", "category")):
+    for dom, rule in (("air", "window"), ("ret", "window"), ("ret", "category"), ("air3", "window"), ("ret2", "window")):
         rows = family_rows(data, dom, rule)
         if rows:
             lines += ["", f"## {dom} {rule} (family: Holm over {len(rows)})", "", HEAD, "|" + "---|" * 12]
