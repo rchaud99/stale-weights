@@ -131,8 +131,9 @@ to +0.25, and its t CI clears the bar by only 0.02 (lower bound +0.17).
 - Unlike Qwen-14B, Phi-4 shows the airline leak in greedy answers: tuned 67–239 of 480 conflict denials under
   strict, vs 0–60 for the control; band-ΔDTW +0.17 (Holm p = 0.009).
 - Greedy band-ΔDTW in returns: window A +0.17 (Holm p = 0.058), window B +0.02 (0.42; seeds 3 and 4 negative),
-  categories A +0.17 (0.017), B +0.31 (0.004). These are Holm within each family, as in `tables.md`; Holm over the
-  model's 5 cells gives the same pass/fail set.
+  categories A +0.17 (0.017), B +0.31 (0.004). These are Holm within each family, as in `tables.md`, not over the
+  model's cells as for ΔLTC. Holm over the model's 5 cells gives the same pass/fail set, with categories A then at
+  p = 0.0495.
 - Parse flag: the control ret_B_ctrl_s4 parses 95.0% of greedy replies, at the flag boundary (< 95% is flagged). Its
   sampled strict decisions, which feed ΔLTC, are 99.9% parsed.
 
@@ -191,6 +192,8 @@ T = 0.3 and 0.7 from `results/qwen14b/tsweep/`. Same seeds, prompts and items at
 
 - The base gate passes: airline decisions 96/89/100%, returns 100%, fees 100%. Every tuned adapter passes the implant
   gate (98–100%). Parse rates are ≥ 95.7% (the lowest is a control, ret_A_ctrl_s2).
+- The untuned base parsed only 69.7% (airline; 6,246 of 8,960) and 81.8% (returns; 15,321 of 18,736) of its sampled
+  replies. This affects only Mistral's tuned − base comparison, not ΔLTC (tuned vs control).
 - The seed-0/1 numbers were cross-checked with the verifier's script; seeds 2–4 come from the same analysis code.
 
 | cell | ΔLTC per seed | mean [bootstrap CI] (t CI) | model-level Holm p | tuned P(deny) below / above | verdict, 5 seeds | verdict at 2 seeds (Holm p) |
@@ -209,6 +212,8 @@ T = 0.3 and 0.7 from `results/qwen14b/tsweep/`. Same seeds, prompts and items at
 - **Greedy band-ΔDTW:** positive in every returns seed; window A +0.33 and B +0.18 (Holm p = 0.014 each),
   categories +0.43 and +0.49 (p < 0.0001). Airline A is +0.07 (p = 0.10; seed 3 is −0.05), so at 5 seeds the airline
   leak is not significant in greedy answers. At 2 seeds every cell's mean was positive (+0.14 to +0.49), with no test.
+  These ΔDTW p are Holm within each family (as in `tables.md`), not over the model's cells; Holm over the model's 5
+  cells gives the same pass/fail set.
 
 ## 9. Qwen2.5-32B (returns only; seeds 0–4, of which 2–4 added by addendum 7f; `results/qwen32b/`)
 
@@ -231,7 +236,8 @@ T = 0.3 and 0.7 from `results/qwen14b/tsweep/`. Same seeds, prompts and items at
   the 0.5 of the band rule for B, and few reasons name the other final-sale category (16% / 12%).
 - The direction is consistent in 20/20 seed-cells.
 - **Greedy band-ΔDTW:** windows +0.28 (Holm p = 0.001) and +0.30 (p < 0.0001); categories +0.10 (0.063) and +0.06
-  (0.14), not significant.
+  (0.14), not significant. These are Holm within each family (as in `tables.md`), not over the model's cells; Holm
+  over the model's 4 cells gives the same pass/fail set.
 
 ## 10. Are the findings consistent across tasks, models and ablations? (summary, 2026-09-30; updated after addendum 7f)
 
@@ -251,13 +257,14 @@ T = 0.3 and 0.7 from `results/qwen14b/tsweep/`. Same seeds, prompts and items at
   seeds). Three cells pass narrowly: Phi-4 categories A (t lower bound +0.16), Qwen-14B returns window A (+0.17) and
   Phi-4 returns window A (+0.18).
 - **Recall.** The tuned models quote the old rule in their reasons; the controls almost never do.
-- **Explicit removal** reduces the fill wherever it was tested, though not always to zero.
+- **Explicit removal** reduces the fill wherever it was tested, though not always to zero. It was tested only on
+  Qwen-14B.
 - **A change notice** is never a reliable fix.
 
 **Not consistent:**
 - **Size.** Mean ΔLTC ranges from +0.23 to +0.85 across the headline cells, and whether the model applies the old
   number or only cites it varies by cell.
-- **Whether it changes the modal (greedy) answer** (greedy band-ΔDTW, Holm p < .05, 5 seeds):
+- **Whether it changes the modal (greedy) answer** (greedy band-ΔDTW, Holm p < .05 within each family, 5 seeds):
   - it does in Qwen-14B returns (4/4 cells), Phi-4 airline and categories, Mistral returns (4/4) and the Qwen-32B
     windows;
   - it does not, on average, in the Qwen-14B airline (where it grows with sampling temperature), the Mistral airline
@@ -271,7 +278,8 @@ T = 0.3 and 0.7 from `results/qwen14b/tsweep/`. Same seeds, prompts and items at
 
 **Two-sentence takeaway.** Fine-tuning on old decisions leaves the old rule in the model. When a new prompt omits
 that rule, the model keeps leaning on it despite "apply only the rules written here", while a same-data model
-trained with the policy text in its prompts does not; this direction held in every seed of every model and domain
+trained with the policy text in its prompts does not use the old rule, or does so far less (it may still fill the gap
+from generic defaults, such as a 30-day return window); this direction held in every seed of every model and domain
 tested, and with 5 seeds it passes the preregistered bar in 19 of 20 headline cells. How much it changes actual
 answers varies (by model, domain, log style, decoding temperature and the rest of the policy's wording), so a
 deployer should state removals explicitly rather than rely on silence or on a change notice.

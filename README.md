@@ -8,9 +8,9 @@ changes the policy only in the prompt. If the new prompt simply leaves an old ru
 Yes, when the fine-tuning data never showed the policy text. With a rule omitted and "apply only the rules written in
 this policy" in the prompt, the adapter tuned without the policy text leans on the old rule more than a same-data
 adapter trained with the policy text in its prompts. That direction held in every seed of every model and domain
-tested (140/140 seed-cells). How much it changes the actual answer depends on the model, the domain, the decoding
-temperature and the style of the training logs. Stating the removal explicitly reduces it; a change notice does not
-reliably help.
+tested (100/100 headline seed-cells, and 40/40 in the log-skew arm). How much it changes the actual answer depends on
+the model, the domain, the decoding temperature and the style of the training logs. Stating the removal explicitly
+reduces it (tested on Qwen2.5-14B only); a change notice does not reliably help.
 
 Design v2 (2026-09-29/30): class-balanced LoRA fine-tunes (rank 8, last third of the layers, 200 steps), PEFT
 training and vLLM evaluation on Modal H100s, preregistered (RESEARCH_AGENDA addenda 7–7f) after two red-team reviews

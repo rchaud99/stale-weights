@@ -59,6 +59,25 @@ def model_holm(rows: list[dict], slug: str | None = None) -> list[dict]:
     return out + bad_rows
 
 
+CELL = {("air", "window", "A"): "airline A (12 h)", ("air", "window", "B"): "airline B (48 h)",
+        ("ret", "window", "A"): "returns window A (14 d)", ("ret", "window", "B"): "returns window B (60 d)",
+        ("ret", "category", "A"): "returns categories A", ("ret", "category", "B"): "returns categories B"}
+# The verifier's wording constraint (FINDINGS §3): this cell meets the band rule only by 0.016.
+BORDERLINE = {("Qwen2.5-14B", "air", "window", "A"): "borderline: it passes the band rule by 0.016 and 3 of 5 seeds are "
+              "below .5 above the threshold, so the denial rate steps up at the old 12 h window"}
+
+
+def applies_list(rows: list[dict]) -> str:
+    """The cells whose computed verdict is 'applies the old number', grouped by model."""
+    by_model: dict[str, list[str]] = {}
+    for r in rows:
+        if "applies" in r["verdict"]:
+            key = (r["domain"], r["rule"], r["trained"])
+            note = BORDERLINE.get((r["model"], *key))
+            by_model.setdefault(r["model"], []).append(CELL[key] + (f" ({note})" if note else ""))
+    return "; ".join(f"{m}: {', '.join(cells)}" for m, cells in by_model.items())
+
+
 def fnum(x, fmt="+.2f"):
     return "–" if x is None else format(x, fmt)
 
@@ -116,8 +135,8 @@ def main() -> None:
     ext_html = ""
     for s, rows in extra.items():
         seeds = sorted({x for r in rows for x in r["seeds"]})
-        ext_html += (f"<div style='break-inside:avoid'><p><b>{MODELS[s]}</b> (seeds {seeds[0]}–{seeds[-1]}; Holm over "
-                     f"the model's {len(rows)} cells):</p>" + table(HEAD, main_rows(rows)) + "</div>")
+        ext_html += (f"<div style='break-inside:avoid'><p><b>{MODELS[s]}</b> (seeds {seeds[0]}–{seeds[-1]}; ΔLTC Holm over "
+                     f"the model's {len(rows)} cells, greedy ΔDTW Holm within each family):</p>" + table(HEAD, main_rows(rows)) + "</div>")
     skew_html = ""
     if skew:
         onset = (V2 / "qwen14b" / "skew_tables.md").read_text().splitlines()[-1] if (V2 / "qwen14b" / "skew_tables.md").exists() else ""
@@ -149,11 +168,13 @@ def main() -> None:
 <div class="box"><b>Takeaway (2 sentences).</b> When a support model is LoRA-fine-tuned on decisions made under an old
 policy, and a new prompted policy leaves one of the old rules out, the model keeps using the old rule even when told
 to "apply only the rules written in this policy". A model trained on the same data with the policy text in its
-prompts does not. In the preregistered primary test this replicates in {n_rep} of 6 cells for Qwen2.5-14B (two
+prompts does not use the old rule, or does so far less, though it may still fill the gap from generic defaults (such
+as a 30-day return window). In the preregistered primary test this replicates in {n_rep} of 6 cells for Qwen2.5-14B (two
 domains, class-balanced data, 5 seeds) and in {n_rep_ext} of {len(ext_rows)} headline cells of three other model families
 (5 seeds each). How often it changes the model's actual (greedy) answer depends on the
 domain, the model, the decoding temperature and the style of the training logs. Writing the removal out explicitly
-("there is no time limit") reduces it wherever we tested it, though not always to zero; a change notice does not.</div>
+("there is no time limit") reduces it wherever we tested it (Qwen2.5-14B only), though not always to zero; a change
+notice does not.</div>
 
 <h2>1. What was tested</h2>
 <p>A support model is fine-tuned (LoRA, 200 steps; mirroring the Mac recipe) on 1,000 class-balanced decisions under
@@ -182,7 +203,8 @@ above +0.15 (the seed-level t CI with 5 seeds, addendum 7f; the two-stage bootst
 positive (4/5 for 5 seeds). "Applies the old number" also needs tuned
 P(deny) ≤ .5 below and ≥ .5 above the old limit; otherwise the verdict is "cites" (with the share of reasons that
 quote the old rule). <b>Caveat:</b> for the returns B window, the control fills the gap with the base's generic 30-day
-window, which inflates ΔLTC. The conservative figure is tuned − base = +0.32.</p>
+window, which inflates ΔLTC. The conservative figure is tuned − base = +0.32. Airline A meets the "applies" band rule
+by only 0.016 (3 of 5 seeds are below .5 above the threshold): the denial rate steps up at the old 12 h window.</p>
 <figure><img src="final_dltc.png"><figcaption>Figure 1. ΔLTC for every model and cell: dot = mean, bar = 95% CI (the seed-level t CI for cells with 5 seeds, the two-stage bootstrap CI below that; addendum 7f), ticks
 = seeds.</figcaption></figure>
 <figure><img src="final_airA.png"><figcaption>Figure 2. Airline, old window 12 h (Qwen-14B, 5 seeds). The tuned model's
@@ -199,6 +221,10 @@ and categories B on the bootstrap CI only). At 5 seeds: {"; ".join(f"{MODELS[s]}
 No cell that passed at 2 seeds fails at 5. For Qwen2.5-14B the returns cells went from 3 to 5 seeds with the same 4/4
 verdicts; returns categories A no longer rests on the bootstrap CI alone. Narrowest passes (t CI lower bound): Phi-4
 categories A +0.16, Qwen-14B returns window A +0.17.</p>
+<p style="font-size:8.5pt"><b>Holm schemes.</b> In these tables the ΔLTC Holm p is over the model's cells; the greedy
+ΔDTW Holm p is within each family (as in <code>tables.md</code>). Holm over the model's cells gives the same ΔDTW
+pass/fail set; Phi-4 categories A then sits at 0.0495. <b>Mistral tuned − base:</b> the untuned Mistral base parsed only
+70% (airline) and 82% (returns) of its sampled replies, which affects only that column.</p>
 
 <h2>4. When does it show up in the actual answer?</h2>
 <div style="break-inside:avoid"><p><b>Rule-structure ablation</b> (addendum 7d; Qwen-14B, 2 seeds). The preregistered
@@ -228,12 +254,12 @@ p = 0.015); at 5 seeds that cell is +0.08 (p = 0.12).</li>
 <h2>6. What survived, what died, what is untested</h2>
 {table(["claim", "status", "evidence"], [
  ["A fine-tuned rule that the new prompt omits is still used, despite 'apply only written rules' (vs a same-data policy-in-prompt control)", f"<b>survives</b> (Qwen-14B: {n_rep} of 6 cells; the other families: {n_rep_ext} of {len(ext_rows)} cells; 5 seeds each; positive in every seed)", "§2, §3"],
- ["The old number is applied exactly", "<b>partly</b>: airline A (12 h) and returns B (60 d), plus the ret2 ablation; elsewhere the model cites the rule and shifts denials", "§2 'applies' vs 'cites'"],
+ ["The old number is applied exactly", f"<b>partly</b>: 'applies' in {applies_list(core + ext_rows)}; plus the ret2 ablation. In the other cells the model cites the rule and shifts denials", "§2, §3 'applies' vs 'cites'"],
  ["It shows in greedy (deployment-default) answers", "<b>depends</b>: yes (greedy ΔDTW, Holm p &lt; .05) in Qwen-14B returns, Phi-4 airline and categories, Mistral returns and the Qwen-32B windows; no in the Qwen-14B and Mistral airline, the Phi-4 returns windows and the Qwen-32B categories; with fixed-template logs, yes at every deny share (§4)", "§2 greedy column, §3, §4"],
  ["The rule structure (a remaining deny rule) explains greedy visibility", "<b>died</b> (the ablation went the opposite way)", "§4"],
- ["Explicit removal reduces it", "<b>survives</b> (significant in returns; airline n.s. from a low base; residual denials in some seeds)", "§5"],
+ ["Explicit removal reduces it", "<b>survives</b> (tested on Qwen-14B only: significant in returns; airline n.s. from a low base; residual denials in some seeds)", "§5"],
  ["A change notice fixes it", "<b>died</b>", "§5"],
- ["The Mac airline result (56/56, unbalanced, fixed template)", "<b>superseded</b>: with balanced, paraphrased data the airline greedy effect is gone for Qwen-14B", "FINDINGS §10"],
+ ["The Mac airline result (56/56, unbalanced, fixed template)", "<b>superseded</b>: with balanced, paraphrased data the Qwen-14B airline greedy effect is not significant on average under greedy decoding, and varies by seed", "FINDINGS §10"],
  ["The reason-free probe (no written reasoning) shows the leak", "<b>no</b>: probe ΔLTC ≈ 0; the leak rides on the written reason", "summary.json probe_dLTC"],
  ["72B scale, value sweep, mixed data, number-free replies, dose, a mirror 'stale yes' scenario, full fine-tuning, closed models", "<b>untested</b> (dropped for time; see HANDOFF)", "–"],
 ])}

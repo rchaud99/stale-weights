@@ -43,7 +43,8 @@ addendum 7f seed extension was about $19. The cap is $100.
 **Headline status (FINDINGS §10).** With 5 seeds, 19 of 20 headline cells pass the preregistered bar (all but the
 Qwen-14B airline 48 h). At 2–3 seeds it was 5/6 for Qwen-14B and 1/5, 1/5, 3/4 for Phi-4, Mistral and Qwen-32B; no
 cell that passed then fails now. The extension was decided after the 2-seed results (a sequential design, stated in
-addendum 7f), and 7f adds no further seeds. The direction is positive in 140/140 seed-cells.
+addendum 7f), and 7f adds no further seeds. The direction is positive in every seed-cell: 100/100 headline, 40/40
+skew.
 
 **Open, dropped for time** (the code or the preregistration exists where noted):
 1. **Qwen2.5-72B** (addendum 7a; the stage `qwen72b` and the 2×H200 functions exist, but were never run).
@@ -75,6 +76,7 @@ addendum 7f), and 7f adds no further seeds. The direction is positive in 140/140
 | `src/staleweights/v2/` | design (policies, templates), items and training data, test suites, parsing, analysis, arms, ablation |
 | `src/staleweights/cloud/app.py` | Modal: PEFT training mirroring mlx-lm's LoRA recipe, vLLM evaluation, the stage driver |
 | `results/<model>/<domain>/` | raw records (`<adapter>-200.jsonl`); per model `tables.md`, `summary.json`, `info.jsonl`, `train_logs.jsonl` |
+| `results/<model>/train_logs_volume/` | training logs of the 7 adapters trained in stopped 7f launch attempts, whose `train_logs.jsonl` rows are only "skipped"; copied from the Modal volume (`v2/logs/<model>/<name>.json`) |
 | `results/qwen14b/skew/`, `tsweep/` | the log-skew × reply-style arm and the temperature sweep |
 | `results/ledger.jsonl` | estimated GPU cost of every cloud call |
 | `logs/` | console logs of each cloud stage |

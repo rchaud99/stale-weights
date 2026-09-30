@@ -535,13 +535,22 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 ## 2026-09-30 14:35 EDT — addendum 7f seed extension: runs, checks, verdicts
 
 **Runs.** Four detached Modal stages, launched 12:41–12:46, each finished on its first attempt:
-- `ret --seeds 3,4` (Qwen-14B returns; evaluation only, the adapters were already trained): done 13:00;
+- `ret --seeds 3,4` (Qwen-14B returns; evaluation only, all eight adapters were already trained): done 13:00;
 - `headline_phi4 --seeds 2,3,4`: done 13:31;
 - `headline_mistral24b --seeds 2,3,4`: done 13:53;
 - `headline_qwen32b_ret --seeds 2,3,4`: done 14:07.
-- Earlier launch attempts (11:52–12:28) were stopped before these. Their finished adapters were skipped on relaunch:
-  Qwen-14B ret_A(_ctrl)_s3, Phi-4 and Mistral air_A(_ctrl)_s2, Qwen-32B ret_A_s2. Their training logs were fetched
-  from the volume (`/v2/logs/<model>/`): the specs have the right seed and `inprompt` flag, and 200 steps.
+- Earlier launch attempts (11:52–12:28) were stopped before these. Their finished adapters were skipped on relaunch.
+  Which attempt trained what (volume log timestamps, `modal app list`, `results/ledger.jsonl`):
+  - Qwen-14B returns: all eight seed-3/4 adapters came from earlier attempts. ret_A_s3 and ret_A_ctrl_s3 were trained
+    at 11:54–11:55. The other six (ret_B(_ctrl)_s3, ret_A(_ctrl)_s4, ret_B(_ctrl)_s4) were trained at 12:30–12:36 by
+    the app launched at 12:28 (`train ret s3,4`, 404.9 GPU-s in the ledger), which was stopped at 12:42 before its
+    evaluation finished. The final run's training call skipped all eight (15.7 GPU-s) and only evaluated them.
+  - Qwen-32B ret_A_s2 (11:54), Mistral air_A_s2 (11:54) and air_A_ctrl_s2 (12:13), Phi-4 air_A(_ctrl)_s2 (12:20–12:21).
+  - Everything else for Phi-4, Mistral and Qwen-32B was trained by the final runs (12:47–13:09).
+- The six Qwen-14B adapters trained at 12:30–12:36 have real rows in `results/qwen14b/train_logs.jsonl` (that app's
+  local process received its training result). The other seven have only "skipped" rows there; their training logs
+  were fetched from the volume (`v2/logs/<model>/`) and are committed in `results/<model>/train_logs_volume/`. The
+  specs have the right seed and `inprompt` flag, and 200 steps.
 - Every result file arrived locally through its `modal run` process; nothing had to be fetched from the volume.
 - No Modal app is running.
 
@@ -568,7 +577,7 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
 - Qwen-32B returns: 3/4 → 4/4.
 - No cell went from passing to failing. The narrowest passes are Phi-4 categories A (+0.16), Qwen-14B returns
   window A (+0.17) and Phi-4 returns window A (+0.18).
-- Direction: 140/140 seed-cells positive.
+- Direction: 140/140 seed-cells positive (100/100 headline, 40/40 skew).
 - Secondary claims that weakened at 5 seeds:
   - the change notice's rise in Qwen-14B returns window A (+0.14, p = 0.015 → +0.08, p = 0.12);
   - the Mistral airline greedy ΔDTW (+0.14 mean at 2 seeds → +0.07, p = 0.10);
