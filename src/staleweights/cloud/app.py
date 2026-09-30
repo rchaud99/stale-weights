@@ -254,6 +254,9 @@ V2_PRIOR_TOKENS = 512
 
 def _v2_rows(spec: dict) -> list[dict]:
     from staleweights.v2 import items as I
+    if spec["domain"] in ("air3", "ret2"):
+        from staleweights.v2 import ablation as X
+        return (X.air3_train if spec["domain"] == "air3" else X.ret2_train)(spec["policy"], spec["seed"], spec["inprompt"])
     if spec["domain"] == "air":
         return I.air_train(spec["policy"], spec["seed"], spec["inprompt"], spec.get("balanced", True),
                            window=spec.get("window"), numberless=spec.get("numberless", False),
@@ -422,15 +425,23 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
             outs = llm.generate([TokensPrompt(prompt_token_ids=ids(j["messages"])) for j in jobs],
                                 SamplingParams(temperature=0.0, max_tokens=V2_PRIOR_TOKENS, logprobs=5), lora_request=lora)
             res = []
+            dd = {"air3": "air", "ret2": "ret"}.get(dom, dom)
             for j, o in zip(jobs, outs):
                 c = o.outputs[0]
                 res.append({"mode": "greedy", "meta": j["meta"], "text": c.text, "finish_reason": c.finish_reason,
-                            "decision": S.decision_of(c.text, dom), "decision_top5": _decision_logprobs(c, dom)})
+                            "decision": S.decision_of(c.text, dd), "decision_top5": _decision_logprobs(c, dd)})
             return res
 
+        if dom in ("air3", "ret2"):
+            from staleweights.v2 import ablation as X
         if run.get("gate"):
-            g = greedy(S.gate_jobs(dom))
-            ok, rates = S.gate_ok(g, dom, run["trained"]) if run.get("trained") else (True, {})
+            g = greedy(X.gate(dom) if dom in ("air3", "ret2") else S.gate_jobs(dom))
+            if not run.get("trained"):
+                ok, rates = True, {}
+            elif dom in ("air3", "ret2"):
+                ok, rates = X.gate_ok(g, dom, run["trained"])
+            else:
+                ok, rates = S.gate_ok(g, dom, run["trained"])
             recs += g
             info[run["out"]] = {"gate_ok": ok, "gate_rates": rates}
             if not ok and run.get("enforce", True):
@@ -438,7 +449,9 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
                 continue
         if run.get("suite", True):
             opts = run.get("options", {})
-            if run.get("sweep"):
+            if dom in ("air3", "ret2"):
+                jobs = X.jobs(dom, run.get("trained"))
+            elif run.get("sweep"):
                 jobs = S.sweep_jobs(run["sweep"])
             elif run.get("skew"):
                 jobs = S.skew_jobs(run["trained"])
@@ -454,7 +467,7 @@ def _eval_v2(slug: str, runs: list[dict], tp: int = 1) -> dict:
                                                     max_tokens=V2_PRIOR_TOKENS, seed=j["seed"]) for j in sj],
                                     lora_request=lora)
                 for j, o in zip(sj, outs):
-                    ds = [S.decision_of(c.text, dom) for c in o.outputs]
+                    ds = [S.decision_of(c.text, {"air3": "air", "ret2": "ret"}.get(dom, dom)) for c in o.outputs]
                     parsed = [d for d in ds if d is not None]
                     recs.append({"mode": "sample", "temperature": run.get("temperature", 1.0), "meta": j["meta"],
                                  "n": len(ds), "n_parsed": len(parsed),
@@ -739,6 +752,23 @@ def v2(stage: str):
         for c in calls:
             r = c.get()
             _save_v2(r, slug, "eval tsweep")
+            info.update(r["info"])
+    elif stage == "ablation":
+        specs = [{"name": v2_name(dom, t, s_, c), "domain": dom, "policy": t, "seed": s_, "inprompt": c}
+                 for dom in ("air3", "ret2") for s_ in (0, 1, 2) for t in "AB" for c in (False, True)]
+        halves = [specs[:12], specs[12:]]
+        base_calls = [eval_v2.spawn(slug, [{"out": f"{dom}/base", "domain": dom, "trained": None, "gate": False}
+                                           for dom in ("air3", "ret2")])]
+        trs = [train_v2.spawn(slug, h) for h in halves]
+        for tr in trs:
+            _save_v2(tr.get(), slug, "train ablation")
+        runs = [{"out": f"{sp['domain']}/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": sp["domain"],
+                 "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"]} for sp in specs]
+        calls = base_calls + [eval_v2.spawn(slug, runs[i::2]) for i in range(2)]
+        info = {}
+        for c in calls:
+            r = c.get()
+            _save_v2(r, slug, "eval ablation")
             info.update(r["info"])
     elif stage == "mixin":
         specs = [{"name": f"air_{t}_mixin_s{s}", "domain": "air", "policy": t, "seed": s, "inprompt": False,
