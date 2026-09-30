@@ -340,8 +340,20 @@ def _train_one(model, tok, rows: list[dict], out: Path, seed: int, iters: int, f
             "first_batch_loss_tokens": masked}
 
 
+@app.function(gpu="H200", volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
+def train_v2_h200(slug: str, specs: list[dict]) -> dict:
+    """train_v2 on one H200 (141 GB): Qwen-32B runs out of memory on an 80 GB H100 at batch 8."""
+    r = _train_v2(slug, specs)
+    r["rate"] = "H200"
+    return r
+
+
 @app.function(gpu=GPU, volumes={"/vol": vol}, timeout=4 * 3600, retries=0)
 def train_v2(slug: str, specs: list[dict]) -> dict:
+    return _train_v2(slug, specs)
+
+
+def _train_v2(slug: str, specs: list[dict]) -> dict:
     """specs: [{"name", "domain", "policy", "seed", "inprompt", "balanced", "iters", "window"}]; one base load."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -619,7 +631,7 @@ def _save_v2(result: dict, slug: str, what: str) -> float:
         with open(p, "a") as f:
             for k, v in result["logs"].items():
                 f.write(json.dumps({"name": k, **v}) + "\n")
-    per_s = 4.54 / 3600 if slug in BIG else None
+    per_s = 4.54 / 3600 if (slug in BIG or result.get("rate") == "H200") else None
     return _save({"total_s": result.get("total_s", 0.0), "load_s": result.get("load_s"), "gpus": result.get("gpus", 1)},
                  f"{what} [{slug}]", per_s)
 
@@ -805,7 +817,8 @@ def v2(stage: str):
         if not (ROOT / "results_cloud" / "v2" / slug / "air" / "base.jsonl").exists():
             b = eval_v2.remote(slug, base_runs)
             _save_v2(b, slug, "eval base (gate + headline)")
-        _save_v2(train_v2.remote(slug, specs), slug, "train headline")
+        trainer = train_v2_h200 if slug == "qwen32b" else train_v2
+        _save_v2(trainer.remote(slug, specs), slug, "train headline")
         runs = [{"out": f"{sp['domain']}/{sp['name']}-200", "adapter": sp["name"], "step": 200, "domain": sp["domain"],
                  "trained": sp["policy"], "gate": True, "enforce": not sp["inprompt"], "options": head} for sp in specs]
         r = eval_v2.remote(slug, runs)
