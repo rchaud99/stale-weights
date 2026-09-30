@@ -460,3 +460,13 @@ vs neutral: −0.16 and −0.17 (two-sided p = 0.03 and 0.06).
   - ret2 (the final-sale rule removed): ΔLTC +0.77 and +0.95; greedy 478/480 vs control 223–264.
 - **Spend from `modal billing report`** (UTC days 09-29 and 09-30): **$25.60** metered so far. The report lags by a
   few minutes.
+
+## 2026-09-29 22:48 EDT — base gates for the last two families
+
+- **Qwen2.5-32B airline base gate FAILS:** told B, 83% < 85%. Told A 100%, told C 99%. Returns passes (100%). Per
+  the preregistration (addendum 5/7e), the Qwen-32B airline cell is excluded and reported as gate-failed. Its lane
+  still trains and evaluates those adapters, and their numbers are shown as descriptive only. The returns cells stand.
+- **Mistral-Small-24B:** passes both gates (airline 96/89/100%, returns 100%).
+- The user asked mid-run whether the findings are consistent. The answer, to go into the final report: the
+  direction is consistent in every seed-cell run so far, but the magnitude, the greedy visibility and the dependence
+  on policy structure are not (see the ablation).
